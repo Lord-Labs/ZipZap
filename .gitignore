@@ -1,0 +1,36 @@
+# Build outputs and local tooling
+node_modules/
+target/
+dist/
+coverage/
+.cache/
+*.log
+*.tsbuildinfo
+
+# Local secrets; commit only sanitized examples
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Download state and research captures can contain private URLs or credentials
+*.part
+*.zipzap.db
+*.zipzap.db-*
+*.har
+*.saz
+*.pcap
+*.pcapng
+.research-local/
+
+# OS and editor state
+.DS_Store
+Thumbs.db
+Desktop.ini
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
