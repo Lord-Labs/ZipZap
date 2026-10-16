@@ -51,6 +51,8 @@ jobs:
         run: cargo build --workspace --locked
       - name: Verify Rust against the local HTTP fixture
         run: node experiments/engine-strategy/compare.mjs
+      - name: Verify download integrity and durable recovery
+        run: node scripts/test-engine.mjs
 
   required:
     name: Repository checks
