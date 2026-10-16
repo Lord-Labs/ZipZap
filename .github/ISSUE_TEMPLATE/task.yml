@@ -1,0 +1,25 @@
+name: Development task
+description: Define a concrete implementation, documentation, or maintenance task.
+labels: ["type:task"]
+body:
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Outcome
+      description: Explain the result and why it is needed.
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies and milestone
+      description: Link blocking issues and name the roadmap stage. Write None when independent.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria and verification
+      description: Use a checklist of observable outcomes and meaningful checks.
+    validations:
+      required: true
