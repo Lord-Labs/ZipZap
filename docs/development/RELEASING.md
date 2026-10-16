@@ -1,8 +1,11 @@
 # Release process
 
-No release workflow or application artifacts exist yet. This checklist defines
-what must be implemented and verified before publishing the first beta; it does
-not authorize a release from the current documentation-only repository.
+`.github/workflows/release.yml` builds the reviewed Windows beta on manual dispatch
+from protected `main`. It checks the matching version and successful required
+main checks, rebuilds locked dependencies, verifies the core and installer lifecycle,
+and publishes only from the `beta` environment. Its deployment branch policy
+allows protected branches only. Build jobs are read-only; the publishing job
+alone receives contents-write permission. There are no signing secrets.
 
 ## First-beta gates
 
@@ -23,8 +26,9 @@ not authorize a release from the current documentation-only repository.
 2. The maintainer reviews and merges the PR with required checks passing. Release
    tooling must accept only a reviewed commit on protected `main`, use a protected
    release environment, and give write permissions only to the publishing job.
-3. The maintainer creates the matching `v0.1.0-beta.1` tag. Do not move a published
-   version tag; corrections require another version.
+3. Dispatch **Windows beta** from `main` with the reviewed version. The publishing
+   job creates the matching `v0.1.0-beta.1` tag at the exact checked build commit.
+   A pre-existing release/tag is not overwritten. Corrections require another version.
 4. Publish a GitHub **prerelease** with the installer, checksum manifest, release
    notes, tested Windows versions, and known limitations. Verify downloaded
    artifacts against the checksums before announcing completion.
@@ -42,3 +46,17 @@ Stop directing users to a compromised/broken build, communicate affected version
 and publish a corrected version. Coordinate sensitive issues through
 [private reporting](../../SECURITY.md). Preserve published version history and
 explain replacement artifacts rather than silently changing a release binary.
+
+## Outputs and local reproduction
+
+`npm run desktop:build` produces the NSIS installer under
+`target/release/bundle/nsis`. `npm run build:extension` produces `dist/extension`.
+The sidecar preparation step runs `scripts/licenses.mjs` and bundles notices plus
+unmodified MPL source archives into the installed application directory.
+
+CI publishes the installer, browser ZIP, third-party source ZIP, dependency
+metadata, license files and SHA256SUMS.txt. The publishing job checks hashes
+before creating the prerelease. Verify downloaded assets again after publication.
+The release notes live in `docs/releases/<version>.md`; edit them in the reviewed
+release PR. Unsigned status and untested OS/browser/physical-fault cases must stay
+visible. The workflow does not sign artifacts or claim SmartScreen reputation.

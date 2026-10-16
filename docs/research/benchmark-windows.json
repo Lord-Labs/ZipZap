@@ -1,0 +1,87 @@
+{
+  "date": "2026-10-16T20:25:03.402Z",
+  "coreTree": "cf837126fe089d1f76544a5876a82927922821be",
+  "os": "Windows_NT 10.0.26200 x64",
+  "cpu": "13th Gen Intel(R) Core(TM) i5-13450HX",
+  "logicalCpus": 16,
+  "ramBytes": 16873545728,
+  "node": "v24.19.0",
+  "rust": "rustc 1.99.0 (b940084d7 2026-09-28)",
+  "profile": "release, thin LTO, one codegen unit, stripped",
+  "fixture": {
+    "bytes": 33554432,
+    "chunkBytes": 65536,
+    "delayPerChunkMs": 2,
+    "transport": "HTTP loopback, strong ETag, exact ranges, same machine/server and client",
+    "disk": "local NTFS SSD; warm OS caches, no disk-cache flush"
+  },
+  "samples": [
+    {
+      "connections": 1,
+      "repetition": 1,
+      "elapsedMs": 1653.2712999999999,
+      "MiBPerSecond": 19.355564933595595,
+      "peakWorkingSetBytes": 11874304,
+      "cpuSeconds": 0.578125,
+      "peakResponseStreams": 1,
+      "requests": 2,
+      "sha256": "e03376c016449d6befb94816ef1480dbeec5275bd7f882407e49469f3cbfd5f0"
+    },
+    {
+      "connections": 1,
+      "repetition": 2,
+      "elapsedMs": 1726.5347000000002,
+      "MiBPerSecond": 18.53423507792806,
+      "peakWorkingSetBytes": 10395648,
+      "cpuSeconds": 0.6875,
+      "peakResponseStreams": 1,
+      "requests": 2,
+      "sha256": "e03376c016449d6befb94816ef1480dbeec5275bd7f882407e49469f3cbfd5f0"
+    },
+    {
+      "connections": 1,
+      "repetition": 3,
+      "elapsedMs": 1735.7164999999995,
+      "MiBPerSecond": 18.436190472349608,
+      "peakWorkingSetBytes": 10395648,
+      "cpuSeconds": 0.59375,
+      "peakResponseStreams": 1,
+      "requests": 2,
+      "sha256": "e03376c016449d6befb94816ef1480dbeec5275bd7f882407e49469f3cbfd5f0"
+    },
+    {
+      "connections": 4,
+      "repetition": 1,
+      "elapsedMs": 647.6184999999987,
+      "MiBPerSecond": 49.41180648792471,
+      "peakWorkingSetBytes": 11812864,
+      "cpuSeconds": 0.6875,
+      "peakResponseStreams": 4,
+      "requests": 5,
+      "sha256": "e03376c016449d6befb94816ef1480dbeec5275bd7f882407e49469f3cbfd5f0"
+    },
+    {
+      "connections": 4,
+      "repetition": 2,
+      "elapsedMs": 648.0387999999984,
+      "MiBPerSecond": 49.37975936008782,
+      "peakWorkingSetBytes": 11915264,
+      "cpuSeconds": 0.484375,
+      "peakResponseStreams": 4,
+      "requests": 5,
+      "sha256": "e03376c016449d6befb94816ef1480dbeec5275bd7f882407e49469f3cbfd5f0"
+    },
+    {
+      "connections": 4,
+      "repetition": 3,
+      "elapsedMs": 698.9864999999991,
+      "MiBPerSecond": 45.78056943875174,
+      "peakWorkingSetBytes": 11993088,
+      "cpuSeconds": 0.640625,
+      "peakResponseStreams": 4,
+      "requests": 5,
+      "sha256": "e03376c016449d6befb94816ef1480dbeec5275bd7f882407e49469f3cbfd5f0"
+    }
+  ],
+  "limits": "Synthetic per-response pacing rewards parallel streams. Not WAN, TLS, IDM comparison, GUI/WebView memory, cold startup, or disk saturation. CPU and peak working set cover the engine child process lifetime only, not server/test harness. No universal speed claim."
+}

@@ -1,0 +1,113 @@
+name: Windows beta
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Reviewed beta version
+        required: true
+        type: choice
+        options: [0.1.0-beta.1]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-beta-release
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.ref == 'refs/heads/main'
+    runs-on: windows-latest
+    timeout-minutes: 40
+    permissions:
+      contents: read
+      checks: read
+    outputs:
+      commit: ${{ steps.commit.outputs.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Require successful protected-main checks and matching version
+        id: commit
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          $zipzapChecks = gh api "repos/$env:GITHUB_REPOSITORY/commits/$env:GITHUB_SHA/check-runs" | ConvertFrom-Json
+          if($LASTEXITCODE -ne 0) { throw 'Cannot read required checks' }
+          if(-not ($zipzapChecks.check_runs | Where-Object { $_.name -eq 'Repository checks' -and $_.conclusion -eq 'success' -and $_.app.slug -eq 'github-actions' })) { throw 'Protected-main Repository checks must pass first' }
+          $zipzapConfig = Get-Content apps/desktop/src-tauri/tauri.conf.json -Raw | ConvertFrom-Json
+          if($zipzapConfig.version -ne $env:VERSION) { throw 'Version differs from reviewed app configuration' }
+          "sha=$env:GITHUB_SHA" >> $env:GITHUB_OUTPUT
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec
+        with:
+          toolchain: 1.99.0
+          components: clippy, rustfmt
+      - run: npm ci --ignore-scripts --no-audit
+      - run: node scripts/build-native.mjs
+      - run: npm run check
+      - run: cargo fmt --all -- --check
+      - run: cargo clippy --workspace --all-targets --locked -- -D warnings
+      - run: cargo test --workspace --locked
+      - run: cargo build --workspace --locked
+      - run: node experiments/engine-strategy/compare.mjs
+      - run: node scripts/test-engine.mjs
+      - run: npm run desktop:build
+      - run: npm run build:extension
+      - name: Verify installer lifecycle
+        shell: pwsh
+        run: ./scripts/test-installer.ps1 -Installer "target/release/bundle/nsis/ZipZap_${{ inputs.version }}_x64-setup.exe"
+      - name: Package immutable artifacts and checksums
+        shell: pwsh
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          New-Item -ItemType Directory -Path dist/publish -Force | Out-Null
+          Copy-Item -LiteralPath "target/release/bundle/nsis/ZipZap_$($env:VERSION)_x64-setup.exe" -Destination dist/publish
+          Copy-Item -LiteralPath dist/release/THIRD_PARTY_LICENSES.txt,dist/release/dependencies.json,LICENSE -Destination dist/publish
+          Compress-Archive -Path dist/extension/* -DestinationPath "dist/publish/ZipZap_browser_$($env:VERSION).zip"
+          Compress-Archive -Path dist/release/sources/* -DestinationPath "dist/publish/ZipZap_third-party-sources_$($env:VERSION).zip"
+          $zipzapManifest = Get-ChildItem dist/publish -File | Sort-Object Name | ForEach-Object { "$((Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLower())  $($_.Name)" }
+          [IO.File]::WriteAllLines((Join-Path (Get-Location) 'dist/publish/SHA256SUMS.txt'),$zipzapManifest,[Text.UTF8Encoding]::new($false))
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: zipzap-beta
+          path: dist/publish/*
+          if-no-files-found: error
+          retention-days: 30
+
+  publish:
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: beta
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ needs.build.outputs.commit }}
+          persist-credentials: false
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: zipzap-beta
+          path: dist/publish
+      - name: Verify and publish prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+          COMMIT: ${{ needs.build.outputs.commit }}
+        run: |
+          cd dist/publish
+          sha256sum --check SHA256SUMS.txt
+          cd ../..
+          gh release create "v$VERSION" dist/publish/* --repo "$GITHUB_REPOSITORY" --target "$COMMIT" --prerelease --title "ZipZap $VERSION" --notes-file "docs/releases/$VERSION.md"

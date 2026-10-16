@@ -77,9 +77,15 @@ and ideas. Report security vulnerabilities [privately](SECURITY.md).
 ## License and attribution
 
 ZipZap is licensed under the [MIT License](LICENSE). Contributions are accepted
-under the same license. See [dependency notices](THIRD_PARTY_NOTICES.md); a full
-transitive license review is required before distribution. The repository license
-does not replace dependency terms.
+under the same license. See [dependency notices](THIRD_PARTY_NOTICES.md);
+packaging includes transitive license texts and required MPL source archives.
+The repository license does not replace dependency terms.
 
 ZipZap is an independent project inspired by the download-manager workflow. It
 is not affiliated with Internet Download Manager or Tonec.
+
+## Desktop preview
+
+Actual Windows WebView2 interface in Arabic, showing local verification downloads:
+
+![ZipZap Arabic desktop](docs/images/desktop-ar.png)

@@ -34,6 +34,10 @@
     "shortDescription": "Fast, reliable downloads. Yours to keep.",
     "license": "MIT",
     "externalBin": ["binaries/zipzap-native"],
+    "resources": {
+      "../../../dist/release/THIRD_PARTY_LICENSES.txt": "THIRD_PARTY_LICENSES.txt",
+      "../../../dist/release/sources/*": "third-party-sources/"
+    },
     "icon": ["icons/32x32.png", "icons/128x128.png", "icons/icon.ico"],
     "windows": {
       "nsis": {

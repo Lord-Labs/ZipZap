@@ -2,8 +2,9 @@
 
 This is the implementation order for the first Windows beta. The foundation,
 strategy, production HTTP/HTTPS core, durable resume, and bounded queue are
-implemented. Desktop/browser implementation is under verification; release work follows. GitHub
-issues own live acceptance criteria; this document owns scope and sequencing.
+implemented, including verified Windows desktop and browser integration. Final
+release CI and publication follow. GitHub issues own live acceptance criteria;
+this document owns scope and sequencing.
 
 [Project tracker](https://github.com/users/Lord-shaban/projects/12) ·
 [Milestones](https://github.com/Lord-shaban/ZipZap/milestones) ·

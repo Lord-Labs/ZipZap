@@ -64,6 +64,13 @@ jobs:
         run: node experiments/engine-strategy/compare.mjs
       - name: Verify download integrity and durable recovery
         run: node scripts/test-engine.mjs
+      - name: Build Windows installer
+        if: runner.os == 'Windows'
+        run: npm run desktop:build
+      - name: Verify Windows installer lifecycle
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./scripts/test-installer.ps1 -Installer target/release/bundle/nsis/ZipZap_0.1.0-beta.1_x64-setup.exe
 
   required:
     name: Repository checks

@@ -5,7 +5,8 @@ whole reference application has been understood. Public IDM feature descriptions
 establish advertised behavior, not internal algorithms or measured performance.
 
 No IDM binary, extension, runtime, or packet capture has been analyzed for this
-repository. The current plan is a design proposal based on public documentation.
+repository. The implementation is independently authored from public protocol/framework
+documentation and verified against ZipZap's own fixtures.
 
 The separately recorded [engine strategy comparison](engine-strategy.md) uses a
 local HTTP fixture with reqwest/Tokio and an official aria2 Windows binary. It
