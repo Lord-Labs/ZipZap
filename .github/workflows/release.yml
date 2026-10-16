@@ -116,6 +116,11 @@ jobs:
           VERSION: ${{ inputs.version }}
           COMMIT: ${{ needs.build.outputs.commit }}
         run: |
+          existing_tags=$(gh api "repos/$GITHUB_REPOSITORY/git/matching-refs/tags/v$VERSION" --jq '.[].ref')
+          if grep -Fxq "refs/tags/v$VERSION" <<< "$existing_tags"; then
+            echo "Release tag already exists; use a new version" >&2
+            exit 1
+          fi
           cd dist/publish
           sha256sum --check SHA256SUMS.txt
           cd ../..
