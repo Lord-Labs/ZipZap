@@ -1,0 +1,23 @@
+[package]
+name = "zipzap-desktop"
+version = "0.1.0-beta.1"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[target.'cfg(windows)'.build-dependencies]
+tauri-build = { version = "=2.7.3", features = [] }
+
+[target.'cfg(windows)'.dependencies]
+tauri = { version = "=2.12.3", features = [] }
+tauri-plugin-dialog = "=2.8.3"
+tauri-plugin-opener = "=2.7.2"
+tauri-plugin-single-instance = "=2.5.4"
+zipzap-core = { path = "../../../crates/zipzap-core" }
+zipzap-native = { path = "../../../crates/zipzap-native" }
+serde_json = "=1.0.154"
+tokio = { version = "=1.53.3", features = ["time"] }
+
+[features]
+custom-protocol = ["tauri/custom-protocol"]

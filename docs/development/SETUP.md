@@ -1,36 +1,36 @@
 # Development setup
 
-## Current repository tooling
-
-Install Git and Node.js 24 with npm. The tested Node version is pinned in
-`.node-version`; use it when reproducing CI. Node's built-in test runner and
-filesystem APIs are sufficient for the small repository checker. Prettier is the
-only current development dependency, pinned by `package-lock.json`.
+Use Git, Node.js 24 (see `.node-version`), npm and Rust 1.99.0
+(`rust-toolchain.toml`). Windows desktop work needs the MSVC C++ Build Tools,
+Windows SDK and Microsoft Edge WebView2 runtime. Use a Windows x64 host to
+package the desktop; Linux CI checks the core and frontend only.
 
 ```sh
 git clone https://github.com/Lord-shaban/ZipZap.git
 cd ZipZap
 npm ci
-npm run check
+node scripts/build-native.mjs
+npm run desktop:dev
 ```
 
-The same commands work in PowerShell. Do not run npm with administrator rights.
-For an existing clone, use `git pull --ff-only` on a clean `main` before branching.
+The sidecar preparation step is required before Windows workspace compilation
+because Tauri embeds its bundle metadata at compile time. `desktop:build` runs
+that step automatically. Do not run build tools as administrator.
 
-| Command               | What it does                                          |
-| --------------------- | ----------------------------------------------------- |
-| `npm run check`       | Formatting, repository-link checks, and checker tests |
-| `npm run format`      | Format supported documentation/configuration/scripts  |
-| `npm test`            | Run tests for the repository checker                  |
-| `npm run check:links` | Check local Markdown file targets                     |
+| Command                   | Purpose                                                      |
+| ------------------------- | ------------------------------------------------------------ |
+| `npm run check`           | Formatting, local links, checker tests and Svelte/TypeScript |
+| `npm run format`          | Format source and docs                                       |
+| `npm run build:web`       | Production frontend                                          |
+| `npm run build:extension` | Typed extension in `dist/extension`                          |
+| `npm run desktop:dev`     | Real desktop app with Vite                                   |
+| `npm run desktop:build`   | Windows release executable and NSIS installer                |
+| `npx playwright test`     | UI contract, keyboard, RTL and Axe tests                     |
 
-## Rust feasibility probe
+Install Playwright's test browser with `npx playwright install chromium`.
+Linux UI CI uses `npx playwright install --with-deps chromium`.
 
-The Rust workspace contains the production core and an isolated historical
-feasibility experiment; the desktop is the next stage. Install rustup and the Windows MSVC C++
-Build Tools/SDK; `rust-toolchain.toml` selects Rust 1.99.0 with rustfmt and clippy.
-Linux probe builds also need system OpenSSL development libraries and pkg-config.
-The GitHub Ubuntu runner currently provides them.
+## Required Rust and integrity checks
 
 ```sh
 cargo fmt --all -- --check
@@ -41,29 +41,22 @@ node experiments/engine-strategy/compare.mjs
 node scripts/test-engine.mjs
 ```
 
-The [experiment instructions](../../experiments/engine-strategy/README.md) explain
-optional local aria2 comparison. It is not a build dependency. `Cargo.lock` pins
-transitive versions; use `--locked` to detect unexpected resolution changes.
+The HTTP/TLS fixture needs OpenSSL (`openssl` on Linux, Git for Windows' bundled
+OpenSSL on Windows). It creates a temporary localhost CA, trusts it only inside
+its child test process, and never changes the OS trust store. Linux core builds
+need OpenSSL development headers and pkg-config. `Cargo.lock` and the npm lockfile
+are committed; keep `--locked` and use `npm ci`.
 
-The [core guide](ENGINE.md) explains storage and recovery behavior. Issue #7 adds Tauri's remaining Windows
-requirements, including WebView2, with a verified desktop build. Documentation-only
-contributors need Node tooling; CI still verifies that the full repository builds.
-
-## Optional maintainer tools
-
-GitHub CLI (`gh`) is useful for issues, PRs, projects, and checks. Authenticate
-through `gh auth login`; never copy tokens into tracked files. Ordinary
-contributors can use GitHub's website and a fork without CLI authentication.
-
-Ponytail and REA are optional assistant workflows, not build requirements. See
-[agent instructions](../../AGENTS.md) and [research](../research/README.md).
+See [engine behavior](ENGINE.md), [desktop integration](DESKTOP.md),
+[user instructions](../USER_GUIDE.md) and [workflow](WORKFLOW.md).
+Documentation-only contributors can run Node checks; full CI still builds the
+workspace. GitHub CLI is optional for contributors. Ponytail and REA are optional
+assistant workflows, never paid build requirements.
 
 ## Troubleshooting
 
-- A formatting failure is fixed with `npm run format`, then `npm run check`.
-- A local-link failure identifies the source file and missing/invalid target.
-  Fix the link or add the intended document; do not disable the checker.
-- If `npm ci` fails, check the Node version and registry connectivity. Do not
-  delete or regenerate the lockfile just to hide a mismatch.
-- Never attach `.env`, browser captures, private download URLs, or credentials
-  when asking for help. Use sanitized reproductions.
+Close an app running from `target/debug` before rebuilding its executable on
+Windows. If the native host is missing, build/copy the sidecar and use Connect
+Chrome / Edge in settings. A blocked download, duplicate destination or
+unsupported filesystem must be fixed at its cause; do not disable validation.
+Do not attach databases, `.env`, cookies or private URLs to public issues.

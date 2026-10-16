@@ -76,6 +76,7 @@ struct State {
     jobs: Vec<Job>,
     running: HashMap<String, CancellationToken>,
     settings: Settings,
+    samples: HashMap<String, (Instant, u64)>,
 }
 pub struct Manager {
     state: Mutex<State>,
@@ -214,6 +215,7 @@ impl Manager {
                 jobs,
                 running: HashMap::new(),
                 settings,
+                samples: HashMap::new(),
             }),
             client,
             stop: CancellationToken::new(),
@@ -519,17 +521,23 @@ impl Manager {
         let copy = job.clone();
         save(&state, &copy)
     }
-    fn progress(&self, id: &str, count: u64, speed: u64) {
-        if let Some(job) = self
-            .state
-            .lock()
-            .expect("state lock")
-            .jobs
-            .iter_mut()
-            .find(|j| j.id == id)
-        {
+    fn progress(&self, id: &str, count: u64) {
+        let mut state = self.state.lock().expect("state lock");
+        let State { jobs, samples, .. } = &mut *state;
+        if let Some(job) = jobs.iter_mut().find(|j| j.id == id) {
+            let now = Instant::now();
+            let (start, previous) = samples
+                .entry(id.to_owned())
+                .or_insert((now, job.downloaded));
             job.downloaded += count;
-            job.speed = speed;
+            if now.duration_since(*start) >= Duration::from_millis(100) {
+                job.speed = ((job.downloaded.saturating_sub(*previous)) as f64
+                    / now.duration_since(*start).as_secs_f64()) as u64;
+                if now.duration_since(*start) >= Duration::from_secs(1) {
+                    *start = now;
+                    *previous = job.downloaded;
+                }
+            }
         }
     }
     async fn throttle(&self, bytes: usize, token: &CancellationToken) -> Result<()> {

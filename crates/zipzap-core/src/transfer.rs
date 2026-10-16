@@ -337,7 +337,6 @@ async fn receive(
     let mut done = segment.done;
     let mut checkpoint = done;
     let mut updated = Instant::now();
-    let started = Instant::now();
     loop {
         let next = tokio::select! { _ = token.cancelled() => { checkpoint_file(&manager, job, index, &mut file, done, &hash).await?; return Err("Paused".into()); }, chunk = response.chunk() => chunk.map_err(network_error)? };
         let Some(chunk) = next else {
@@ -351,11 +350,7 @@ async fn receive(
             file.write_all(bytes).await.map_err(io_error)?;
             hash.update(bytes);
             done += bytes.len() as u64;
-            manager.progress(
-                &job.id,
-                bytes.len() as u64,
-                ((done - segment.done) as f64 / started.elapsed().as_secs_f64().max(0.001)) as u64,
-            );
+            manager.progress(&job.id, bytes.len() as u64);
             if done - checkpoint >= 1024 * 1024 || updated.elapsed() >= Duration::from_secs(1) {
                 checkpoint_file(&manager, job, index, &mut file, done, &hash).await?;
                 checkpoint = done;

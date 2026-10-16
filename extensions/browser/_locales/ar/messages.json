@@ -1,0 +1,11 @@
+{
+  "name": { "message": "مدير التنزيلات ZipZap" },
+  "description": { "message": "أرسل رابط التنزيل إلى تطبيق ZipZap على جهازك." },
+  "menu": { "message": "التنزيل باستخدام ZipZap" },
+  "link": { "message": "رابط التنزيل" },
+  "send": { "message": "إرسال إلى ZipZap" },
+  "sent": { "message": "تم الإرسال إلى ZipZap. افتح التطبيق لمتابعة التنزيل." },
+  "missing": { "message": "افتح ZipZap واربط المتصفح من الإعدادات." },
+  "invalid": { "message": "استخدم رابط HTTP أو HTTPS بدون بيانات دخول." },
+  "privacy": { "message": "بدون تتبع الصفحات أو تصدير الجلسات. روابط صريحة فقط." }
+}

@@ -5,9 +5,9 @@ Use `docs/ROADMAP.md` for order and `docs/architecture/` for recorded decisions.
 
 ## Current scope
 
-The foundation and engine strategy are complete. Production core and durable
-queue live in `crates/zipzap-core`; follow the roadmap into desktop/browser
-integration. Do not confuse the separate feasibility probe with product code.
+The HTTP/HTTPS core, desktop, and explicit browser handoff are implemented.
+Follow `docs/ROADMAP.md` and the linked issue for verification/release work.
+Do not add speculative app layers or present probe results as shipped features.
 
 ## Ponytail throughout the project
 

@@ -53,13 +53,14 @@ Browser action -> native host -> validated desktop handoff ---+
                                           progress / result -> UI
 ```
 
-The exact local IPC mechanism between native host and application is an open
-decision for #9. Avoid opening an unauthenticated localhost service as a shortcut.
+The native host publishes bounded, fsynced JSON requests by atomic rename into
+the per-user inbox. The desktop consumes them through the existing queue using
+stable UUIDs for idempotency. There is no localhost control service.
 Use bounded progress updates so a fast transfer does not flood UI IPC.
 
-## Planned source layout
+## Source layout
 
-Create these paths only as their implementation begins:
+These paths contain the production components:
 
 ```text
 crates/zipzap-core/      engine and persistence

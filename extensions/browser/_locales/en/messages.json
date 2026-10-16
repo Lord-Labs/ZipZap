@@ -1,0 +1,11 @@
+{
+  "name": { "message": "ZipZap Download Manager" },
+  "description": { "message": "Send a download link to your local ZipZap application." },
+  "menu": { "message": "Download with ZipZap" },
+  "link": { "message": "Download link" },
+  "send": { "message": "Send to ZipZap" },
+  "sent": { "message": "Sent to ZipZap. Open the app to check the download." },
+  "missing": { "message": "Open ZipZap and connect the browser in Settings." },
+  "invalid": { "message": "Use an HTTP/HTTPS link without embedded credentials." },
+  "privacy": { "message": "No page tracking. No cookies exported. Explicit links only." }
+}
