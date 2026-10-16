@@ -616,6 +616,7 @@
     </div>
     <label for="url">{text.url}</label><input
       id="url"
+      autocomplete="off"
       bind:this={urlInput}
       bind:value={url}
       type="url"

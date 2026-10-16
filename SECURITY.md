@@ -2,12 +2,15 @@
 
 ## Supported versions
 
-There are no application releases yet. Only the current default branch receives
-security fixes during development. Do not use development builds for sensitive
-downloads or treat them as a supported product release.
+The first release candidate is `0.1.0-beta.1` for Windows 11 x64. Once published,
+only the latest beta and current `main` receive security fixes; older prereleases
+must be upgraded. Development builds and unsupported operating systems have no
+support promise. Install updates manually from the repository's GitHub Releases,
+verify SHA-256 and read release notes; no automatic updater is included.
 
-The first release must replace this section with an explicit supported-version
-table and upgrade instructions.
+The beta is unsigned. The project claims no Authenticode publisher identity or
+SmartScreen reputation. The [review](docs/development/SECURITY_REVIEW.md) records
+scope, dependency results and limits, including local plaintext URL history.
 
 ## Report a vulnerability privately
 

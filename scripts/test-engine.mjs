@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { spawn, execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { once } from "node:events";
-import { mkdtemp, readFile, writeFile, rm, readdir } from "node:fs/promises";
+import { mkdtemp, readFile, writeFile, rm, readdir, mkdir } from "node:fs/promises";
 import http from "node:http";
 import https from "node:https";
 import os from "node:os";
@@ -276,6 +276,25 @@ try {
   await until(job.id, (j) => j.status === "failed");
   assert.equal(await readFile(job.destination, "utf8"), "keep existing");
   passed.push("destination race cannot overwrite existing data");
+
+  const unavailable = path.join(directory, "unavailable");
+  await mkdir(unavailable);
+  job = await ask({
+    command: "add",
+    url: `${base}/slow`,
+    folder: unavailable,
+    filename: "disk-error.bin",
+  });
+  await action(job, "pause");
+  await delay(200);
+  await rm(unavailable, { recursive: true });
+  await action(job, "resume");
+  await until(job.id, (j) => j.status === "failed");
+  await assert.rejects(readFile(job.destination), { code: "ENOENT" });
+  await mkdir(unavailable);
+  await action(job, "resume");
+  await complete(job);
+  passed.push("unavailable destination fails safely and retries after repair");
 
   await ask({
     command: "settings",

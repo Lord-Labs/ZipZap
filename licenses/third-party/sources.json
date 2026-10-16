@@ -1,0 +1,44 @@
+[
+  {
+    "package": "alloc-stdlib-0.3.0",
+    "source": "https://raw.githubusercontent.com/dropbox/rust-alloc-no-stdlib/0a81fd6928ea3b33c8cd484aa4575d50ffb98012/LICENSE",
+    "sha256": "c0c56f26d9c051cac4d200c34c84e7ae9aaa853e01a982a1df08b09931e518ae"
+  },
+  {
+    "package": "selectors-0.38.0",
+    "source": "https://www.mozilla.org/media/MPL/2.0/index.txt",
+    "sha256": "3f3d9e0024b1921b067d6f7f88deb4a60cbe7a78e76c64e3f1d7fc3b779b9d04"
+  },
+  {
+    "package": "webview2-com-0.39.1",
+    "source": "https://raw.githubusercontent.com/wravery/webview2-rs/edc2caf886175ccaebe86078c9cfe1ae2a187328/LICENSE",
+    "sha256": "0dcf41516e608bbcb6cdc5229feb7b86fe4a643b85e7df251133c93408fdac73"
+  },
+  {
+    "package": "webview2-com-sys-0.39.1",
+    "source": "https://raw.githubusercontent.com/wravery/webview2-rs/edc2caf886175ccaebe86078c9cfe1ae2a187328/LICENSE",
+    "sha256": "0dcf41516e608bbcb6cdc5229feb7b86fe4a643b85e7df251133c93408fdac73"
+  },
+  {
+    "package": "webview2-com-macros-0.8.1",
+    "source": "https://raw.githubusercontent.com/wravery/webview2-rs/dffa41a8a46d3f5565eefbff2de57d38d399f158/LICENSE",
+    "sha256": "0dcf41516e608bbcb6cdc5229feb7b86fe4a643b85e7df251133c93408fdac73"
+  },
+  {
+    "package": "tauri-plugin-2.7.2",
+    "source": "https://raw.githubusercontent.com/tauri-apps/tauri/59b63ab500da9859f12d8888c3298bc29bba0b92/LICENSE-MIT",
+    "sha256": "9dd42ea92cff2ede5cd477cbfcce051b2d0115c0ac7f368ee88cb545055dff1d"
+  },
+  {
+    "package": "is-reference-3.0.3",
+    "source": "https://github.com/Rich-Harris/is-reference/blob/8bb053129bfabe2f6a7d7ed050159d67ebe82829/README.md",
+    "note": "MIT declared in README and package metadata; standard MIT permission text supplied; upstream has no separate copyright notice",
+    "sha256": "68c295d4949054e02b99b2c26945e741574829f608cbd1d0203f11b0ffceea81"
+  },
+  {
+    "package": "locate-character-3.0.0",
+    "source": "https://github.com/Rich-Harris/locate-character/blob/4f08a59ec248121f7002abd02ee7b94e8eda06bc/README.md",
+    "note": "MIT declared in README and package metadata; standard MIT permission text supplied; upstream has no separate copyright notice",
+    "sha256": "bde3dbdd5858b10f3ad3e4d5173401426ea089787eadcd6847a56aa33bf07012"
+  }
+]

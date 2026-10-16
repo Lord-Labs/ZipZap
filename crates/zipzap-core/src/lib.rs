@@ -104,7 +104,12 @@ pub fn validate_url(value: &str) -> Result<Url> {
 }
 
 pub fn validate_filename(value: &str) -> Result<()> {
-    let stem = value.split('.').next().unwrap_or("").to_ascii_uppercase();
+    let stem = value
+        .split('.')
+        .next()
+        .unwrap_or("")
+        .trim_end()
+        .to_ascii_uppercase();
     if value.is_empty()
         || value.len() > 180
         || value.trim() != value
@@ -113,9 +118,14 @@ pub fn validate_filename(value: &str) -> Result<()> {
             .chars()
             .any(|c| c.is_control() || "<>:\"/\\|?*".contains(c))
         || ["CON", "PRN", "AUX", "NUL", "CLOCK$", "CONIN$", "CONOUT$"].contains(&stem.as_str())
-        || (stem.len() == 4
-            && (stem.starts_with("COM") || stem.starts_with("LPT"))
-            && stem.as_bytes()[3].is_ascii_digit())
+        || (["COM", "LPT"].iter().any(|prefix| {
+            stem.strip_prefix(prefix).is_some_and(|suffix| {
+                matches!(
+                    suffix,
+                    "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "¹" | "²" | "³"
+                )
+            })
+        }))
     {
         return Err("Choose a plain filename without reserved names or path characters".into());
     }

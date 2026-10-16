@@ -86,3 +86,19 @@ was changed. Chrome stable branding/store installation remains untested.
 
 Sources: [Playwright extension testing](https://playwright.dev/docs/chrome-extensions),
 [CDP extension test API](https://chromedevtools.github.io/devtools-protocol/tot/Extensions/).
+
+The installed app also paused `manual-restart.bin` at 13.6 MiB, closed, reopened
+with the same paused state and Arabic/default-folder settings, then resumed to
+the exact original 16 MiB SHA-256 above. The deterministic core suite now also
+tests an unavailable destination followed by repair/retry (22 scenarios total).
+See [benchmark evidence](../research/benchmark.md) and
+[security review](SECURITY_REVIEW.md) for M5 details and untested physical faults.
+
+The release-candidate NSIS installer passed clean installation, same-version
+upgrade/reinstall and silent uninstall on this Windows host. Both native host
+registry keys and manifest were checked after install, then absent after removal.
+The existing SQLite database and a retained download kept their SHA-256 values.
+License text and MPL source resources were included in the installed files.
+There is no older public ZipZap version to exercise a cross-version upgrade yet;
+reinstall tests the installer replacement path, not a future schema migration.
+The same `scripts/test-installer.ps1` runs on clean Windows CI runners.

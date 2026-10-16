@@ -34,4 +34,4 @@ requires an explicit reviewed origin/identity change, not a wildcard.
 Browser test profiles are isolated from personal profiles. Modern branded
 browsers can restrict command-line extension loading; successful Chromium tests
 must not be reported as Edge verification. Record actual browser versions and
-manual installation evidence separately when command-line loading is unavailable.
+the actual CDP loading method separately when command-line loading is unavailable.
