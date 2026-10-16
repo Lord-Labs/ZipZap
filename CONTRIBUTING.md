@@ -1,6 +1,6 @@
 # Contributing to ZipZap
 
-Thank you for helping. ZipZap is currently in planning; start with the
+Thank you for helping. ZipZap is in early engine development; start with the
 [roadmap](docs/ROADMAP.md) and [open issues](https://github.com/Lord-shaban/ZipZap/issues).
 An issue's acceptance criteria define the work. Discuss changes to scope before
 spending time on a large implementation.
@@ -13,8 +13,8 @@ spending time on a large implementation.
    from current `main`: `feat/3-http-download`, `fix/42-resume`, or `docs/15-setup`.
 3. Follow [setup](docs/development/SETUP.md). Make the smallest complete change,
    including affected callers, docs, and meaningful verification.
-4. Run `npm run check`. Add application checks when the change introduces code;
-   report the commands and actual results in the PR.
+4. Run `npm run check` and the relevant [Rust/fixture checks](docs/development/SETUP.md)
+   for Rust or experiment changes. Report commands and actual results in the PR.
 5. Open a PR against `main`, link the issue with `Closes #N`, and use the template.
    Draft PRs are welcome. Remove private URLs, tokens, cookies, and local paths
    from logs and screenshots.

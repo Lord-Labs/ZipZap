@@ -33,8 +33,8 @@ this policy; a documentation claim alone does not enforce a rule.
 
 CI runs unprivileged on pushes and pull requests, including forks. Do not add
 release tokens, registry credentials, or privileged PR workflows to run tests.
-Dependabot proposes updates for npm tooling and GitHub Actions; its PRs use the
-same checks and review policy.
+Dependabot proposes updates for npm tooling, Cargo dependencies, and GitHub
+Actions; its PRs use the same checks and review policy.
 
 ## Changes and emergencies
 

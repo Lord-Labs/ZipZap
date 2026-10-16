@@ -4,17 +4,21 @@
 
 `npm run check` runs Prettier, checks local Markdown file targets, and exercises
 the link checker's behavior. GitHub Actions runs the same command on Ubuntu and
-Windows with Node 24. The final `Repository checks` job aggregates both results
-and is the status required for merging.
+Windows with Node 24. The same platform jobs now install pinned Rust 1.99.0,
+check Rust formatting/clippy, run the unit tests, build the feasibility probe,
+and run its six local HTTP scenarios. The final `Repository checks` job aggregates
+both results and is the status required for merging.
 
 Local-link checking verifies inline-link target files, not reference-style links,
 Markdown heading anchors, external HTTP availability, or content correctness. It
 ignores fenced code examples and external URLs. Those limits are intentional;
 reviewers must assess the meaning and accuracy of documentation.
 
-The current workflow does **not** build a Rust application or test a downloader.
-Add actual component checks with the first source for that component; do not add
-green no-op jobs named as application tests.
+The current workflow builds an isolated Rust experiment, **not** a production
+downloader or desktop application. aria2 was compared locally on Windows;
+CI does not install or test that external binary. See the
+[evidence and limits](../research/engine-strategy.md). Add production checks with
+the first actual component rather than renaming probe checks as application tests.
 
 ## Engine gates (M1–M2)
 
@@ -30,9 +34,10 @@ Compare the complete output bytes or a cryptographic digest with the fixture.
 | Queue    | Concurrent transitions, retry bounds, per-host limits, shared bandwidth control     |
 | Secrets  | URL/header redaction and absence of credential data in logs                         |
 
-Introduce Rust formatting, clippy, unit/integration tests, dependency checks, and
-the lockfile with the engine. Include Windows CI for filesystem behavior; add
-other platforms only when their checks run and ownership is clear.
+Rust formatting, clippy, a unit test, the fixture harness, and the lockfile exist
+for the probe. Expand meaningful unit/integration and dependency security checks
+with the production core. Windows/Ubuntu probe CI is tooling evidence, not a
+promise that the future desktop app supports Linux.
 
 ## Desktop and browser gates (M3–M4)
 

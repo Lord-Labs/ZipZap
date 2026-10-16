@@ -7,6 +7,10 @@ establish advertised behavior, not internal algorithms or measured performance.
 No IDM binary, extension, runtime, or packet capture has been analyzed for this
 repository. The current plan is a design proposal based on public documentation.
 
+The separately recorded [engine strategy comparison](engine-strategy.md) uses a
+local HTTP fixture with reqwest/Tokio and an official aria2 Windows binary. It
+does not analyze IDM or establish production performance.
+
 ## Tools
 
 - [Ponytail](https://github.com/DietrichGebert/ponytail) guides small complete changes

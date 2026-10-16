@@ -1,6 +1,6 @@
 # ADR 0001: Windows-first, local download manager
 
-- Status: accepted project direction; engine implementation strategy remains open in #2.
+- Status: accepted project direction; engine strategy resolved by [ADR 0002](0002-download-engine-strategy.md).
 - Date: 2026-10-16.
 - Scope: boundaries and technology direction, not a claim of implemented behavior.
 
@@ -18,10 +18,9 @@ state. A TypeScript Manifest V3 extension will send explicit link requests throu
 native messaging. Pin exact toolchains and dependency versions when components
 are introduced, not by adding unused manifests now.
 
-Before implementing the engine, compare Rust/Tokio/reqwest with reuse of a
-maintained engine such as aria2. Choose the smallest approach that meets integrity,
-resume, cancellation, licensing, and testability requirements. Record a follow-up
-ADR with evidence. Do not introduce a pluggable-engine layer for this experiment.
+Before production implementation, issue #2 compared Rust/Tokio/reqwest with reuse
+of aria2. [ADR 0002](0002-download-engine-strategy.md) records the evidence and
+selects Rust/Tokio/reqwest. No pluggable-engine layer was introduced.
 
 ## Component ownership
 
@@ -80,7 +79,8 @@ application-shaped demo as part of planning.
 - A fully native Rust UI would reduce the web toolchain, but this project chooses
   web UI tooling for the intended desktop experience and contribution workflow.
 - An existing engine may reduce implementation work; a custom Rust engine offers
-  direct control. Issue #2 resolves this with a bounded comparison.
+  direct control. [ADR 0002](0002-download-engine-strategy.md) resolves the tradeoff
+  with a bounded comparison.
 - A single application owns jobs for now. Closing the window may keep a tray
   instance alive when that behavior is implemented; a separate service/daemon is
   not part of the MVP. Quitting the process pauses work and preserves recovery state.

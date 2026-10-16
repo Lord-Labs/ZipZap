@@ -5,9 +5,10 @@ Use `docs/ROADMAP.md` for order and `docs/architecture/` for recorded decisions.
 
 ## Current scope
 
-This repository is in the foundation/planning stage. Do not implement the app,
-add empty app scaffolding, or claim product features work as part of repository
-maintenance. Implementation begins with roadmap issue #2 after foundation #1.
+The foundation is complete. Issue #2 adds an isolated engine feasibility probe
+and records the engine strategy; production downloads begin with #3. Follow the
+roadmap, do not add empty app scaffolding, and never claim probe behavior as a
+shipped product feature.
 
 ## Ponytail throughout the project
 
@@ -26,9 +27,12 @@ here. The repository does not require a particular assistant or paid service.
 ## GitHub workflow
 
 Use an issue, a short-lived branch, and a PR into `main`. Keep changes reviewable.
-Run `npm run check` for the current repository; future code needs its own relevant
-checks. Never bypass failing CI, invent test results, publish credentials, or
-merge unrelated work. Follow `docs/development/WORKFLOW.md`.
+Run `npm run check`. Rust changes also require `cargo fmt --all -- --check`,
+`cargo clippy --workspace --all-targets --locked -- -D warnings`,
+`cargo test --workspace --locked`, `cargo build --workspace --locked`, and
+`node experiments/engine-strategy/compare.mjs`. Never bypass failing CI, invent
+test results, publish credentials, or merge unrelated work. Follow
+`docs/development/WORKFLOW.md`.
 
 ## Research
 

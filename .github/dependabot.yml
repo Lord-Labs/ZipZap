@@ -1,5 +1,14 @@
 version: 2
 updates:
+  - package-ecosystem: cargo
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3
+    labels: ["area:tooling"]
+    groups:
+      rust-dependencies:
+        patterns: ["*"]
   - package-ecosystem: npm
     directory: /
     schedule:
