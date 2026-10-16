@@ -1,5 +1,5 @@
 [workspace]
-members = ["experiments/engine-strategy"]
+members = ["experiments/engine-strategy", "crates/zipzap-core"]
 resolver = "3"
 
 [workspace.package]

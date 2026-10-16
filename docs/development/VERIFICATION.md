@@ -7,18 +7,18 @@ the link checker's behavior. GitHub Actions runs the same command on Ubuntu and
 Windows with Node 24. The same platform jobs now install pinned Rust 1.99.0,
 check Rust formatting/clippy, run the unit tests, build the feasibility probe,
 and run its six local HTTP scenarios. The final `Repository checks` job aggregates
-both results and is the status required for merging.
+both results and is the status required for merging. The production core also
+has unit validation tests and `scripts/test-engine.mjs`: trusted/untrusted TLS,
+byte integrity, safe fallback, durable recovery, cancellation, and queue limits.
 
 Local-link checking verifies inline-link target files, not reference-style links,
 Markdown heading anchors, external HTTP availability, or content correctness. It
 ignores fenced code examples and external URLs. Those limits are intentional;
 reviewers must assess the meaning and accuracy of documentation.
 
-The current workflow builds an isolated Rust experiment, **not** a production
-downloader or desktop application. aria2 was compared locally on Windows;
-CI does not install or test that external binary. See the
-[evidence and limits](../research/engine-strategy.md). Add production checks with
-the first actual component rather than renaming probe checks as application tests.
+The workflow builds the production core and the isolated experiment. There is
+no desktop build yet. aria2 remains historical local evidence, not a CI
+dependency. The core fixture never alters the operating system trust store.
 
 ## Engine gates (M1–M2)
 

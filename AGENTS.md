@@ -5,10 +5,9 @@ Use `docs/ROADMAP.md` for order and `docs/architecture/` for recorded decisions.
 
 ## Current scope
 
-The foundation is complete. Issue #2 adds an isolated engine feasibility probe
-and records the engine strategy; production downloads begin with #3. Follow the
-roadmap, do not add empty app scaffolding, and never claim probe behavior as a
-shipped product feature.
+The foundation and engine strategy are complete. Production core and durable
+queue live in `crates/zipzap-core`; follow the roadmap into desktop/browser
+integration. Do not confuse the separate feasibility probe with product code.
 
 ## Ponytail throughout the project
 
@@ -30,7 +29,7 @@ Use an issue, a short-lived branch, and a PR into `main`. Keep changes reviewabl
 Run `npm run check`. Rust changes also require `cargo fmt --all -- --check`,
 `cargo clippy --workspace --all-targets --locked -- -D warnings`,
 `cargo test --workspace --locked`, `cargo build --workspace --locked`, and
-`node experiments/engine-strategy/compare.mjs`. Never bypass failing CI, invent
+`node experiments/engine-strategy/compare.mjs`, and `node scripts/test-engine.mjs`. Never bypass failing CI, invent
 test results, publish credentials, or merge unrelated work. Follow
 `docs/development/WORKFLOW.md`.
 

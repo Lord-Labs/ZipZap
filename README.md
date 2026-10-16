@@ -7,9 +7,9 @@ A free, open-source download manager focused on reliable downloads, safe resume,
 and a straightforward desktop experience. Windows first, with a Rust engine and
 a planned Tauri interface.
 
-**Status: foundation complete; engine strategy verified with an isolated local
-probe. No production downloader, application, installer, or performance claims
-are available yet.**
+**Status: HTTP/HTTPS engine and durable queue implemented and tested; desktop
+and browser integration are next. There is no installer or application release
+yet, and no performance superiority claim.**
 
 [العربية](docs/README.ar.md) · [Roadmap](docs/ROADMAP.md) ·
 [Project tracker](https://github.com/users/Lord-shaban/projects/12) ·
@@ -23,7 +23,7 @@ are available yet.**
 - Explicit “Download with ZipZap” actions in Chrome and Edge.
 - Local download history and settings, with no account or hosted service required.
 
-These are planned capabilities, not a list of implemented features. Automatic
+The engine/queue capabilities are implemented; the desktop and extension remain planned. Automatic
 browser interception, media extraction, scheduling by time, macOS, and Linux are
 outside the first beta. See [scope and acceptance criteria](docs/PRODUCT.md).
 
@@ -52,7 +52,8 @@ npm ci
 npm run check
 ```
 
-These commands verify repository documentation and tooling. A separate isolated
+These commands verify repository documentation and tooling. The production [core](docs/development/ENGINE.md) has its own integrity/recovery
+fixtures. A separate isolated
 [engine probe](experiments/engine-strategy/README.md) verifies feasibility; there
 is no app dev server yet. Rust setup/checks and future Tauri requirements are in
 [development setup](docs/development/SETUP.md).
