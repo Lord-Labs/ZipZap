@@ -17,7 +17,7 @@ jobs:
   validate:
     name: Repository (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 15
+    timeout-minutes: 35
     strategy:
       fail-fast: false
       matrix:
@@ -36,18 +36,29 @@ jobs:
         run: npm ci --ignore-scripts --no-audit
       - name: Verify repository
         run: npm run check
+      - name: Build frontend and browser extension
+        run: npm run build:web && npm run build:extension
+      - name: Install browser test runtime
+        if: runner.os == 'Linux'
+        run: npx playwright install --with-deps chromium
+      - name: Verify UI behavior and accessibility
+        if: runner.os == 'Linux'
+        run: npx playwright test
       - name: Set up pinned Rust toolchain
         uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable, pinned 2026-10-16
         with:
           toolchain: 1.99.0
           components: clippy, rustfmt
+      - name: Prepare Windows native sidecar
+        if: runner.os == 'Windows'
+        run: node scripts/build-native.mjs
       - name: Check Rust formatting
         run: cargo fmt --all -- --check
-      - name: Lint the feasibility probe
+      - name: Lint Rust workspace
         run: cargo clippy --workspace --all-targets --locked -- -D warnings
-      - name: Test the feasibility probe
+      - name: Test Rust workspace
         run: cargo test --workspace --locked
-      - name: Build the feasibility probe
+      - name: Build Rust workspace
         run: cargo build --workspace --locked
       - name: Verify Rust against the local HTTP fixture
         run: node experiments/engine-strategy/compare.mjs

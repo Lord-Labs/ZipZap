@@ -3,7 +3,7 @@
 ## What runs today
 
 `npm run check` runs Prettier, checks local Markdown file targets, and exercises
-the link checker's behavior. GitHub Actions runs the same command on Ubuntu and
+the link checker's behavior, and Svelte/TypeScript diagnostics. GitHub Actions runs the same command on Ubuntu and
 Windows with Node 24. The same platform jobs now install pinned Rust 1.99.0,
 check Rust formatting/clippy, run the unit tests, build the feasibility probe,
 and run its six local HTTP scenarios. The final `Repository checks` job aggregates
@@ -16,9 +16,10 @@ Markdown heading anchors, external HTTP availability, or content correctness. It
 ignores fenced code examples and external URLs. Those limits are intentional;
 reviewers must assess the meaning and accuracy of documentation.
 
-The workflow builds the production core and the isolated experiment. There is
-no desktop build yet. aria2 remains historical local evidence, not a CI
-dependency. The core fixture never alters the operating system trust store.
+The workspace includes the core, native bridge and Windows desktop shell. CI
+builds the frontend and extension, and runs Playwright/Axe on Ubuntu. Windows
+prepares the native sidecar before compiling the desktop. aria2 is historical
+evidence, not a CI dependency. The core fixture never changes OS trust.
 
 ## Engine gates (M1–M2)
 
@@ -60,3 +61,28 @@ limitations; do not generalize from a single fast local-server run.
 Installer evidence includes clean install, launch, upgrade, uninstall, and retained
 downloads. Only actual verified capabilities belong in release notes or README
 feature lists. See [release process](RELEASING.md).
+
+## Recorded Windows integration (2026-10-16)
+
+Windows 11 Pro build 26200 x64, WebView2, Node 24.19.0 and Rust 1.99.0.
+A real desktop URL/folder action downloaded a 16 MiB local fixture:
+`01a12f59399d0486b14577e498d91675c69b35238726f44128ce4d4763544408`.
+Native folder selection, English/Arabic switching, persisted folder/language,
+completed rows and polite status text were inspected in the Windows accessibility
+tree. Keyboard focus/Escape, form validation and layouts at 375/780/1200 pixels
+also passed the three UI tests; Axe reported zero violations in those states.
+This is not a claim of screen-reader certification.
+
+A per-user NSIS installation exited 0 and registered both browser host keys.
+Chrome for Testing 149.0.7827.55 and Microsoft Edge 155.0.4283.45 sent real
+popup requests through the installed native host, app and engine. A closed app
+started from the host. Both produced 1 MiB files with SHA-256:
+`b8a74bb29f5cab9c4aa7e78d78053b0c23ef8cbbaccd8796396659e39eb3623c`.
+Invalid file URLs were rejected; a duplicate destination showed a recoverable
+app notice and left the original file intact. Tests used isolated profiles.
+Edge used the CDP `Extensions.loadUnpacked` test API because branded-browser
+command-line sideload flags are restricted; no personal profile or browser policy
+was changed. Chrome stable branding/store installation remains untested.
+
+Sources: [Playwright extension testing](https://playwright.dev/docs/chrome-extensions),
+[CDP extension test API](https://chromedevtools.github.io/devtools-protocol/tot/Extensions/).

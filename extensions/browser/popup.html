@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>ZipZap</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header>
+      <img src="icon32.png" width="32" height="32" alt="" /><strong>ZipZap<span>.</span></strong>
+    </header>
+    <p data-i18n="description"></p>
+    <form>
+      <label for="url" data-i18n="link"></label
+      ><input
+        id="url"
+        type="url"
+        dir="ltr"
+        placeholder="https://example.com/file.zip"
+        required
+        maxlength="16384"
+      /><button type="submit" data-i18n="send"></button>
+    </form>
+    <p id="status" role="status" aria-live="polite"></p>
+    <footer data-i18n="privacy"></footer>
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

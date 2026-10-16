@@ -2,7 +2,7 @@
 
 This is the implementation order for the first Windows beta. The foundation,
 strategy, production HTTP/HTTPS core, durable resume, and bounded queue are
-implemented. Desktop/browser integration and release verification follow. GitHub
+implemented. Desktop/browser implementation is under verification; release work follows. GitHub
 issues own live acceptance criteria; this document owns scope and sequencing.
 
 [Project tracker](https://github.com/users/Lord-shaban/projects/12) ·
@@ -47,7 +47,7 @@ Issue #2 compares a small native Rust engine with reuse of aria2, including a
 bounded HTTP fixture, integration costs, and dependency licensing. The
 [recorded decision](architecture/0002-download-engine-strategy.md) selects
 Rust/Tokio/reqwest with one owned transfer-state model. The probe is not production
-code. Issues #3�#6 implement the streamed core, validated segmentation, durable resume,
+code. Issues #3–#6 implement the streamed core, validated segmentation, durable resume,
 and queue. See [core behavior and limits](development/ENGINE.md). Desktop work
 starts in #7 and must call this same core.
 

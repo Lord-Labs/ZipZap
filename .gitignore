@@ -6,6 +6,8 @@ coverage/
 .cache/
 *.log
 *.tsbuildinfo
+apps/desktop/src-tauri/binaries/
+apps/desktop/src-tauri/gen/
 
 # Local secrets; commit only sanitized examples
 .env
@@ -34,3 +36,10 @@ Desktop.ini
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
+
+apps/desktop/src-tauri/icons/*
+!apps/desktop/src-tauri/icons/32x32.png
+!apps/desktop/src-tauri/icons/128x128.png
+!apps/desktop/src-tauri/icons/icon.ico
+test-results/
+playwright-report/

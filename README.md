@@ -5,17 +5,16 @@
 
 A free, open-source download manager focused on reliable downloads, safe resume,
 and a straightforward desktop experience. Windows first, with a Rust engine and
-a planned Tauri interface.
+a Tauri interface.
 
-**Status: HTTP/HTTPS engine and durable queue implemented and tested; desktop
-and browser integration are next. There is no installer or application release
-yet, and no performance superiority claim.**
+**Status: Windows desktop and browser handoff implemented; first-beta release
+verification is in progress. No public release yet or performance superiority claim.**
 
 [العربية](docs/README.ar.md) · [Roadmap](docs/ROADMAP.md) ·
 [Project tracker](https://github.com/users/Lord-shaban/projects/12) ·
 [Contributing](CONTRIBUTING.md)
 
-## Planned first beta
+## First-beta capabilities
 
 - HTTP/HTTPS downloads with bounded parallel connections when supported.
 - Pause, safe resume after restart, queue management, and bandwidth control.
@@ -23,11 +22,11 @@ yet, and no performance superiority claim.**
 - Explicit “Download with ZipZap” actions in Chrome and Edge.
 - Local download history and settings, with no account or hosted service required.
 
-The engine/queue capabilities are implemented; the desktop and extension remain planned. Automatic
+Automatic
 browser interception, media extraction, scheduling by time, macOS, and Linux are
 outside the first beta. See [scope and acceptance criteria](docs/PRODUCT.md).
 
-## Proposed stack
+## Stack
 
 | Component           | Direction                                                                                            |
 | ------------------- | ---------------------------------------------------------------------------------------------------- |
@@ -52,11 +51,12 @@ npm ci
 npm run check
 ```
 
-These commands verify repository documentation and tooling. The production [core](docs/development/ENGINE.md) has its own integrity/recovery
-fixtures. A separate isolated
-[engine probe](experiments/engine-strategy/README.md) verifies feasibility; there
-is no app dev server yet. Rust setup/checks and future Tauri requirements are in
-[development setup](docs/development/SETUP.md).
+Run `node scripts/build-native.mjs` then `npm run desktop:dev` on Windows.
+See [development setup](docs/development/SETUP.md) for native prerequisites,
+[the user guide](docs/USER_GUIDE.md) for app/browser usage, and
+[core behavior](docs/development/ENGINE.md) for recovery and filesystem limits.
+The [historical engine probe](experiments/engine-strategy/README.md) is isolated
+from the production application.
 
 ## Find your way
 

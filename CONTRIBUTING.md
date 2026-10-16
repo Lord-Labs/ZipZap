@@ -1,6 +1,6 @@
 # Contributing to ZipZap
 
-Thank you for helping. ZipZap is in early engine development; start with the
+Thank you for helping. ZipZap is preparing its first Windows beta; start with the
 [roadmap](docs/ROADMAP.md) and [open issues](https://github.com/Lord-shaban/ZipZap/issues).
 An issue's acceptance criteria define the work. Discuss changes to scope before
 spending time on a large implementation.
