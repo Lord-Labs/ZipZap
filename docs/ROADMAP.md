@@ -1,8 +1,9 @@
 # Roadmap
 
-This is the implementation order for the first Windows beta. Nothing beyond the
-foundation is implemented yet. GitHub issues own the live acceptance criteria;
-this document owns scope and sequencing. No delivery dates are promised.
+This is the implementation order for the first Windows beta. The foundation and
+isolated engine feasibility probe are complete; production downloads are not yet
+implemented. GitHub issues own live acceptance criteria; this document owns scope
+and sequencing. No delivery dates are promised.
 
 [Project tracker](https://github.com/users/Lord-shaban/projects/12) ·
 [Milestones](https://github.com/Lord-shaban/ZipZap/milestones) ·
@@ -40,12 +41,14 @@ Work may overlap only when dependencies and boundaries are clear. In particular,
 desktop polish must not substitute for engine integrity, and browser integration
 must use the same queue and validation as manual desktop requests.
 
-## First task after the foundation
+## Engine strategy and next implementation
 
-Issue #2 compares a small native Rust engine with reuse of an established engine.
-The current direction favors Rust/Tokio/reqwest, but integration cost, maintenance,
-testability, and dependency licenses must justify the decision. Use a bounded
-technical experiment and record the result before building product layers.
+Issue #2 compares a small native Rust engine with reuse of aria2, including a
+bounded HTTP fixture, integration costs, and dependency licensing. The
+[recorded decision](architecture/0002-download-engine-strategy.md) selects
+Rust/Tokio/reqwest with one owned transfer-state model. The probe is not production
+code. Issue #3 now starts the streamed single-transfer core before segmentation
+or UI work.
 
 ## Tracking rules
 

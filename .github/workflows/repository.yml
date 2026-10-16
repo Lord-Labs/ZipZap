@@ -17,7 +17,7 @@ jobs:
   validate:
     name: Repository (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 10
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
@@ -36,6 +36,21 @@ jobs:
         run: npm ci --ignore-scripts --no-audit
       - name: Verify repository
         run: npm run check
+      - name: Set up pinned Rust toolchain
+        uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable, pinned 2026-10-16
+        with:
+          toolchain: 1.99.0
+          components: clippy, rustfmt
+      - name: Check Rust formatting
+        run: cargo fmt --all -- --check
+      - name: Lint the feasibility probe
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+      - name: Test the feasibility probe
+        run: cargo test --workspace --locked
+      - name: Build the feasibility probe
+        run: cargo build --workspace --locked
+      - name: Verify Rust against the local HTTP fixture
+        run: node experiments/engine-strategy/compare.mjs
 
   required:
     name: Repository checks

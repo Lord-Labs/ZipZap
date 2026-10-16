@@ -7,8 +7,9 @@ A free, open-source download manager focused on reliable downloads, safe resume,
 and a straightforward desktop experience. Windows first, with a Rust engine and
 a planned Tauri interface.
 
-**Status: repository foundation and planning. No application, installer, or
-performance claims are available yet.**
+**Status: foundation complete; engine strategy verified with an isolated local
+probe. No production downloader, application, installer, or performance claims
+are available yet.**
 
 [العربية](docs/README.ar.md) · [Roadmap](docs/ROADMAP.md) ·
 [Project tracker](https://github.com/users/Lord-shaban/projects/12) ·
@@ -28,13 +29,13 @@ outside the first beta. See [scope and acceptance criteria](docs/PRODUCT.md).
 
 ## Proposed stack
 
-| Component           | Direction                                                                     |
-| ------------------- | ----------------------------------------------------------------------------- |
-| Download engine     | Rust; evaluate Tokio/reqwest against an existing engine before implementation |
-| Desktop application | Tauri 2, Svelte, TypeScript, Vite                                             |
-| Persistent state    | SQLite                                                                        |
-| Browser integration | TypeScript, Manifest V3, native messaging                                     |
-| Collaboration       | GitHub Issues, Projects, pull requests, and Actions                           |
+| Component           | Direction                                                                                            |
+| ------------------- | ---------------------------------------------------------------------------------------------------- |
+| Download engine     | Rust with Tokio/reqwest; [decision and evidence](docs/architecture/0002-download-engine-strategy.md) |
+| Desktop application | Tauri 2, Svelte, TypeScript, Vite                                                                    |
+| Persistent state    | SQLite                                                                                               |
+| Browser integration | TypeScript, Manifest V3, native messaging                                                            |
+| Collaboration       | GitHub Issues, Projects, pull requests, and Actions                                                  |
 
 The [architecture decision](docs/architecture/0001-project-direction.md) records
 the boundaries, tradeoffs, and decisions still to be made. Download speed depends
@@ -51,9 +52,10 @@ npm ci
 npm run check
 ```
 
-These commands verify repository documentation and tooling. There is no app dev
-server yet. Rust/Tauri setup and application CI will arrive with the corresponding
-implementation issue; see [development setup](docs/development/SETUP.md).
+These commands verify repository documentation and tooling. A separate isolated
+[engine probe](experiments/engine-strategy/README.md) verifies feasibility; there
+is no app dev server yet. Rust setup/checks and future Tauri requirements are in
+[development setup](docs/development/SETUP.md).
 
 ## Find your way
 
@@ -74,8 +76,9 @@ and ideas. Report security vulnerabilities [privately](SECURITY.md).
 ## License and attribution
 
 ZipZap is licensed under the [MIT License](LICENSE). Contributions are accepted
-under the same license. Dependency licenses and notices must be reviewed before
-distribution; the repository license does not replace their terms.
+under the same license. See [dependency notices](THIRD_PARTY_NOTICES.md); a full
+transitive license review is required before distribution. The repository license
+does not replace dependency terms.
 
 ZipZap is an independent project inspired by the download-manager workflow. It
 is not affiliated with Internet Download Manager or Tonec.

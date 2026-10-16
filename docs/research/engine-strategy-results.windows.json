@@ -1,0 +1,107 @@
+{
+  "fixtureBytes": 8388608,
+  "sha256": "31215c982ebf43f04ee735a7b8225d60c3163d623a2f04aafd2617eda91a3b18",
+  "aria2Compared": true,
+  "observations": [
+    {
+      "engine": "rust",
+      "case": "two ranges",
+      "result": "complete bytes match",
+      "requests": 2
+    },
+    {
+      "engine": "rust",
+      "case": "/ignore",
+      "result": "rejected before creating output"
+    },
+    {
+      "engine": "rust",
+      "case": "/bad-range",
+      "result": "rejected before creating output"
+    },
+    {
+      "engine": "rust",
+      "case": "same identity resume",
+      "result": "complete bytes match"
+    },
+    {
+      "engine": "rust",
+      "case": "changed identity",
+      "result": "rejected; original prefix untouched"
+    },
+    {
+      "engine": "rust",
+      "case": "body cancellation",
+      "result": "server observed connection closed before full body"
+    },
+    {
+      "engine": "aria2",
+      "version": "aria2 version 1.37.0"
+    },
+    {
+      "engine": "aria2",
+      "case": "/range",
+      "result": "complete bytes match",
+      "requests": [
+        {
+          "range": null,
+          "ifRange": null
+        },
+        {
+          "range": "bytes=4194304-8388607",
+          "ifRange": null
+        }
+      ]
+    },
+    {
+      "engine": "aria2",
+      "case": "/ignore",
+      "result": "complete bytes match",
+      "requests": [
+        {
+          "range": null,
+          "ifRange": null
+        },
+        {
+          "range": "bytes=4194304-8388607",
+          "ifRange": null
+        }
+      ]
+    },
+    {
+      "engine": "aria2",
+      "case": "seeded prefix resume /range",
+      "result": "matches original",
+      "requests": [
+        {
+          "range": null,
+          "ifRange": null
+        },
+        {
+          "range": "bytes=4194304-8388607",
+          "ifRange": null
+        }
+      ]
+    },
+    {
+      "engine": "aria2",
+      "case": "seeded prefix resume /changed",
+      "result": "mixed representation",
+      "requests": [
+        {
+          "range": null,
+          "ifRange": null
+        },
+        {
+          "range": "bytes=4194304-8388607",
+          "ifRange": null
+        }
+      ]
+    },
+    {
+      "engine": "aria2",
+      "case": "process cancellation",
+      "result": "server observed connection closed before full body"
+    }
+  ]
+}
