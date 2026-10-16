@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and early ideas
+    url: https://github.com/Lord-shaban/ZipZap/discussions
+    about: Discuss usage and unscoped ideas before opening implementation work.
+  - name: Report a security vulnerability privately
+    url: https://github.com/Lord-shaban/ZipZap/security/advisories/new
+    about: Do not disclose vulnerabilities or credentials in public issues.

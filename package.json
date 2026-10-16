@@ -1,0 +1,21 @@
+{
+  "name": "@zipzap/repository",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Documentation and repository checks for ZipZap; not the application package.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "packageManager": "npm@11.17.0",
+  "scripts": {
+    "format": "prettier --write .",
+    "check:format": "prettier --check .",
+    "check:links": "node scripts/check-links.mjs",
+    "test": "node --test scripts/check-links.test.mjs",
+    "check": "npm run check:format && npm run check:links && npm test"
+  },
+  "devDependencies": {
+    "prettier": "3.9.10"
+  }
+}

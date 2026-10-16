@@ -1,10 +1,81 @@
 # ZipZap
 
-A free, open-source download manager for Windows, with a Rust engine.
+[![Repository checks](https://github.com/Lord-shaban/ZipZap/actions/workflows/repository.yml/badge.svg)](https://github.com/Lord-shaban/ZipZap/actions/workflows/repository.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-**Status: planning and repository setup. There is no application release yet.**
+A free, open-source download manager focused on reliable downloads, safe resume,
+and a straightforward desktop experience. Windows first, with a Rust engine and
+a planned Tauri interface.
 
-The first implementation will focus on reliable HTTP/HTTPS downloads, safe
-resume, a desktop interface, and Chrome/Edge integration.
+**Status: repository foundation and planning. No application, installer, or
+performance claims are available yet.**
 
-Licensed under the [MIT License](LICENSE).
+[العربية](docs/README.ar.md) · [Roadmap](docs/ROADMAP.md) ·
+[Project tracker](https://github.com/users/Lord-shaban/projects/12) ·
+[Contributing](CONTRIBUTING.md)
+
+## Planned first beta
+
+- HTTP/HTTPS downloads with bounded parallel connections when supported.
+- Pause, safe resume after restart, queue management, and bandwidth control.
+- A Windows desktop interface in English and Arabic, including RTL support.
+- Explicit “Download with ZipZap” actions in Chrome and Edge.
+- Local download history and settings, with no account or hosted service required.
+
+These are planned capabilities, not a list of implemented features. Automatic
+browser interception, media extraction, scheduling by time, macOS, and Linux are
+outside the first beta. See [scope and acceptance criteria](docs/PRODUCT.md).
+
+## Proposed stack
+
+| Component           | Direction                                                                     |
+| ------------------- | ----------------------------------------------------------------------------- |
+| Download engine     | Rust; evaluate Tokio/reqwest against an existing engine before implementation |
+| Desktop application | Tauri 2, Svelte, TypeScript, Vite                                             |
+| Persistent state    | SQLite                                                                        |
+| Browser integration | TypeScript, Manifest V3, native messaging                                     |
+| Collaboration       | GitHub Issues, Projects, pull requests, and Actions                           |
+
+The [architecture decision](docs/architecture/0001-project-direction.md) records
+the boundaries, tradeoffs, and decisions still to be made. Download speed depends
+on the server, network, disk, and workload; measurements will precede claims.
+
+## Work on the repository
+
+Use Node.js 24 (the pinned version is in [.node-version](.node-version)) and npm:
+
+```sh
+git clone https://github.com/Lord-shaban/ZipZap.git
+cd ZipZap
+npm ci
+npm run check
+```
+
+These commands verify repository documentation and tooling. There is no app dev
+server yet. Rust/Tauri setup and application CI will arrive with the corresponding
+implementation issue; see [development setup](docs/development/SETUP.md).
+
+## Find your way
+
+| Document                                                    | Purpose                                                 |
+| ----------------------------------------------------------- | ------------------------------------------------------- |
+| [Product scope](docs/PRODUCT.md)                            | Users, first-beta requirements, and explicit exclusions |
+| [Roadmap](docs/ROADMAP.md)                                  | Ordered milestones, issues, and completion gates        |
+| [Architecture](docs/architecture/0001-project-direction.md) | Stack, component ownership, and data flow               |
+| [Development workflow](docs/development/WORKFLOW.md)        | Issue → branch → PR → checks → merge                    |
+| [Verification](docs/development/VERIFICATION.md)            | Current checks and future application test requirements |
+| [Release process](docs/development/RELEASING.md)            | Evidence required before a public release               |
+| [Research protocol](docs/research/README.md)                | Evidence-based investigation with REA                   |
+
+Report reproducible bugs through [Issues](https://github.com/Lord-shaban/ZipZap/issues).
+Use [Discussions](https://github.com/Lord-shaban/ZipZap/discussions) for questions
+and ideas. Report security vulnerabilities [privately](SECURITY.md).
+
+## License and attribution
+
+ZipZap is licensed under the [MIT License](LICENSE). Contributions are accepted
+under the same license. Dependency licenses and notices must be reviewed before
+distribution; the repository license does not replace their terms.
+
+ZipZap is an independent project inspired by the download-manager workflow. It
+is not affiliated with Internet Download Manager or Tonec.

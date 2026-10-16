@@ -1,0 +1,43 @@
+name: Bug report
+description: Report a reproducible problem with ZipZap or repository tooling.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        No application has been released yet. Include a commit for development builds.
+        Report vulnerabilities privately via the Security tab. Remove private URLs, cookies, and tokens.
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      description: Include the full commit hash for unreleased code.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Windows version/architecture, browser if relevant, and relevant tool versions.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Use a public test URL or a minimal local fixture, without credentials.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior and sanitized evidence
+      description: Include errors or screenshots when useful; remove personal information.
+    validations:
+      required: true
