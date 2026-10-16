@@ -28,6 +28,10 @@ function Assert-ZipZapInstalled {
     if (-not (Test-Path -LiteralPath (Join-Path $zipzapInstallPath $zipzapName))) { throw "Missing installed file: $zipzapName" }
   }
   foreach($zipzapKey in $zipzapHostKeys) { if(-not (Test-Path -LiteralPath $zipzapKey)) { throw 'Native host registration missing' } }
+  foreach($zipzapSource in (Get-ChildItem (Join-Path $zipzapWorkspace 'dist/release/sources') -Filter '*.crate' -File)) {
+    $zipzapInstalledSource = Join-Path $zipzapInstallPath ('third-party-sources/' + $zipzapSource.Name)
+    if((Get-FileHash -LiteralPath $zipzapInstalledSource).Hash -ne (Get-FileHash -LiteralPath $zipzapSource.FullName).Hash) { throw 'Bundled third-party source differs' }
+  }
   $zipzapManifest = Get-Content -LiteralPath (Join-Path $zipzapState 'native-host.json') -Raw | ConvertFrom-Json
   if($zipzapManifest.path -ne (Join-Path $zipzapInstallPath 'zipzap-native.exe')) { throw 'Native registration points at another installation' }
   if((Get-FileHash -LiteralPath $zipzapDatabase).Hash -ne $zipzapStateHash) { throw 'Installer changed user state' }

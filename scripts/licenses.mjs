@@ -2,9 +2,18 @@ import { execFileSync } from "node:child_process";
 import { readFile, writeFile, mkdir, readdir, copyFile, stat } from "node:fs/promises";
 import path from "node:path";
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 
 const output = path.resolve(process.argv[2] || "dist/release");
 await mkdir(output, { recursive: true });
+for (const record of JSON.parse(await readFile("licenses/third-party/sources.json", "utf8"))) {
+  const data = await readFile(path.join("licenses/third-party", `${record.package}.txt`));
+  assert.equal(
+    createHash("sha256").update(data).digest("hex"),
+    record.sha256,
+    `Supplemental notice changed: ${record.package}`,
+  );
+}
 const metadata = JSON.parse(
   execFileSync(
     "cargo",
