@@ -103,3 +103,38 @@ License text and MPL source resources were included in the installed files.
 There is no older public ZipZap version to exercise a cross-version upgrade yet;
 reinstall tests the installer replacement path, not a future schema migration.
 The same `scripts/test-installer.ps1` runs on clean Windows CI runners.
+
+## First-beta acceptance checklist
+
+- [x] HTTP/HTTPS, validated ranges, fallback, redirects and errors produce verified bytes or safe failures.
+- [x] Pause/restart/resume, immediate resume, changed resources and damaged partials preserve file integrity.
+- [x] Queue order, concurrency and shared bandwidth limits pass deterministic fixtures.
+- [x] English/Arabic desktop downloads, persisted settings, keyboard interaction and automated accessibility checks pass.
+- [x] Chrome for Testing and Edge handoff reach complete files through the installed host and shared engine.
+- [x] Source security review, dependency notices, MPL sources and known limitations are recorded.
+- [x] Windows clean install, same-version reinstall and uninstall preserve state/downloads and clean up host registration.
+- [x] Protected CI publishes the reviewed commit as a prerelease, and downloaded assets match its checksum manifest.
+
+## Published beta (2026-10-17)
+
+[0.1.0-beta.1](https://github.com/Lord-shaban/ZipZap/releases/tag/v0.1.0-beta.1)
+was published from reviewed commit `c9caec970ec244c17319f01afdd1a510716b6b51`.
+[PR #18](https://github.com/Lord-shaban/ZipZap/pull/18) records distribution/security
+verification; [PR #21](https://github.com/Lord-shaban/ZipZap/pull/21) fixes immediate
+resume while a paused worker finishes its checkpoint. The
+[protected-main checks](https://github.com/Lord-shaban/ZipZap/actions/runs/38987645035)
+passed on Windows and Ubuntu. The
+[Windows beta workflow](https://github.com/Lord-shaban/ZipZap/actions/runs/38988700324)
+rebuilt that commit, passed the installer lifecycle and published through `beta`.
+
+All seven release assets were downloaded after publication. The six payloads
+(installer, browser ZIP, third-party sources ZIP, notices, dependency metadata and
+MIT license) matched every entry in `SHA256SUMS.txt`, with no missing or extra
+payloads. The published tag was independently checked against the commit above.
+
+- Installer SHA-256: `954ed29c5d9379799725954c2abfd8a80de92c9652d7cb72b3ecf3c7aa582969`.
+- Manifest SHA-256: `a84fd729a36330751383b3177e25ce2f87252ebfb4f8ff43a65eb8f9f498e68c`.
+
+The unsigned Windows 11 x64 support scope and all
+[release limitations](../releases/0.1.0-beta.1.md) still apply. `npm audit --json`
+was repeated on 2026-10-17 and reported zero vulnerabilities.
