@@ -379,11 +379,11 @@ impl Manager {
                 if !state.running.contains_key(id)
                     && [Status::Completed, Status::Cancelled, Status::Failed].contains(&status) =>
             {
-                let job = state.jobs.remove(index);
                 state
                     .db
                     .execute("DELETE FROM jobs WHERE id=?1", [id])
                     .map_err(db_error)?;
+                let job = state.jobs.remove(index);
                 drop(state);
                 transfer::cleanup(&job);
                 return Ok(());

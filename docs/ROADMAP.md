@@ -69,6 +69,10 @@ hard or security-sensitive work as `good first issue` merely to attract contribu
 
 ## After the beta
 
+Post-beta reliability work starts with [#23](https://github.com/Lord-shaban/ZipZap/issues/23):
+preserve live history and recoverable files when database deletion fails, and
+verify a successful retry after repair. This does not change the published beta.
+
 Reassess automatic browser interception, Firefox, scheduled queues, media support,
 and other operating systems using user feedback and compatibility evidence. Add
 scoped issues when accepted; these ideas are not commitments for the first beta.

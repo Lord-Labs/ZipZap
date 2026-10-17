@@ -47,5 +47,7 @@ checkpoint are discarded on recovery. A process terminated in the narrow interva
 between publishing the final link and committing the completed state can leave a
 correct final file with a failed job on retry; the existing file is never replaced.
 Reconcile that file manually. Completed user files are never deleted by queue
-history removal. Database URLs may contain private query parameters; keep the
+history removal. History removal commits the database deletion before removing
+the live entry or cleaning temporary parts; a database error keeps them available
+for retry. Database URLs may contain private query parameters; keep the
 per-user database private and do not attach it to bug reports.
