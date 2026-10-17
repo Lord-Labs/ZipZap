@@ -23,7 +23,23 @@ Credentials and authenticated URLs must not leak through logs, crash reports, or
 public issues. There is no telemetry or remote account system in the MVP scope.
 This describes a requirement, not an audit of an application that already exists.
 
-## Deferred
+## Next-beta scope
+
+The [M6 plan](planning/NEXT_PHASE.md) accepts post-beta work on persistence and
+storage failure recovery, safe upgrades/publication, actionable retries, safe
+filename suggestions and link refresh, one durable queue with scheduling,
+batch/category/desktop workflows, explicit tray behavior, browser enqueue
+feedback, Windows provenance, diagnostics and release qualification. These are
+acceptance targets, not shipped capabilities. The published beta remains as
+described above; application versions change only during a qualified release.
+
+Scheduling is in-process only while the app is running, including explicit tray
+mode. The plan does not introduce a daemon, OS wake/shutdown or several queues.
+Automatic browser capture, authentication/proxies, Firefox/store packaging and
+media extraction have separate M7 go/no-go studies; no study implies feature
+acceptance or broad production permissions.
+
+## Outside the published first beta
 
 - Automatic interception of all browser downloads and session-cookie forwarding.
 - Video/audio extraction, HLS/DASH processing, and platform-specific extractors.
@@ -33,7 +49,8 @@ This describes a requirement, not an audit of an application that already exists
 
 Direct media-file URLs can use the ordinary HTTP engine; that does not imply
 support for arbitrary web players or protected streams. Firefox follows after
-the first Chrome/Edge integration is proven.
+the first Chrome/Edge integration is proven and its separate feasibility gate
+is accepted. Time-based scheduling is now planned in M6, within the limits above.
 
 ## Quality priorities
 

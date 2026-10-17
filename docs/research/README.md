@@ -13,6 +13,13 @@ The separately recorded [engine strategy comparison](engine-strategy.md) uses a
 local HTTP fixture with reqwest/Tokio and an official aria2 Windows binary. It
 does not analyze IDM or establish production performance.
 
+## Next-phase study
+
+The [next-phase feature study](next-phase-features.md) maps the inspected ZipZap
+baseline and official IDM/platform documentation to the accepted M6 backlog and
+separate M7 decisions. It reuses existing REA evidence and does not claim new
+native analysis, runtime verification or performance results.
+
 ## Tools
 
 - [Ponytail](https://github.com/DietrichGebert/ponytail) guides small complete changes

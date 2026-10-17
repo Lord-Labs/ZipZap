@@ -6,7 +6,9 @@ Use `docs/ROADMAP.md` for order and `docs/architecture/` for recorded decisions.
 ## Current scope
 
 The HTTP/HTTPS core, desktop, and explicit browser handoff are implemented.
-Follow `docs/ROADMAP.md` and the linked issue for verification/release work.
+Follow `docs/ROADMAP.md`, `docs/planning/NEXT_PHASE.md`, and the linked issue
+for the accepted M6 reliability, daily-use, and release work. M7 issues are
+decision-only studies; do not implement their features before a scoped decision.
 Do not add speculative app layers or present probe results as shipped features.
 
 ## Ponytail throughout the project

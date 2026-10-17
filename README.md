@@ -15,6 +15,11 @@ SHA-256 checksums before installing.**
 [Project tracker](https://github.com/users/Lord-shaban/projects/12) ·
 [Contributing](CONTRIBUTING.md)
 
+The [next development phase](docs/planning/NEXT_PHASE.md) is prepared for a
+daily-use beta: recovery, durable queue/scheduling, desktop completion and
+release qualification. [الخطة بالعربية](docs/planning/NEXT_PHASE.ar.md).
+These are planned tasks, separate from the published first beta.
+
 ## First-beta capabilities
 
 - HTTP/HTTPS downloads with bounded parallel connections when supported.
@@ -61,15 +66,16 @@ from the production application.
 
 ## Find your way
 
-| Document                                                    | Purpose                                                 |
-| ----------------------------------------------------------- | ------------------------------------------------------- |
-| [Product scope](docs/PRODUCT.md)                            | Users, first-beta requirements, and explicit exclusions |
-| [Roadmap](docs/ROADMAP.md)                                  | Ordered milestones, issues, and completion gates        |
-| [Architecture](docs/architecture/0001-project-direction.md) | Stack, component ownership, and data flow               |
-| [Development workflow](docs/development/WORKFLOW.md)        | Issue → branch → PR → checks → merge                    |
-| [Verification](docs/development/VERIFICATION.md)            | Current checks and future application test requirements |
-| [Release process](docs/development/RELEASING.md)            | Evidence required before a public release               |
-| [Research protocol](docs/research/README.md)                | Evidence-based investigation with REA                   |
+| Document                                                    | Purpose                                                        |
+| ----------------------------------------------------------- | -------------------------------------------------------------- |
+| [Product scope](docs/PRODUCT.md)                            | Users, first-beta requirements, and explicit exclusions        |
+| [Roadmap](docs/ROADMAP.md)                                  | Ordered milestones, issues, and completion gates               |
+| [Next phase](docs/planning/NEXT_PHASE.md)                   | Daily-use beta scope, dependencies, research and release gates |
+| [Architecture](docs/architecture/0001-project-direction.md) | Stack, component ownership, and data flow                      |
+| [Development workflow](docs/development/WORKFLOW.md)        | Issue → branch → PR → checks → merge                           |
+| [Verification](docs/development/VERIFICATION.md)            | Current checks and future application test requirements        |
+| [Release process](docs/development/RELEASING.md)            | Evidence required before a public release                      |
+| [Research protocol](docs/research/README.md)                | Evidence-based investigation with REA                          |
 
 Report reproducible bugs through [Issues](https://github.com/Lord-shaban/ZipZap/issues).
 Use [Discussions](https://github.com/Lord-shaban/ZipZap/discussions) for questions
