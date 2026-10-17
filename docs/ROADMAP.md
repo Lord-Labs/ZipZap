@@ -71,7 +71,15 @@ hard or security-sensitive work as `good first issue` merely to attract contribu
 
 Post-beta reliability work starts with [#23](https://github.com/Lord-shaban/ZipZap/issues/23):
 preserve live history and recoverable files when database deletion fails, and
-verify a successful retry after repair. This does not change the published beta.
+verify a successful retry after repair. That fix was merged in
+[#24](https://github.com/Lord-shaban/ZipZap/pull/24). This does not change the published beta.
+
+The next accepted desktop work is [#25](https://github.com/Lord-shaban/ZipZap/issues/25):
+use the [bounded IDM workspace study](research/idm-desktop.md) to implement a
+compact toolbar, file categories and sortable download table with existing
+engine commands. Keep the ZipZap name/logo, Arabic support, accessibility and
+safe history removal. This work does not add scheduling, interception or media
+extraction, and remains separate from the published beta until release.
 
 Reassess automatic browser interception, Firefox, scheduled queues, media support,
 and other operating systems using user feedback and compatibility evidence. Add

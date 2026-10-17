@@ -57,6 +57,26 @@
 
   let filter = "all";
 
+  let category = "all";
+  let selectedId: string | null = null;
+  let sortKey: "recent" | "filename" | "total" | "status" = "recent";
+  let descending = false;
+  let pausingAll = false;
+
+  const categories = ["compressed", "documents", "music", "programs", "video", "other"] as const;
+  const fileCategory = (path: string) => {
+    const extension =
+      basename(path)
+        .match(/\.([^.]+)$/)?.[1]
+        .toLowerCase() || "";
+    if (/^(zip|rar|7z|gz|bz2|xz|tar|tgz|zst)$/.test(extension)) return "compressed";
+    if (/^(pdf|docx?|xlsx?|pptx?|txt|csv|epub|odt|rtf)$/.test(extension)) return "documents";
+    if (/^(mp3|m4a|wav|flac|ogg|aac|opus)$/.test(extension)) return "music";
+    if (/^(exe|msi|msix|appx|apk)$/.test(extension)) return "programs";
+    if (/^(mp4|mkv|webm|avi|mov|m4v)$/.test(extension)) return "video";
+    return "other";
+  };
+
   let search = "";
 
   let error = "";
@@ -147,12 +167,37 @@
           (filter === "active"
             ? ["queued", "downloading"].includes(j.status)
             : j.status === filter)) &&
+        (category === "all" || fileCategory(j.destination) === category) &&
         `${basename(j.destination)} ${hostname(j.url)}`
           .toLocaleLowerCase()
           .includes(search.toLocaleLowerCase()),
     )
     .slice()
-    .reverse();
+    .reverse()
+    .sort((a, b) => {
+      if (sortKey === "recent") return 0;
+      if (sortKey === "total") {
+        if (a.total === null) return b.total === null ? 0 : 1;
+        if (b.total === null) return -1;
+        return (a.total - b.total) * (descending ? -1 : 1);
+      }
+      const left = sortKey === "filename" ? basename(a.destination) : text[a.status];
+      const right = sortKey === "filename" ? basename(b.destination) : text[b.status];
+      return left.localeCompare(right, language, { numeric: true }) * (descending ? -1 : 1);
+    });
+
+  $: if (selectedId && !filtered.some((job) => job.id === selectedId)) selectedId = null;
+  $: selected = filtered.find((job) => job.id === selectedId);
+  $: selectedBusy = !selected || busyIds.has(selected.id) || pausingAll;
+  $: canPause = selected && ["queued", "downloading"].includes(selected.status);
+  $: canResume = selected && ["paused", "failed"].includes(selected.status);
+  $: canCancel = selected && ["queued", "downloading", "paused"].includes(selected.status);
+  $: canRemove = selected && ["completed", "failed", "cancelled"].includes(selected.status);
+
+  function sortBy(key: "filename" | "total" | "status") {
+    descending = sortKey === key ? !descending : false;
+    sortKey = key;
+  }
 
   $: if (typeof document !== "undefined") {
     document.documentElement.lang = language;
@@ -234,6 +279,7 @@
       await invoke("add_download", { url, filename: filename.trim() || null, destination });
       addDialog.close();
       filter = "all";
+      category = "all";
       search = "";
       await refresh();
     } catch (e) {
@@ -261,18 +307,36 @@
   }
 
   async function action(job: Job, value: string) {
+    if (busyIds.has(job.id)) return false;
     busyIds = new Set([...busyIds, job.id]);
     error = "";
 
     try {
       await invoke("download_action", { id: job.id, action: value });
       await refresh();
+      return true;
     } catch (e) {
       error = String(e);
+      return false;
     } finally {
       const next = new Set(busyIds);
       next.delete(job.id);
       busyIds = next;
+    }
+  }
+
+  async function pauseAll() {
+    if (pausingAll) return;
+    pausingAll = true;
+    try {
+      for (const job of jobs.filter((job) => ["queued", "downloading"].includes(job.status))) {
+        const current = jobs.find((item) => item.id === job.id);
+        if (current && ["queued", "downloading"].includes(current.status)) {
+          if (!(await action(current, "pause"))) break;
+        }
+      }
+    } finally {
+      pausingAll = false;
     }
   }
 
@@ -342,100 +406,125 @@
 <div class="sr-only" role="status" aria-live="polite" aria-atomic="true">{announcement}</div>
 
 <div class="shell">
-  <aside class="sidebar">
-    <a class="brand" href="#downloads" aria-label="ZipZap"
-      ><span class="brand-mark"
+  <header class="app-header">
+    <a class="brand" href="#downloads" aria-label="ZipZap">
+      <span class="brand-mark"
         ><svg width="30" height="30" viewBox="0 0 256 256" aria-hidden="true"
           ><path d="M65 65h130l-93 101h89v28H58v-25l91-77H65z" fill="currentColor" /><path
             d="m175 112 29 0 0 43 14-14 17 18-44 43-42-43 17-18 9 10z"
             fill="#b7f7d2"
           /></svg
         ></span
-      ><span>ZipZap<span class="brand-dot">.</span></span></a
+      >
+      <span>ZipZap</span>
+    </a>
+    <h1>{text.downloads}</h1>
+    <span class="app-version" dir="ltr">{version}</span>
+    <button class="language" onclick={switchLanguage}
+      ><Icon name="globe" />{language === "en" ? "العربية" : "English"}</button
     >
+  </header>
 
-    <div class="workspace-label">{text.downloads}</div>
-
-    <nav aria-label={text.filter}>
-      {#each [{ id: "all", label: text.all, icon: "grid", count: jobs.length }, { id: "active", label: text.active, icon: "download", count: activeCount }, { id: "completed", label: text.completed, icon: "check", count: completedCount }, { id: "paused", label: text.paused, icon: "pause", count: jobs.filter((j) => j.status === "paused").length }, { id: "failed", label: text.failed, icon: "alert", count: jobs.filter((j) => j.status === "failed").length }] as item}
+  <section class="command-section" aria-label={text.actions}>
+    <div class="command-bar" role="group" aria-label={text.actions}>
+      <button class="tool add-tool" onclick={newDownload} aria-haspopup="dialog"
+        ><Icon name="plus" /><span>{text.add}</span></button
+      >
+      <span class="tool-divider" aria-hidden="true"></span>
+      <button
+        class="tool green"
+        disabled={selectedBusy || !canResume}
+        onclick={() => selected && action(selected, "resume")}
+        ><Icon name="play" /><span>{selected?.status === "failed" ? text.retry : text.resume}</span
+        ></button
+      >
+      <button
+        class="tool orange"
+        disabled={selectedBusy || !canPause}
+        onclick={() => selected && action(selected, "pause")}
+        ><Icon name="pause" /><span>{text.pause}</span></button
+      >
+      <button
+        class="tool orange"
+        disabled={!activeCount || pausingAll || busyIds.size > 0}
+        onclick={pauseAll}><Icon name="pauseAll" /><span>{text.pauseAll}</span></button
+      >
+      <button
+        class="tool red"
+        disabled={selectedBusy || !canCancel}
+        onclick={() => selected && action(selected, "cancel")}
+        ><Icon name="close" /><span>{text.cancel}</span></button
+      >
+      <span class="tool-divider" aria-hidden="true"></span>
+      <button
+        class="tool red"
+        disabled={selectedBusy || !canRemove}
+        onclick={() => selected && action(selected, "remove")}
+        title={text.removeHint}><Icon name="trash" /><span>{text.remove}</span></button
+      >
+      <button
+        class="tool blue"
+        disabled={selectedBusy || selected?.status !== "completed"}
+        onclick={() => selected && openFile(selected)}
+        ><Icon name="external" /><span>{text.open}</span></button
+      >
+      <button
+        class="tool blue"
+        disabled={selectedBusy || selected?.status !== "completed"}
+        onclick={() => selected && openFile(selected, true)}
+        ><Icon name="folder" /><span>{text.reveal}</span></button
+      >
+      <span class="tool-divider" aria-hidden="true"></span>
+      <button class="tool violet" onclick={showSettings} aria-haspopup="dialog"
+        ><Icon name="settings" /><span>{text.settings}</span></button
+      >
+    </div>
+  </section>
+  <div class="workspace">
+    <aside class="sidebar" aria-label={text.categories}>
+      <h2>{text.categories}</h2>
+      <nav aria-label={text.filter}>
         <button
-          class:chosen={filter === item.id}
-          aria-current={filter === item.id ? "page" : undefined}
-          onclick={() => (filter = item.id)}
-          title={item.label}
-          aria-label={item.label}
-          ><Icon name={item.icon} /><span>{item.label}</span><span class="nav-count"
-            >{item.count}</span
+          class:chosen={filter === "all" && category === "all"}
+          aria-current={filter === "all" && category === "all" ? "page" : undefined}
+          onclick={() => {
+            filter = "all";
+            category = "all";
+          }}
+          ><Icon name="folder" /><span>{text.all}</span><span class="nav-count">{jobs.length}</span
           ></button
         >
-      {/each}
-    </nav>
-
-    <div class="sidebar-bottom">
-      <div class="local-note"><Icon name="shield" /><span>{text.local}</span></div>
-      <button
-        class="sidebar-settings"
-        aria-label={text.settings}
-        onclick={showSettings}
-        aria-haspopup="dialog"><Icon name="settings" /><span>{text.settings}</span></button
-      >
-      <div class="sidebar-version">{text.version}<span dir="ltr">{version}</span></div>
-    </div>
-  </aside>
-
-  <main id="downloads" tabindex="-1">
-    <header class="topbar">
-      <div class="breadcrumb">ZipZap <span>/</span> {text.downloads}</div>
-      <button class="language" onclick={switchLanguage}
-        ><Icon name="globe" />{language === "en" ? "العربية" : "English"}</button
-      >
-    </header>
-
-    <div class="content">
-      <section class="heading">
-        <div>
-          <div class="eyebrow">
-            <span class="status-dot"></span>{ready ? text.ready : text.loading}
-          </div>
-          <h1>{text.title}</h1>
-          <p>{text.subtitle}</p>
-        </div>
-        <button class="primary add-button" onclick={newDownload} aria-haspopup="dialog"
-          ><Icon name="plus" />{text.add}</button
-        >
-      </section>
-
-      <section class="stats" aria-label={text.downloadSettings}>
-        <div class="stat">
-          <span class="stat-icon"><Icon name="download" /></span>
-          <div>
-            <span>{text.active}</span><strong
-              >{new Intl.NumberFormat(language).format(activeCount)}<small>{text.files}</small
-              ></strong
+        <div class="category-children">
+          {#each categories as item}
+            <button
+              class:chosen={category === item}
+              aria-current={category === item ? "page" : undefined}
+              onclick={() => {
+                filter = "all";
+                category = item;
+              }}><Icon name={item} /><span>{text[item]}</span></button
             >
-          </div>
+          {/each}
         </div>
+        <div class="nav-divider"></div>
+        {#each [{ id: "active", label: text.active, icon: "download", count: activeCount }, { id: "paused", label: text.paused, icon: "pause", count: jobs.filter((j) => j.status === "paused").length }, { id: "completed", label: text.completed, icon: "check", count: completedCount }, { id: "failed", label: text.failed, icon: "alert", count: jobs.filter((j) => j.status === "failed").length }, { id: "cancelled", label: text.cancelled, icon: "close", count: jobs.filter((j) => j.status === "cancelled").length }] as item}
+          <button
+            class:chosen={filter === item.id}
+            aria-current={filter === item.id ? "page" : undefined}
+            onclick={() => {
+              filter = item.id;
+              category = "all";
+            }}
+            ><Icon name={item.icon} /><span>{item.label}</span><span class="nav-count"
+              >{item.count}</span
+            ></button
+          >
+        {/each}
+      </nav>
+      <div class="sidebar-note"><Icon name="shield" /><span>{text.local}</span></div>
+    </aside>
 
-        <div class="stat">
-          <span class="stat-icon blue"><Icon name="check" /></span>
-          <div>
-            <span>{text.completed}</span><strong
-              >{new Intl.NumberFormat(language).format(completedCount)}<small>{text.files}</small
-              ></strong
-            >
-          </div>
-        </div>
-
-        <div class="stat">
-          <span class="stat-icon orange"><Icon name="speed" /></span>
-          <div>
-            <span>{text.speed}</span><strong class="speed-number" dir="ltr"
-              >{bytes(totalSpeed)}<small>/s</small></strong
-            >
-          </div>
-        </div>
-      </section>
-
+    <main id="downloads" tabindex="-1">
       {#if error}<div class="message error" role="alert">
           <Icon name="alert" /><span>{error}</span><button
             class="icon-button"
@@ -443,7 +532,6 @@
             aria-label={text.clearError}><Icon name="close" /></button
           >
         </div>{/if}
-
       {#if notice}<div class="message notice" role="status">
           <Icon name="check" /><span>{notice}</span><button
             class="icon-button"
@@ -455,13 +543,13 @@
       <section class="download-panel" aria-label={text.downloads}>
         <div class="panel-toolbar">
           <h2>
-            {filter === "all"
-              ? text.all
-              : filter === "active"
-                ? text.active
-                : text[filter as "paused" | "failed" | "completed"]}<span class="count-pill"
-              >{filtered.length}</span
-            >
+            {category !== "all"
+              ? text[category as (typeof categories)[number]]
+              : filter === "all"
+                ? text.all
+                : filter === "active"
+                  ? text.active
+                  : text[filter as Status]}<span class="count-pill">{filtered.length}</span>
           </h2>
           <label class="search"
             ><Icon name="search" /><input
@@ -473,131 +561,119 @@
           >
         </div>
 
-        {#if !ready}<div class="empty">
-            <span class="empty-icon"><Icon name="clock" /></span>
-            <h3>{text.loading}</h3>
-          </div>
-        {:else if filtered.length === 0}
-          <div class="empty">
-            <div class="empty-orbit">
-              <span class="empty-icon"><Icon name="download" /></span><span class="orbit-dot"
-              ></span>
-            </div>
-            <h3>{search || filter !== "all" ? text.noResults : text.empty}</h3>
-            <p>{text.emptyText}</p>
-            <button class="secondary" onclick={newDownload}
-              ><Icon name="plus" />{text.emptyAction}</button
+        <!-- svelte-ignore a11y_no_noninteractive_tabindex (Keyboard users need to scroll the table horizontally.) -->
+        <div class="table-scroll" tabindex="0" role="region" aria-label={text.downloadTable}>
+          <table>
+            <caption class="sr-only">{text.tableHelp}</caption>
+            <thead
+              ><tr>
+                {#each [{ key: "filename", label: text.filename }, { key: "total", label: text.total }, { key: "status", label: text.status }] as column}
+                  <th
+                    scope="col"
+                    aria-sort={sortKey === column.key
+                      ? descending
+                        ? "descending"
+                        : "ascending"
+                      : "none"}
+                    ><button onclick={() => sortBy(column.key as "filename" | "total" | "status")}
+                      >{column.label}<span aria-hidden="true"
+                        >{sortKey === column.key ? (descending ? "▾" : "▴") : "↕"}</span
+                      ></button
+                    ></th
+                  >
+                {/each}
+                <th scope="col">{text.timeLeft}</th><th scope="col">{text.transferRate}</th><th
+                  scope="col">{text.website}</th
+                >
+              </tr></thead
             >
-            <div class="empty-tags">
-              <span><Icon name="shield" />{text.private}</span><span
-                ><Icon name="check" />{text.account}</span
-              >
-            </div>
-          </div>
-        {:else}
-          <ul class="job-list">
-            {#each filtered as job (job.id)}
-              <li class="job" class:failed={job.status === "failed"}>
-                <div class="file-icon"><Icon name="file" /></div>
-
-                <div class="job-info">
-                  <div class="file-heading">
-                    <strong title={basename(job.destination)}
-                      ><bdi>{basename(job.destination)}</bdi></strong
-                    ><span
-                      class="badge"
-                      class:finished={job.status === "completed"}
-                      class:running={job.status === "downloading"}
-                      class:danger={job.status === "failed"}>{text[job.status]}</span
-                    >
-                  </div>
-                  <div class="file-origin">
-                    <bdi dir="ltr">{hostname(job.url)}</bdi><span>·</span><bdi dir="ltr"
-                      >{job.total !== null ? bytes(job.total) : text.unknown}</bdi
-                    >
-                  </div>
-
-                  <progress
-                    max="100"
-                    value={job.total || job.status === "completed" ? percent(job) : undefined}
-                    aria-label={`${basename(job.destination)} ${text[job.status]}`}
-                  ></progress>
-
-                  <div class="progress-detail">
-                    <span
-                      ><bdi dir="ltr"
-                        >{bytes(job.downloaded)}{job.total !== null
-                          ? ` / ${bytes(job.total)}`
-                          : ""}</bdi
-                      ></span
-                    ><span
-                      >{job.status === "downloading"
-                        ? `${bytes(job.speed)}/s`
-                        : job.status === "queued"
-                          ? text.waiting
-                          : ""}{remaining(job) ? ` · ${remaining(job)}` : ""}</span
-                    >
-                  </div>
-
-                  {#if job.error}<p class="job-error" role="status">{job.error}</p>{/if}
-                </div>
-
-                <div class="job-actions" aria-label={text.actions}>
-                  {#if ["downloading", "queued"].includes(job.status)}<button
-                      class="icon-button"
-                      disabled={busyIds.has(job.id)}
-                      onclick={() => action(job, "pause")}
-                      aria-label={text.pause}
-                      title={text.pause}><Icon name="pause" /></button
-                    >
-                  {:else if ["paused", "failed"].includes(job.status)}<button
-                      class="icon-button resume"
-                      disabled={busyIds.has(job.id)}
-                      onclick={() => action(job, "resume")}
-                      aria-label={job.status === "failed" ? text.retry : text.resume}
-                      title={text.resume}><Icon name="play" /></button
-                    >
-                  {/if}
-
-                  {#if job.status === "completed"}<button
-                      class="icon-button"
-                      onclick={() => openFile(job)}
-                      aria-label={text.open}
-                      title={text.open}><Icon name="external" /></button
+            <tbody>
+              {#each filtered as job (job.id)}
+                <tr class:selected={selectedId === job.id} class:failed={job.status === "failed"}>
+                  <td class="filename-cell"
                     ><button
-                      class="icon-button"
-                      onclick={() => openFile(job, true)}
-                      aria-label={text.reveal}
-                      title={text.reveal}><Icon name="folder" /></button
-                    >{/if}
-
-                  {#if ["queued", "downloading", "paused"].includes(job.status)}<button
-                      class="icon-button"
-                      disabled={busyIds.has(job.id)}
-                      onclick={() => action(job, "cancel")}
-                      aria-label={text.cancel}
-                      title={text.cancel}><Icon name="close" /></button
-                    >{:else}<button
-                      class="icon-button"
-                      disabled={busyIds.has(job.id)}
-                      onclick={() => action(job, "remove")}
-                      aria-label={text.remove}
-                      title={text.remove}><Icon name="trash" /></button
-                    >{/if}
-                </div>
-              </li>
-            {/each}
-          </ul>
-        {/if}
+                      class="file-select"
+                      aria-pressed={selectedId === job.id}
+                      onclick={() => (selectedId = job.id)}
+                      title={basename(job.destination)}
+                      ><Icon name={fileCategory(job.destination)} /><bdi
+                        >{basename(job.destination)}</bdi
+                      ></button
+                    >{#if job.error}<p class="job-error">{job.error}</p>{/if}</td
+                  >
+                  <td
+                    ><bdi dir="ltr">{job.total !== null ? bytes(job.total) : text.unknown}</bdi></td
+                  >
+                  <td class="status-cell"
+                    ><span
+                      class="job-status"
+                      class:running={job.status === "downloading"}
+                      class:finished={job.status === "completed"}
+                      >{text[job.status]}{job.total && job.status === "downloading"
+                        ? ` (${Math.floor(percent(job))}%)`
+                        : ""}</span
+                    ><progress
+                      max="100"
+                      value={job.total || job.status === "completed" ? percent(job) : undefined}
+                      aria-label={`${basename(job.destination)} ${text[job.status]}`}
+                    ></progress></td
+                  >
+                  <td>{remaining(job) || "—"}</td>
+                  <td
+                    ><bdi dir="ltr"
+                      >{job.status === "downloading" ? `${bytes(job.speed)}/s` : "—"}</bdi
+                    ></td
+                  >
+                  <td class="origin-cell"
+                    ><bdi dir="ltr" title={hostname(job.url)}>{hostname(job.url)}</bdi></td
+                  >
+                </tr>
+              {/each}
+            </tbody>
+          </table>
+          {#if !ready}<div class="empty">
+              <Icon name="clock" />
+              <h3>{text.loading}</h3>
+            </div>
+          {:else if filtered.length === 0}<div class="empty">
+              <Icon name="download" />
+              <h3>
+                {search || filter !== "all" || category !== "all" ? text.noResults : text.empty}
+              </h3>
+              <p>{text.emptyText}</p>
+              <button class="secondary" onclick={newDownload}
+                ><Icon name="plus" />{text.emptyAction}</button
+              >
+            </div>{/if}
+        </div>
       </section>
 
-      <footer>
-        <span><Icon name="shield" />{text.private}</span><span>{text.footer}</span><span
-          >ZipZap <bdi>{version}</bdi></span
-        >
-      </footer>
-    </div>
-  </main>
+      <section class="selection-details" aria-label={text.details}>
+        {#if selected}
+          <div>
+            <strong>{text.destination}</strong><bdi dir="ltr">{pathLabel(selected.destination)}</bdi
+            >
+          </div>
+          <div>
+            <strong>{text.saved}</strong><bdi dir="ltr"
+              >{bytes(selected.downloaded)}{selected.total !== null
+                ? ` / ${bytes(selected.total)}`
+                : ""}</bdi
+            ><span>{text[selected.status]}</span>
+          </div>
+          {#if selected.error}<p class="job-error" role="status">{selected.error}</p>{/if}
+        {:else}<p>{text.selectHint}</p>{/if}
+      </section>
+    </main>
+  </div>
+
+  <footer class="statusbar">
+    <span><span class="status-dot"></span>{ready ? text.ready : text.loading}</span><span
+      >{text.active}: {activeCount}</span
+    ><span>{text.speed}: <bdi dir="ltr">{bytes(totalSpeed)}/s</bdi></span><span class="footer-note"
+      >{text.footer}</span
+    >
+  </footer>
 </div>
 
 <dialog bind:this={addDialog} aria-labelledby="add-title">

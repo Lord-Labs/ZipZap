@@ -8,9 +8,18 @@ while assembly completes. Existing files are never overwritten.
 
 Open **New download**, paste a direct HTTP/HTTPS link, optionally choose a plain
 filename, select a folder, then start. Progress, speed and remaining time come
-from the engine. Unknown lengths show an indeterminate progress bar. Use the row
-buttons to pause, resume, cancel, or retry. Cancellation discards owned partial
+from the engine. Unknown lengths show an indeterminate progress bar. Select a file
+and use the toolbar to pause, resume, cancel, or retry. Cancellation discards owned partial
 files; removing a completed history entry keeps the downloaded file.
+
+The development version uses a compact toolbar, category pane and download
+table. Select a filename to enable its available toolbar actions. **Pause all**
+pauses active and queued downloads, stopping if a command fails so you can
+inspect the error and retry. The category pane filters by filename extension;
+it does not move files or detect media. Search matches filenames and websites.
+Click Filename, Total size or Status to sort; click again to reverse. Unknown
+sizes stay last. Selecting a status filter clears the file-category filter.
+These workspace changes are not included in the published first beta.
 
 Settings control one to four simultaneous downloads, one to four connections per
 download, a shared speed limit (0 means unlimited), the default folder and
@@ -52,7 +61,9 @@ recover them. Remove the unpacked extension separately through your browser.
 ## Keyboard and accessibility
 
 Tab/Shift+Tab move focus; Enter/Space activate buttons; Escape closes a dialog.
-Dialogs keep focus inside until closed. Buttons have accessible labels, progress
+Select a filename with Enter/Space to use the toolbar. Tab to the table region
+and use arrow keys to scroll when columns do not fit. Dialogs keep focus inside
+until closed. Buttons have accessible labels, progress
 has names/values, and status changes use a polite live region. Paths and URLs
 remain left-to-right inside Arabic layouts. System fonts and reduced-motion
 preferences are respected. Automated checks supplement the Windows accessibility

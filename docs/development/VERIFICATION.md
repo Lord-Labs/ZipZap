@@ -1,5 +1,22 @@
 # Verification
 
+## Desktop workspace follow-up (2026-10-17)
+
+[Issue #25](https://github.com/Lord-shaban/ZipZap/issues/25) replaces the desktop
+dashboard with a compact toolbar, filename categories and sortable table. Local
+`npm run check` passed with zero Svelte errors/warnings; `npm run build:web`
+passed. All nine Playwright UI tests passed, including command/error handling,
+selection, categories, sorting and English/Arabic layouts. Axe found zero
+violations in the tested empty/modal/populated states at 375/780/1200 pixels.
+The final Arabic screenshot was visually inspected using synthetic fixture jobs.
+
+These tests mock the Tauri IPC boundary. Native Windows download, browser,
+installer and Rust checks were not repeated for this frontend/configuration
+change. The existing beta evidence below remains evidence for its original
+commit. GitHub Actions is skipped for this change at the maintainer's explicit
+request; no hosted-check result is claimed. The
+[IDM study](../research/idm-desktop.md) records the reference evidence and limits.
+
 ## What runs today
 
 `npm run check` runs Prettier, checks local Markdown file targets, and exercises
