@@ -20,11 +20,17 @@ request; no hosted-check result is claimed. The
 ## What runs today
 
 `npm run check` runs Prettier, checks local Markdown file targets, and exercises
-the link checker's behavior, and Svelte/TypeScript diagnostics. GitHub Actions runs the same command on Ubuntu and
+the link checker's behavior, and Svelte/TypeScript diagnostics. Required checks
+run locally. As of 2026-10-18, [maintainer decision #54](https://github.com/Lord-shaban/ZipZap/issues/54)
+disables automatic hosted checks and removes their required merge status, while
+preserving PR, conversation-resolution and linear-history protections. Hosted
+checks are skipped unless separately requested; this is not a passing result.
+
+The retained manual Repository workflow runs the same command on Ubuntu and
 Windows with Node 24. The same platform jobs now install pinned Rust 1.99.0,
 check Rust formatting/clippy, run the unit tests, build the feasibility probe,
 and run its six local HTTP scenarios. The final `Repository checks` job aggregates
-both results and is the status required for merging. The production core also
+both results; it is no longer required for merging. The production core also
 has unit validation tests and `scripts/test-engine.mjs`: trusted/untrusted TLS,
 byte integrity, safe fallback, durable recovery, cancellation, and queue limits.
 
@@ -33,7 +39,7 @@ Markdown heading anchors, external HTTP availability, or content correctness. It
 ignores fenced code examples and external URLs. Those limits are intentional;
 reviewers must assess the meaning and accuracy of documentation.
 
-The workspace includes the core, native bridge and Windows desktop shell. CI
+The workspace includes the core, native bridge and Windows desktop shell. Manual CI
 builds the frontend and extension, and runs Playwright/Axe on Ubuntu. Windows
 prepares the native sidecar before compiling the desktop. aria2 is historical
 evidence, not a CI dependency. The core fixture never changes OS trust.
