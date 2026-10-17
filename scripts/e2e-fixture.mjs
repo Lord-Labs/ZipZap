@@ -6,6 +6,7 @@ const folder = new URL("../.research-local/", import.meta.url);
 await mkdir(folder, { recursive: true });
 const full = Buffer.alloc(16 * 1024 * 1024);
 for (let i = 0; i < full.length; i++) full[i] = (i * 17 + (i >>> 12)) & 255;
+const note = Buffer.from("ZipZap native smoke test.\r\nاختبار تنزيل محلي آمن.\r\n", "utf8");
 const server = http.createServer(async (req, res) => {
   if (req.url === "/") {
     res.setHeader("Content-Type", "text/html; charset=utf-8");
@@ -14,7 +15,12 @@ const server = http.createServer(async (req, res) => {
     );
     return;
   }
-  const data = req.url?.includes("manual") ? full : full.subarray(0, 1024 * 1024);
+  const data =
+    req.url === "/smoke-note.txt"
+      ? note
+      : req.url?.includes("manual")
+        ? full
+        : full.subarray(0, 1024 * 1024);
   let start = 0,
     end = data.length - 1;
   const range = /^bytes=(\d+)-(\d*)$/.exec(req.headers.range || "");
@@ -45,6 +51,7 @@ server.listen(0, "127.0.0.1", async () => {
     browserSha256: createHash("sha256")
       .update(full.subarray(0, 1024 * 1024))
       .digest("hex"),
+    noteSha256: createHash("sha256").update(note).digest("hex"),
   };
   await writeFile(new URL("e2e-fixture.json", folder), JSON.stringify(value, null, 2));
   console.log(JSON.stringify(value));

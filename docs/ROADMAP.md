@@ -101,6 +101,12 @@ relationships. Start with [#29](https://github.com/Lord-shaban/ZipZap/issues/29)
 and [#30](https://github.com/Lord-shaban/ZipZap/issues/30), then follow those
 dependencies rather than issue number alone. All implementation tasks start Todo.
 
+The failed-save consistency fix #30 was merged in
+[#53](https://github.com/Lord-shaban/ZipZap/pull/53). The
+[#29 native baseline](development/NATIVE_SMOKE.md) now records actual isolated
+Windows/WebView2 evidence for the classic workspace. These development changes
+are separate from the published first beta; remaining M6 dependencies stay open.
+
 [M7](https://github.com/Lord-shaban/ZipZap/milestone/8) contains four separate
 go/no-go studies: [browser capture/page links #48](https://github.com/Lord-shaban/ZipZap/issues/48),
 [auth/proxies #49](https://github.com/Lord-shaban/ZipZap/issues/49),

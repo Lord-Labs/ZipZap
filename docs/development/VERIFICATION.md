@@ -1,5 +1,14 @@
 # Verification
 
+## Native current-source baseline (2026-10-18)
+
+[Issue #29 evidence and repeatable procedure](NATIVE_SMOKE.md) cover actual
+WebView2/Tauri downloads from source `6568cc9`, with isolated identity/state,
+real pause/resume/reopen/cancel, exact output hashes, safe history removal,
+native folder selection, OS open/reveal handoff, and English/Arabic keyboard
+and accessibility-tree checks at 780×560. Browser/installer evidence remains
+separate. Hosted tests were skipped by the current maintainer policy.
+
 ## Desktop workspace follow-up (2026-10-17)
 
 [Issue #25](https://github.com/Lord-shaban/ZipZap/issues/25) replaces the desktop
