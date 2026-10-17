@@ -14,6 +14,26 @@ responses trigger safe restarts or the single-stream fallback.
 Resume requests made while a paused worker finishes its durable checkpoint are
 queued immediately; the scheduler waits for that worker to exit before restarting.
 
+## Persistence failures (development version)
+
+Pause, resume, cancel, scheduler starts and checkpoints save a candidate before
+changing live state or cancelling workers. A rejected action leaves its previous
+state, worker token and recoverable parts intact. A replacement transfer plan is
+also saved before discarding obsolete parts. These changes are not in the
+published first beta.
+
+Database failures stop automatic transfer retries. If the worker cannot save its
+terminal state, it releases its queue slot and exposes a live Failed status with
+an explicit **last saved state retained** error through the same desktop snapshot
+and headless jobs response. That error/status could not be persisted: reopening
+recovers the last saved checkpoint, normally as Paused. Repair storage before
+retrying; a successful retry commits the new state. Already saved pause, queued
+resume and cancel decisions survive worker exit without another redundant save.
+
+Completed is exposed only after its save succeeds. If publication succeeds but
+that save fails, the final file and parts remain; the job reports failure. The
+existing manual publication-recovery limit below still applies until #32.
+
 ## Verify
 
 ```sh
@@ -27,7 +47,11 @@ OpenSSL (Git for Windows' OpenSSL on Windows). Only the test CLI process is give
 that certificate as an explicit trust root; the OS trust store is never changed.
 The same fixture verifies rejection without that trust root. Tests cover actual
 bytes, checkpoint recovery after a killed process, partial-file corruption,
-changed resources, fallback, errors, cancellation, and output races.
+changed resources, fallback, errors, cancellation, and output races. SQLite
+triggers inject checkpoint/terminal and completion-save failures during actual
+HTTP downloads, followed by repair, retry and reopen checks. Core unit tests also
+cover rejected pause/resume/cancel actions, failed scheduler saves and worker-exit
+races; the history-removal regression remains required.
 
 ## Headless interface
 

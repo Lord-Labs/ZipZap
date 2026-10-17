@@ -118,7 +118,6 @@ pub(super) async fn download(
         }
     }
     if !reusable {
-        cleanup(&job);
         let count = if ranged && total.unwrap_or(0) >= 2 * 1024 * 1024 {
             manager.settings().connections as u64
         } else {
@@ -150,6 +149,9 @@ pub(super) async fn download(
         current.validator = job.validator.clone();
         current.effective_url = job.effective_url.clone();
     })?;
+    if !reusable {
+        cleanup(&job);
+    }
     let mut tasks = JoinSet::new();
     for index in 0..job.segments.len() {
         let m = Arc::clone(&manager);
@@ -196,11 +198,12 @@ pub(super) async fn download(
     // shortcut: atomic no-clobber publication requires hard-link-capable storage (NTFS on Windows).
     {
         let mut state = manager.state.lock().expect("state lock");
-        let current = state
+        let index = state
             .jobs
-            .iter_mut()
-            .find(|j| j.id == id)
+            .iter()
+            .position(|j| j.id == id)
             .ok_or("Download not found")?;
+        let mut current = state.jobs[index].clone();
         if current.status != Status::Downloading || token.is_cancelled() {
             return Err("Paused".into());
         }
@@ -209,8 +212,8 @@ pub(super) async fn download(
         current.speed = 0;
         current.downloaded = complete.segments.iter().map(|s| s.done).sum();
         current.error = None;
-        let copy = current.clone();
-        save(&state, &copy)?;
+        save(&state, &current)?;
+        state.jobs[index] = current;
     }
     cleanup(&job);
     Ok(())

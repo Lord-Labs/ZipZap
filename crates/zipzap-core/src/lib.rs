@@ -1,4 +1,6 @@
 //! Download state, integrity, durable checkpoints, and one bounded queue.
+#[cfg(test)]
+mod persistence_tests;
 mod transfer;
 
 use reqwest::{Client, Url};
@@ -357,23 +359,18 @@ impl Manager {
             .position(|j| j.id == id)
             .ok_or("Download not found")?;
         let status = state.jobs[index].status.clone();
+        let mut job = state.jobs[index].clone();
         match action {
             "pause" if [Status::Queued, Status::Downloading].contains(&status) => {
-                state.jobs[index].status = Status::Paused;
-                if let Some(token) = state.running.get(id) {
-                    token.cancel();
-                }
+                job.status = Status::Paused;
             }
             "resume" if [Status::Paused, Status::Failed].contains(&status) => {
                 // The scheduler waits for the previous worker to exit before restarting.
-                state.jobs[index].status = Status::Queued;
-                state.jobs[index].error = None;
+                job.status = Status::Queued;
+                job.error = None;
             }
             "cancel" if status != Status::Completed => {
-                state.jobs[index].status = Status::Cancelled;
-                if let Some(token) = state.running.get(id) {
-                    token.cancel();
-                }
+                job.status = Status::Cancelled;
             }
             "remove"
                 if !state.running.contains_key(id)
@@ -390,9 +387,14 @@ impl Manager {
             }
             _ => return Err("Action is not available for this download state".into()),
         }
-        state.jobs[index].speed = 0;
-        let job = state.jobs[index].clone();
+        job.speed = 0;
         save(&state, &job)?;
+        state.jobs[index] = job.clone();
+        if [Status::Paused, Status::Cancelled].contains(&job.status)
+            && let Some(token) = state.running.get(id)
+        {
+            token.cancel();
+        }
         let clean = job.status == Status::Cancelled && !state.running.contains_key(id);
         drop(state);
         if clean {
@@ -433,12 +435,15 @@ impl Manager {
                         {
                             continue;
                         }
-                        state.jobs[index].status = Status::Downloading;
-                        if let Err(error) = save(&state, &state.jobs[index]) {
+                        let mut job = job.clone();
+                        job.status = Status::Downloading;
+                        if let Err(error) = save(&state, &job) {
                             state.jobs[index].status = Status::Failed;
-                            state.jobs[index].error = Some(error);
+                            state.jobs[index].speed = 0;
+                            state.jobs[index].error = Some(unsaved_error(error));
                             continue;
                         }
+                        state.jobs[index] = job;
                         let token = manager.stop.child_token();
                         let id = state.jobs[index].id.clone();
                         state.running.insert(id.clone(), token.clone());
@@ -471,20 +476,23 @@ impl Manager {
                     break;
                 }
                 Err(error) => {
+                    let storage_failed = error.starts_with("State database error:");
                     if error.starts_with("Range rejected") {
                         single = true;
                     }
                     failure = Some(error);
-                    if token.is_cancelled() {
+                    if token.is_cancelled() || storage_failed {
                         break;
                     }
                     tokio::select! { _ = token.cancelled() => break, _ = tokio::time::sleep(Duration::from_millis(500 * (1 << attempt))) => {} }
                 }
             }
         }
-        let _ = self.update(id, |job| {
-            job.speed = 0;
+        let mut state = self.state.lock().expect("state lock");
+        if let Some(index) = state.jobs.iter().position(|j| j.id == id) {
+            let mut job = state.jobs[index].clone();
             if job.status == Status::Downloading {
+                job.speed = 0;
                 job.status = if token.is_cancelled() {
                     Status::Paused
                 } else if failure.is_some() {
@@ -493,13 +501,18 @@ impl Manager {
                     Status::Completed
                 };
                 job.error = if token.is_cancelled() { None } else { failure };
+                if let Err(error) = save(&state, &job) {
+                    // This live failure is not durable; retain the last saved checkpoint.
+                    job.status = Status::Failed;
+                    job.error = Some(unsaved_error(error));
+                }
+                state.jobs[index] = job.clone();
             }
-        });
-        let cancelled = self.job(id).is_ok_and(|j| j.status == Status::Cancelled);
-        if cancelled && let Ok(job) = self.job(id) {
-            transfer::cleanup(&job);
+            if job.status == Status::Cancelled {
+                transfer::cleanup(&job);
+            }
         }
-        self.state.lock().expect("state lock").running.remove(id);
+        state.running.remove(id);
     }
 
     pub async fn shutdown(&self) {
@@ -520,14 +533,16 @@ impl Manager {
     }
     fn update(&self, id: &str, action: impl FnOnce(&mut Job)) -> Result<()> {
         let mut state = self.state.lock().expect("state lock");
-        let job = state
+        let index = state
             .jobs
-            .iter_mut()
-            .find(|j| j.id == id)
+            .iter()
+            .position(|j| j.id == id)
             .ok_or("Download not found")?;
-        action(job);
-        let copy = job.clone();
-        save(&state, &copy)
+        let mut job = state.jobs[index].clone();
+        action(&mut job);
+        save(&state, &job)?;
+        state.jobs[index] = job;
+        Ok(())
     }
     fn progress(&self, id: &str, count: u64) {
         let mut state = self.state.lock().expect("state lock");
@@ -629,6 +644,11 @@ fn io_error(error: std::io::Error) -> String {
 }
 fn db_error(error: rusqlite::Error) -> String {
     format!("State database error: {error}")
+}
+fn unsaved_error(error: String) -> String {
+    format!(
+        "Could not save download state; last saved state retained. Repair storage and retry: {error}"
+    )
 }
 fn json_error(_: serde_json::Error) -> String {
     "Invalid state document".into()

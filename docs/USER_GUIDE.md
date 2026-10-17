@@ -21,6 +21,14 @@ Click Filename, Total size or Status to sort; click again to reverse. Unknown
 sizes stay last. Selecting a status filter clears the file-category filter.
 These workspace changes are not included in the published first beta.
 
+The development version also keeps a rejected pause/resume/cancel action from
+changing the download when its database save fails. If a worker cannot save its
+final state, it shows Failed with a **last saved state retained** message. Repair
+the storage problem, then retry; reopening uses the last saved checkpoint. If a
+complete file already exists after this error, keep it and choose another name
+or move the verified file before retrying; ZipZap never replaces it. See
+[recovery limits](development/ENGINE.md).
+
 Settings control one to four simultaneous downloads, one to four connections per
 download, a shared speed limit (0 means unlimited), the default folder and
 language. The language button switches English/LTR and Arabic/RTL. Closing the
