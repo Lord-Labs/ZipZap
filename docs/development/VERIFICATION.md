@@ -90,7 +90,8 @@ Sources: [Playwright extension testing](https://playwright.dev/docs/chrome-exten
 The installed app also paused `manual-restart.bin` at 13.6 MiB, closed, reopened
 with the same paused state and Arabic/default-folder settings, then resumed to
 the exact original 16 MiB SHA-256 above. The deterministic core suite now also
-tests an unavailable destination followed by repair/retry (22 scenarios total).
+tests an unavailable destination followed by repair/retry and immediate resume
+while the paused worker exits (23 scenarios total).
 See [benchmark evidence](../research/benchmark.md) and
 [security review](SECURITY_REVIEW.md) for M5 details and untested physical faults.
 

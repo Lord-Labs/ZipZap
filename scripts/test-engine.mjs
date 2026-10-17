@@ -233,6 +233,13 @@ try {
   await complete(job);
   passed.push("pause/restart/resume with persisted prefix hashes");
 
+  job = await add("/slow", "immediate-resume.bin");
+  await until(job.id, (j) => j.downloaded > 256 * 1024);
+  await action(job, "pause");
+  await action(job, "resume");
+  await complete(job);
+  passed.push("immediate resume waits for the paused worker before restarting");
+
   job = await add("/mutable", "changed.bin");
   await until(job.id, (j) => j.downloaded > 256 * 1024);
   await action(job, "pause");
@@ -245,11 +252,12 @@ try {
   job = await add("/slow", "corrupt.bin");
   await until(job.id, (j) => j.downloaded > 256 * 1024);
   await action(job, "pause");
-  await delay(200);
+  await stop();
   const partial = path.join(directory, `.zipzap-${job.id}.part0`);
   const content = await readFile(partial);
   content[0] ^= 255;
   await writeFile(partial, content);
+  start();
   await action(job, "resume");
   await complete(job);
   passed.push("corrupt partial data discarded instead of appended");
@@ -286,8 +294,9 @@ try {
     filename: "disk-error.bin",
   });
   await action(job, "pause");
-  await delay(200);
+  await stop();
   await rm(unavailable, { recursive: true });
+  start();
   await action(job, "resume");
   await until(job.id, (j) => j.status === "failed");
   await assert.rejects(readFile(job.destination), { code: "ENOENT" });
