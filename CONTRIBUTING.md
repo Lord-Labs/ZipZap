@@ -19,7 +19,9 @@ spending time on a large implementation.
 5. Open a PR against `main`, link the issue with `Closes #N`, and use the template.
    Draft PRs are welcome. Remove private URLs, tokens, cookies, and local paths
    from logs and screenshots.
-6. Address review and CI failures. Maintainers squash-merge after the acceptance
+6. Address review and local check failures. Hosted checks are manual-only by
+   [maintainer decision #54](https://github.com/Lord-shaban/ZipZap/issues/54);
+   skipped checks are not passing results. Maintainers squash-merge after the acceptance
    criteria are met; merging closes the linked issue.
 
 Use a title such as `feat: add safe resume` or `docs: explain Windows setup`.

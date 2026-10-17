@@ -31,8 +31,12 @@ Use an issue, a short-lived branch, and a PR into `main`. Keep changes reviewabl
 Run `npm run check`. Rust changes also require `cargo fmt --all -- --check`,
 `cargo clippy --workspace --all-targets --locked -- -D warnings`,
 `cargo test --workspace --locked`, `cargo build --workspace --locked`, and
-`node experiments/engine-strategy/compare.mjs`, and `node scripts/test-engine.mjs`. Never bypass failing CI, invent
-test results, publish credentials, or merge unrelated work. Follow
+`node experiments/engine-strategy/compare.mjs`, and `node scripts/test-engine.mjs`.
+At the maintainer's explicit request on 2026-10-18 (#54), skip hosted GitHub
+checks unless separately requested. Local checks remain required; record hosted
+checks as skipped, never passed. PRs may be squash-merged autonomously after local
+verification and resolved review conversations. Never invent test results,
+publish credentials, or merge unrelated work. Follow
 `docs/development/WORKFLOW.md`.
 
 ## Research

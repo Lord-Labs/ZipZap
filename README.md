@@ -1,6 +1,5 @@
 # ZipZap
 
-[![Repository checks](https://github.com/Lord-shaban/ZipZap/actions/workflows/repository.yml/badge.svg)](https://github.com/Lord-shaban/ZipZap/actions/workflows/repository.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 A free, open-source download manager focused on reliable downloads, safe resume,
@@ -56,6 +55,9 @@ cd ZipZap
 npm ci
 npm run check
 ```
+
+Verification runs locally. Hosted GitHub checks are manual-only by
+[maintainer decision](https://github.com/Lord-shaban/ZipZap/issues/54).
 
 Run `node scripts/build-native.mjs` then `npm run desktop:dev` on Windows.
 See [development setup](docs/development/SETUP.md) for native prerequisites,

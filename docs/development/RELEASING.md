@@ -7,6 +7,12 @@ and publishes only from the `beta` environment. Its deployment branch policy
 allows protected branches only. Build jobs are read-only; the publishing job
 alone receives contents-write permission. There are no signing secrets.
 
+The [2026-10-18 development policy](WORKFLOW.md) makes hosted verification
+manual-only. It does not authorize a release or remove the release workflow's
+successful-check prerequisite. A future release needs a separate maintainer
+decision on hosted qualification before that workflow can proceed; never treat
+skipped checks as a release pass.
+
 ## First-beta gates
 
 Verified for `0.1.0-beta.1` on 2026-10-17; see the
