@@ -364,10 +364,8 @@ impl Manager {
                     token.cancel();
                 }
             }
-            "resume"
-                if [Status::Paused, Status::Failed].contains(&status)
-                    && !state.running.contains_key(id) =>
-            {
+            "resume" if [Status::Paused, Status::Failed].contains(&status) => {
+                // The scheduler waits for the previous worker to exit before restarting.
                 state.jobs[index].status = Status::Queued;
                 state.jobs[index].error = None;
             }

@@ -11,6 +11,9 @@ pause/resume, and a shared bandwidth limit. Unknown/weak validators, missing or
 changed partial data, changed effective URLs, ignored ranges, and invalid range
 responses trigger safe restarts or the single-stream fallback.
 
+Resume requests made while a paused worker finishes its durable checkpoint are
+queued immediately; the scheduler waits for that worker to exit before restarting.
+
 ## Verify
 
 ```sh
