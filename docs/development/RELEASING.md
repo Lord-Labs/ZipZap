@@ -9,14 +9,18 @@ alone receives contents-write permission. There are no signing secrets.
 
 ## First-beta gates
 
-- [ ] M1–M4 are complete with the issue acceptance criteria and real integration evidence.
-- [ ] M5 verification and security review have no unresolved release blockers.
-- [ ] The Windows support matrix and known limitations match tested behavior.
-- [ ] Toolchains/dependencies are pinned; dependency licenses and notices are reviewed.
-- [ ] Installer CI builds the chosen release commit and produces SHA-256 checksums.
-- [ ] Clean install, upgrade, uninstall, and native-host registration are tested.
-- [ ] English/Arabic instructions, security support policy, and release notes are current.
-- [ ] Signing and SmartScreen status are disclosed accurately; no signature is claimed without verification.
+Verified for `0.1.0-beta.1` on 2026-10-17; see the
+[acceptance checklist and publication record](VERIFICATION.md). Reassess these
+gates for each later release.
+
+- [x] M1–M4 are complete with the issue acceptance criteria and real integration evidence.
+- [x] M5 verification and security review have no unresolved release blockers.
+- [x] The Windows support matrix and known limitations match tested behavior.
+- [x] Toolchains/dependencies are pinned; dependency licenses and notices are reviewed.
+- [x] Installer CI builds the chosen release commit and produces SHA-256 checksums.
+- [x] Clean install, upgrade, uninstall, and native-host registration are tested.
+- [x] English/Arabic instructions, security support policy, and release notes are current.
+- [x] Signing and SmartScreen status are disclosed accurately; no signature is claimed without verification.
 
 ## Publish through a reviewed release PR
 

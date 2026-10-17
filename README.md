@@ -7,8 +7,9 @@ A free, open-source download manager focused on reliable downloads, safe resume,
 and a straightforward desktop experience. Windows first, with a Rust engine and
 a Tauri interface.
 
-**Status: Windows desktop and browser handoff implemented; first-beta release
-verification is in progress. No public release yet or performance superiority claim.**
+**Status: [0.1.0-beta.1](https://github.com/Lord-shaban/ZipZap/releases/tag/v0.1.0-beta.1)
+is available for Windows 11 x64. This beta is unsigned; verify the published
+SHA-256 checksums before installing.**
 
 [العربية](docs/README.ar.md) · [Roadmap](docs/ROADMAP.md) ·
 [Project tracker](https://github.com/users/Lord-shaban/projects/12) ·

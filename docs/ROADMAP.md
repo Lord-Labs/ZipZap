@@ -2,8 +2,11 @@
 
 This is the implementation order for the first Windows beta. The foundation,
 strategy, production HTTP/HTTPS core, durable resume, and bounded queue are
-implemented, including verified Windows desktop and browser integration. Final
-release CI and publication follow. GitHub issues own live acceptance criteria;
+implemented, including verified Windows desktop and browser integration.
+[0.1.0-beta.1](https://github.com/Lord-shaban/ZipZap/releases/tag/v0.1.0-beta.1)
+was published on 2026-10-17 with the M0–M5 gates verified; see the
+[acceptance checklist and publication evidence](development/VERIFICATION.md).
+GitHub issues own live acceptance criteria;
 this document owns scope and sequencing.
 
 [Project tracker](https://github.com/users/Lord-shaban/projects/12) ·
