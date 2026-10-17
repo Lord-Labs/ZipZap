@@ -1,7 +1,8 @@
 # Contributing to ZipZap
 
-Thank you for helping. ZipZap is preparing its first Windows beta; start with the
-[roadmap](docs/ROADMAP.md) and [open issues](https://github.com/Lord-shaban/ZipZap/issues).
+Thank you for helping. ZipZap has published its first Windows beta; start with the
+[next-phase plan](docs/planning/NEXT_PHASE.md), [roadmap](docs/ROADMAP.md) and
+[open issues](https://github.com/Lord-shaban/ZipZap/issues).
 An issue's acceptance criteria define the work. Discuss changes to scope before
 spending time on a large implementation.
 
