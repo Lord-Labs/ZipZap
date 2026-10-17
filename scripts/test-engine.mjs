@@ -2,12 +2,13 @@ import assert from "node:assert/strict";
 import { spawn, execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { once } from "node:events";
-import { mkdtemp, readFile, writeFile, rm, readdir, mkdir } from "node:fs/promises";
+import { mkdtemp, readFile, writeFile, rm, readdir, mkdir, rename } from "node:fs/promises";
 import http from "node:http";
 import https from "node:https";
 import os from "node:os";
 import path from "node:path";
 import { createInterface } from "node:readline";
+import { DatabaseSync } from "node:sqlite";
 import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 
@@ -239,6 +240,61 @@ try {
   await action(job, "resume");
   await complete(job);
   passed.push("immediate resume waits for the paused worker before restarting");
+
+  const db = new DatabaseSync(path.join(directory, "state.sqlite"));
+  try {
+    db.exec(`CREATE TRIGGER reject_checkpoint BEFORE UPDATE ON jobs
+      WHEN json_extract(NEW.data, '$.status') = 'failed' OR EXISTS (
+        SELECT 1 FROM json_each(NEW.data, '$.segments')
+        WHERE json_extract(value, '$.done') > 1048576)
+      BEGIN SELECT RAISE(ABORT, 'injected checkpoint save failure'); END;`);
+    job = await add("/slow", "checkpoint-save-error.bin");
+    const failed = await until(job.id, (j) => j.status === "failed");
+    assert.match(failed.error, /last saved state retained.*injected checkpoint save failure/);
+    assert.equal(failed.speed, 0);
+    const durable = JSON.parse(db.prepare("SELECT data FROM jobs WHERE id=?").get(job.id).data);
+    assert.equal(durable.status, "downloading");
+    assert.ok(durable.segments.some((s) => s.done > 0));
+    assert.deepEqual(failed.segments, durable.segments);
+    assert.ok((await readdir(directory)).includes(`.zipzap-${job.id}.part0`));
+    await assert.rejects(readFile(job.destination), { code: "ENOENT" });
+    db.exec("DROP TRIGGER reject_checkpoint;");
+    await stop();
+    start();
+    assert.equal((await get(job.id)).status, "paused");
+    await action(job, "resume");
+    await complete(job);
+    passed.push(
+      "checkpoint and terminal save failures retain durable parts and recover after repair/restart",
+    );
+
+    db.exec(`CREATE TRIGGER reject_completion BEFORE UPDATE ON jobs
+      WHEN json_extract(NEW.data, '$.status') = 'completed'
+      BEGIN SELECT RAISE(ABORT, 'injected completion save failure'); END;`);
+    job = await add("/range", "completion-save-error.bin");
+    const unpublished = await until(job.id, (j) => j.status === "failed");
+    assert.match(unpublished.error, /injected completion save failure/);
+    assert.equal(unpublished.speed, 0);
+    assert.equal(digest(await readFile(job.destination)), digest(bytes));
+    assert.ok((await readdir(directory)).includes(`.zipzap-${job.id}.part0`));
+    assert.equal(
+      JSON.parse(db.prepare("SELECT data FROM jobs WHERE id=?").get(job.id).data).status,
+      "failed",
+    );
+    db.exec("DROP TRIGGER reject_completion;");
+    // Publication reconciliation belongs to #32; keep the verified output for manual recovery.
+    await rename(job.destination, `${job.destination}.verified`);
+    await action(job, "resume");
+    await complete(job);
+    await stop();
+    start();
+    assert.equal((await get(job.id)).status, "completed");
+    passed.push(
+      "completion save failure never reports success, keeps output/parts, and permits a safe retry",
+    );
+  } finally {
+    db.close();
+  }
 
   job = await add("/mutable", "changed.bin");
   await until(job.id, (j) => j.downloaded > 256 * 1024);
