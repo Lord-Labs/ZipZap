@@ -23,6 +23,7 @@ Windows graph are not a claim of distributed platform support. See the
 | sha2                                                | Checkpoint integrity                 | MIT OR Apache-2.0                       |
 | Tauri and its dialog/opener/single-instance plugins | Desktop shell                        | MIT OR Apache-2.0                       |
 | winreg                                              | Per-user browser host registration   | MIT                                     |
+| windows-sys                                         | Windows publication file identity    | MIT OR Apache-2.0                       |
 | Svelte, Vite, TypeScript                            | UI and build tools                   | MIT; Apache-2.0 for TypeScript          |
 | Prettier and Svelte plugin                          | Formatting                           | MIT                                     |
 | Playwright / Axe                                    | UI behavior and accessibility checks | Apache-2.0; MPL-2.0 for Axe             |

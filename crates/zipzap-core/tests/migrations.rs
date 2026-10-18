@@ -58,7 +58,7 @@ fn snapshot(db: &Connection) -> (i64, Vec<(String, String)>, String) {
 
 #[test]
 fn first_beta_state_recovers_order_validators_parts_and_settings_on_reopen() {
-    for schema in [0, 1] {
+    for schema in [0, 1, 2] {
         let (folder, database, db, mut jobs, settings) = fixture(schema);
         jobs[1].status = Status::Paused;
         jobs[1].downloaded = 6;
@@ -73,7 +73,7 @@ fn first_beta_state_recovers_order_validators_parts_and_settings_on_reopen() {
                 serde_json::to_value(manager.settings()).unwrap(),
                 serde_json::to_value(&settings).unwrap()
             );
-            assert_eq!(snapshot(&db).0, 1);
+            assert_eq!(snapshot(&db).0, 2);
             assert_eq!(
                 std::fs::read(folder.path().join(format!(".zipzap-{}.part0", jobs[1].id))).unwrap(),
                 b"prefix"
@@ -150,7 +150,7 @@ fn mismatched_identity_and_overflowing_prefix_are_rejected_without_writes() {
 
 #[test]
 fn newer_schema_is_rejected_before_journal_or_record_changes() {
-    let (_folder, database, db, _, _) = fixture(2);
+    let (_folder, database, db, _, _) = fixture(3);
     let before = snapshot(&db);
     assert_eq!(
         db.pragma_query_value(None, "journal_mode", |r| r.get::<_, String>(0))
@@ -170,6 +170,35 @@ fn newer_schema_is_rejected_before_journal_or_record_changes() {
         "database bytes changed"
     );
     assert_eq!(snapshot(&Connection::open(database).unwrap()), before);
+}
+
+#[test]
+fn malformed_publication_evidence_rolls_back_the_schema_upgrade() {
+    for invalid in ["digest", "destination"] {
+        let (_folder, database, db, jobs, _) = fixture(1);
+        let mut job = serde_json::to_value(&jobs[2]).unwrap();
+        job["publication"] = json!({
+            "bytes": 6, "sha256": jobs[2].segments[0].hash, "identity": {"volume": 0, "index": vec![0u8; 16]}
+        });
+        if invalid == "digest" {
+            job["publication"]["sha256"] = json!("invalid");
+        } else {
+            job["destination"] = json!("");
+        }
+        db.execute(
+            "UPDATE jobs SET data=?1 WHERE id=?2",
+            params![job.to_string(), jobs[2].id],
+        )
+        .unwrap();
+        let before = snapshot(&db);
+        assert!(
+            Manager::open(&database)
+                .err()
+                .unwrap()
+                .contains("Invalid saved publication evidence")
+        );
+        assert_eq!(snapshot(&db), before);
+    }
 }
 
 #[test]

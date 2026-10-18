@@ -7,7 +7,7 @@ use tokio::{
     task::JoinSet,
 };
 
-fn part(job: &Job, index: usize) -> PathBuf {
+pub(super) fn part(job: &Job, index: usize) -> PathBuf {
     job.destination
         .parent()
         .expect("validated parent")
@@ -15,6 +15,9 @@ fn part(job: &Job, index: usize) -> PathBuf {
 }
 pub(super) fn cleanup(job: &Job) {
     for index in 0..=4 {
+        if index == 4 && job.publication.is_some() && !publication::owns_assembly(job) {
+            continue;
+        }
         let _ = std::fs::remove_file(part(job, index));
     }
 }
@@ -50,6 +53,14 @@ pub(super) async fn download(
     single: bool,
 ) -> Result<()> {
     let mut job = manager.job(id)?;
+    if job.publication.is_some() {
+        let m = Arc::clone(&manager);
+        let id = id.to_owned();
+        let token = token.clone();
+        return tokio::task::spawn_blocking(move || publication::publish(&m, &id, &token))
+            .await
+            .map_err(|_| "Publication worker stopped unexpectedly".to_owned())?;
+    }
     if job.destination.symlink_metadata().is_ok() {
         return Err("Destination already exists; no file was replaced".into());
     }
@@ -195,28 +206,11 @@ pub(super) async fn download(
         return Err("Final byte count does not match the resource".into());
     }
     drop(assembled);
-    // shortcut: atomic no-clobber publication requires hard-link-capable storage (NTFS on Windows).
-    {
-        let mut state = manager.state.lock().expect("state lock");
-        let index = state
-            .jobs
-            .iter()
-            .position(|j| j.id == id)
-            .ok_or("Download not found")?;
-        let mut current = state.jobs[index].clone();
-        if current.status != Status::Downloading || token.is_cancelled() {
-            return Err("Paused".into());
-        }
-        std::fs::hard_link(&assembled_path, &job.destination).map_err(io_error)?;
-        current.status = Status::Completed;
-        current.speed = 0;
-        current.downloaded = complete.segments.iter().map(|s| s.done).sum();
-        current.error = None;
-        save(&state, &current)?;
-        state.jobs[index] = current;
-    }
-    cleanup(&job);
-    Ok(())
+    let id = id.to_owned();
+    let token = token.clone();
+    tokio::task::spawn_blocking(move || publication::publish(&manager, &id, &token))
+        .await
+        .map_err(|_| "Publication worker stopped unexpectedly".to_owned())?
 }
 
 async fn checked_prefix(path: &Path, segment: &Segment) -> Result<Sha256> {
