@@ -197,7 +197,55 @@ async function stop(kill = false) {
 }
 const passed = [];
 try {
+  const legacy = JSON.parse(
+    await readFile(
+      new URL("../crates/zipzap-core/tests/fixtures/first-beta-state.json", import.meta.url),
+      "utf8",
+    ),
+  );
+  const prefix = bytes.subarray(0, 65536);
+  const resumed = {
+    ...legacy.jobs[1],
+    url: `${base}/range`,
+    effective_url: `${base}/range`,
+    destination: path.join(directory, "first-beta-resume.bin"),
+    total: bytes.length,
+    downloaded: prefix.length + 1024,
+    validator: '"v1"',
+    segments: [{ start: 0, end: bytes.length - 1, done: prefix.length, hash: digest(prefix) }],
+  };
+  const legacyDb = new DatabaseSync(path.join(directory, "state.sqlite"));
+  try {
+    legacyDb.exec(
+      "CREATE TABLE jobs(id TEXT PRIMARY KEY, data TEXT NOT NULL); CREATE TABLE settings(id INTEGER PRIMARY KEY CHECK(id=1), data TEXT NOT NULL); PRAGMA user_version=1;",
+    );
+    legacyDb.prepare("INSERT INTO jobs VALUES(?, ?)").run(resumed.id, JSON.stringify(resumed));
+    legacyDb
+      .prepare("INSERT INTO settings VALUES(1, ?)")
+      .run(JSON.stringify({ ...legacy.settings, speed_limit: 0 }));
+  } finally {
+    legacyDb.close();
+  }
+  await writeFile(path.join(directory, `.zipzap-${resumed.id}.part0`), prefix);
   start();
+  assert.equal((await get(resumed.id)).status, "paused");
+  assert.equal((await get(resumed.id)).downloaded, prefix.length);
+  const settings = await ask({ command: "settings" });
+  assert.equal(settings.language, "ar");
+  assert.equal(settings.download_folder, null);
+  await action(resumed, "resume");
+  await complete(resumed);
+  assert.ok(
+    requests.some(
+      (r) => r.range === `bytes=${prefix.length}-${bytes.length - 1}` && r.ifRange === '"v1"',
+    ),
+  );
+  await stop();
+  start();
+  assert.equal((await get(resumed.id)).status, "completed");
+  passed.push(
+    "first-beta state upgrades, resumes its owned prefix over HTTP, and reopens completed",
+  );
   await complete(
     await ask({
       command: "add",

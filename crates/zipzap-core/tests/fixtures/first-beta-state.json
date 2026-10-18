@@ -1,0 +1,66 @@
+{
+  "settings": {
+    "max_concurrent": 2,
+    "connections": 2,
+    "speed_limit": 65536,
+    "language": "ar"
+  },
+  "jobs": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "url": "https://fixture.invalid/queued.bin",
+      "destination": "queued.bin",
+      "status": "queued",
+      "downloaded": 0,
+      "total": null,
+      "speed": 0,
+      "error": null,
+      "segments": [],
+      "validator": null,
+      "effective_url": null,
+      "created_at": 30
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000002",
+      "url": "https://fixture.invalid/resume.bin",
+      "destination": "resume.bin",
+      "status": "downloading",
+      "downloaded": 8,
+      "total": 12,
+      "speed": 100,
+      "error": null,
+      "segments": [
+        {
+          "start": 0,
+          "end": 11,
+          "done": 6,
+          "hash": "e7a2e8b216e5aec3facf743962d3997f2e7d70088ef257de472d6a258049832e"
+        }
+      ],
+      "validator": "\"first-beta-v1\"",
+      "effective_url": "https://fixture.invalid/resume.bin",
+      "created_at": 10
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000003",
+      "url": "https://fixture.invalid/completed.bin",
+      "destination": "completed.bin",
+      "status": "completed",
+      "downloaded": 6,
+      "total": 6,
+      "speed": 0,
+      "error": null,
+      "segments": [
+        {
+          "start": 0,
+          "end": 5,
+          "done": 6,
+          "hash": "e7a2e8b216e5aec3facf743962d3997f2e7d70088ef257de472d6a258049832e"
+        }
+      ],
+      "validator": "\"first-beta-v1\"",
+      "effective_url": "https://fixture.invalid/completed.bin",
+      "created_at": 20
+    }
+  ]
+}

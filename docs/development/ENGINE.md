@@ -34,6 +34,32 @@ Completed is exposed only after its save succeeds. If publication succeeds but
 that save fails, the final file and parts remain; the job reports failure. The
 existing manual publication-recovery limit below still applies until #32.
 
+## Saved-state upgrades (development version)
+
+Startup accepts first-beta schemas 0/1 and retains schema 1; no speculative M6
+fields are added. [ADR 0003](../architecture/0003-atomic-state-upgrades.md)
+defines the contract for future fields. Table creation, job validation/recovery
+and the schema marker commit in one SQLite transaction before any worker starts.
+A rejected update, malformed record or interrupted transaction leaves the prior
+committed records recoverable. Job IDs must match their table keys and checkpoint
+byte counts must not overflow. Settings use the same value validation as new
+settings; an offline saved download folder remains available to repair.
+
+Queue insertion order, validators, checkpoint hashes, settings and owned file
+paths are retained; startup never removes or modifies partial/completed files.
+The migration fixture uses synthetic first-beta JSON, including omitted optional
+folder data. Tests cover failed upgrades and retry, table-creation rollback,
+reopen, malformed records, and a child process killed with an uncommitted
+transaction in rollback-journal and WAL modes. The HTTP fixture resumes an owned
+first-beta prefix with its validator, verifies the final digest and reopens it.
+
+A newer schema is rejected before changing journal mode or records. Do not edit
+`user_version` to force a downgrade. Use the compatible newer binary, or restore a
+coherent pre-upgrade SQLite backup with all ZipZap instances closed. Never copy a
+live database/WAL pair separately. No additional snapshot is needed for this
+transactional upgrade. Keep databases private and preserve completed files;
+installer upgrade/downgrade qualification remains part of #47.
+
 ## Verify
 
 ```sh

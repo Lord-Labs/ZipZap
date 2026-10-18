@@ -29,6 +29,15 @@ complete file already exists after this error, keep it and choose another name
 or move the verified file before retrying; ZipZap never replaces it. See
 [recovery limits](development/ENGINE.md).
 
+In the development version, opening first-beta saved state recovers the queue and
+settings in one transaction. If recovery fails, the database and download files
+are retained for repair and retry. A database from a newer unsupported version
+is rejected without resetting it. Do not lower its schema number or delete it
+to make an older app start; use the compatible app or restore a coherent backup
+with all instances closed. A saved folder on an offline drive does not prevent
+opening history. These changes are not in the published first beta; installer
+upgrade qualification remains pending.
+
 Settings control one to four simultaneous downloads, one to four connections per
 download, a shared speed limit (0 means unlimited), the default folder and
 language. The language button switches English/LTR and Arabic/RTL. Closing the

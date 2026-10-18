@@ -72,6 +72,22 @@ impl Default for Settings {
         }
     }
 }
+impl Settings {
+    fn validate(&self) -> Result<()> {
+        if !(1..=4).contains(&self.max_concurrent)
+            || !(1..=4).contains(&self.connections)
+            || self.speed_limit > 10_000_000_000
+            || !["en", "ar"].contains(&self.language.as_str())
+            || self
+                .download_folder
+                .as_ref()
+                .is_some_and(|p| p.len() > 32768 || !Path::new(p).is_absolute())
+        {
+            return Err("Invalid queue settings".into());
+        }
+        Ok(())
+    }
+}
 
 struct State {
     db: Connection,
@@ -157,31 +173,36 @@ impl Manager {
         owner
             .try_lock()
             .map_err(|_| "Another ZipZap process already owns this database")?;
-        let db = Connection::open(database).map_err(db_error)?;
-        db.pragma_update(None, "journal_mode", "WAL")
-            .map_err(db_error)?;
-        db.pragma_update(None, "synchronous", "FULL")
-            .map_err(db_error)?;
+        let mut db = Connection::open(database).map_err(db_error)?;
         let schema: i64 = db
             .pragma_query_value(None, "user_version", |r| r.get(0))
             .map_err(db_error)?;
         if schema > 1 {
             return Err("Database was created by a newer ZipZap version".into());
         }
-        db.execute_batch("CREATE TABLE IF NOT EXISTS jobs (id TEXT PRIMARY KEY, data TEXT NOT NULL); CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY CHECK(id=1), data TEXT NOT NULL); PRAGMA user_version=1;").map_err(db_error)?;
+        db.pragma_update(None, "journal_mode", "WAL")
+            .map_err(db_error)?;
+        db.pragma_update(None, "synchronous", "FULL")
+            .map_err(db_error)?;
+        let tx = db
+            .transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)
+            .map_err(db_error)?;
+        tx.execute_batch("CREATE TABLE IF NOT EXISTS jobs (id TEXT PRIMARY KEY, data TEXT NOT NULL); CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY CHECK(id=1), data TEXT NOT NULL);").map_err(db_error)?;
         let mut jobs = Vec::new();
         {
-            let mut statement = db
-                .prepare("SELECT data FROM jobs ORDER BY rowid")
+            let mut statement = tx
+                .prepare("SELECT id,data FROM jobs ORDER BY rowid")
                 .map_err(db_error)?;
             for row in statement
-                .query_map([], |r| r.get::<_, String>(0))
+                .query_map([], |r| Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?)))
                 .map_err(db_error)?
             {
-                let mut job: Job = serde_json::from_str(&row.map_err(db_error)?)
+                let (id, data) = row.map_err(db_error)?;
+                let mut job: Job = serde_json::from_str(&data)
                     .map_err(|_| "Invalid saved job; database retained for recovery")?;
                 let uuid = Uuid::parse_str(&job.id).map_err(|_| "Invalid saved job identity")?;
                 if uuid.to_string() != job.id
+                    || id != job.id
                     || job.segments.len() > 4
                     || job.segments.iter().any(|s| {
                         s.end.is_some_and(|end| {
@@ -198,17 +219,25 @@ impl Manager {
                     job.status = Status::Paused;
                 }
                 job.speed = 0;
-                job.downloaded = job.segments.iter().map(|s| s.done).sum();
+                job.downloaded = job
+                    .segments
+                    .iter()
+                    .try_fold(0u64, |total, segment| total.checked_add(segment.done))
+                    .ok_or("Invalid saved checkpoint; database retained for recovery")?;
                 jobs.push(job);
             }
         }
-        let settings = match db.query_row("SELECT data FROM settings WHERE id=1", [], |r| {
-            r.get::<_, String>(0)
-        }) {
-            Ok(value) => serde_json::from_str(&value).map_err(|_| "Invalid saved settings")?,
-            Err(rusqlite::Error::QueryReturnedNoRows) => Settings::default(),
-            Err(error) => return Err(db_error(error)),
-        };
+        let settings: Settings =
+            match tx.query_row("SELECT data FROM settings WHERE id=1", [], |r| {
+                r.get::<_, String>(0)
+            }) {
+                Ok(value) => serde_json::from_str(&value).map_err(|_| "Invalid saved settings")?,
+                Err(rusqlite::Error::QueryReturnedNoRows) => Settings::default(),
+                Err(error) => return Err(db_error(error)),
+            };
+        settings
+            .validate()
+            .map_err(|_| "Invalid saved settings; database retained for recovery")?;
         let client = Client::builder()
             .user_agent("ZipZap/0.1.0-beta.1")
             .connect_timeout(Duration::from_secs(10))
@@ -221,7 +250,18 @@ impl Manager {
             client
         };
         let client = client.build().map_err(network_error)?;
-        let manager = Arc::new(Self {
+        // Recovery and the schema marker become durable together before workers can start.
+        for job in &jobs {
+            tx.execute(
+                "UPDATE jobs SET data=?1 WHERE id=?2",
+                params![serde_json::to_string(job).map_err(json_error)?, job.id],
+            )
+            .map_err(db_error)?;
+        }
+        tx.pragma_update(None, "user_version", 1)
+            .map_err(db_error)?;
+        tx.commit().map_err(db_error)?;
+        Ok(Arc::new(Self {
             state: Mutex::new(State {
                 db,
                 jobs,
@@ -235,12 +275,7 @@ impl Manager {
             limit_changed: tokio::sync::Notify::new(),
             _owner: owner,
             hosts: Mutex::new(HashMap::new()),
-        });
-        // Persist recovered states before any new work starts.
-        for job in manager.jobs() {
-            manager.update(&job.id, |_| {})?;
-        }
-        Ok(manager)
+        }))
     }
 
     pub fn jobs(&self) -> Vec<Job> {
@@ -250,13 +285,11 @@ impl Manager {
         self.state.lock().expect("state lock").settings.clone()
     }
     pub fn set_settings(&self, settings: Settings) -> Result<()> {
-        if !(1..=4).contains(&settings.max_concurrent)
-            || !(1..=4).contains(&settings.connections)
-            || settings.speed_limit > 10_000_000_000
-            || !["en", "ar"].contains(&settings.language.as_str())
-            || settings.download_folder.as_ref().is_some_and(|p| {
-                p.len() > 32768 || !Path::new(p).is_absolute() || !Path::new(p).is_dir()
-            })
+        settings.validate()?;
+        if settings
+            .download_folder
+            .as_ref()
+            .is_some_and(|p| !Path::new(p).is_dir())
         {
             return Err("Invalid queue settings".into());
         }
