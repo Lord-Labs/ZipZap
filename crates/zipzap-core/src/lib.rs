@@ -4,6 +4,8 @@ mod persistence_tests;
 mod publication;
 #[cfg(test)]
 mod publication_tests;
+mod retry;
+pub use retry::FailureReason;
 #[cfg(test)]
 mod storage_tests;
 mod transfer;
@@ -70,6 +72,12 @@ pub struct Job {
     pub created_at: u64,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub publication: Option<Publication>,
+    #[serde(default)]
+    pub attempt: u8,
+    #[serde(default)]
+    pub next_retry: Option<u64>,
+    #[serde(default)]
+    pub failure_reason: Option<FailureReason>,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -241,6 +249,7 @@ impl Manager {
                     job.status = Status::Paused;
                 }
                 job.speed = 0;
+                job.next_retry = None;
                 job.downloaded = job
                     .segments
                     .iter()
@@ -287,7 +296,9 @@ impl Manager {
         } else {
             client
         };
-        let client = client.build().map_err(network_error)?;
+        let client = client
+            .build()
+            .map_err(|error| network_error(error).message)?;
         let mut publication_guards = Vec::new();
         for job in &mut jobs {
             match publication::recover(job) {
@@ -295,6 +306,7 @@ impl Manager {
                 Ok(None) => {}
                 Err(error) => {
                     job.status = Status::Failed;
+                    job.failure_reason = Some(retry::Failure::from(error.clone()).reason);
                     job.error = Some(error);
                 }
             }
@@ -428,6 +440,9 @@ impl Manager {
                 .unwrap_or_default()
                 .as_secs(),
             publication: None,
+            attempt: 0,
+            next_retry: None,
+            failure_reason: None,
         };
         state
             .db
@@ -477,6 +492,12 @@ impl Manager {
             _ => return Err("Action is not available for this download state".into()),
         }
         job.speed = 0;
+        job.next_retry = None;
+        job.error = None;
+        job.failure_reason = None;
+        if action == "resume" {
+            job.attempt = 0;
+        }
         save(&state, &job)?;
         state.jobs[index] = job.clone();
         if [Status::Paused, Status::Cancelled].contains(&job.status)
@@ -530,6 +551,7 @@ impl Manager {
                             state.jobs[index].status = Status::Failed;
                             state.jobs[index].speed = 0;
                             state.jobs[index].error = Some(unsaved_error(error));
+                            state.jobs[index].failure_reason = Some(FailureReason::Storage);
                             continue;
                         }
                         state.jobs[index] = job;
@@ -559,27 +581,48 @@ impl Manager {
             if token.is_cancelled() {
                 break;
             }
+            if let Err(error) = self.update(id, |job| {
+                if job.status == Status::Downloading && !token.is_cancelled() {
+                    job.attempt = attempt as u8 + 1;
+                    job.next_retry = None;
+                }
+            }) {
+                failure = Some(retry::Failure::from(error));
+                break;
+            }
             match transfer::download(Arc::clone(self), id, &token, single).await {
                 Ok(()) => {
                     failure = None;
                     break;
                 }
                 Err(error) => {
-                    let storage_failed = error.starts_with("State database error:")
-                        || error.starts_with("Storage error:");
-                    if error.starts_with("Range rejected") {
+                    let fallback = !single && error.message.starts_with("Range rejected");
+                    if fallback {
                         single = true;
                     }
-                    failure = Some(error);
-                    if token.is_cancelled()
-                        || storage_failed
-                        || failure
-                            .as_ref()
-                            .is_some_and(|e| e.starts_with("Published file conflict:"))
-                    {
+                    let delay = if fallback {
+                        Some(Duration::ZERO)
+                    } else {
+                        error.delay(attempt)
+                    };
+                    if let Err(save_error) = self.update(id, |job| {
+                        if job.status == Status::Downloading && !token.is_cancelled() {
+                            job.error = Some(error.message.clone());
+                            job.failure_reason = Some(error.reason.clone());
+                            job.speed = 0;
+                            job.next_retry = delay.filter(|_| attempt < 2).map(|delay| {
+                                retry::now_ms().saturating_add(delay.as_millis() as u64)
+                            });
+                        }
+                    }) {
+                        failure = Some(retry::Failure::from(save_error));
                         break;
                     }
-                    tokio::select! { _ = token.cancelled() => break, _ = tokio::time::sleep(Duration::from_millis(500 * (1 << attempt))) => {} }
+                    failure = Some(error);
+                    if token.is_cancelled() || attempt == 2 || delay.is_none() {
+                        break;
+                    }
+                    tokio::select! { _ = token.cancelled() => break, _ = tokio::time::sleep(delay.expect("retry delay")) => {} }
                 }
             }
         }
@@ -588,6 +631,7 @@ impl Manager {
             let mut job = state.jobs[index].clone();
             if job.status == Status::Downloading {
                 job.speed = 0;
+                job.next_retry = None;
                 job.status = if token.is_cancelled() {
                     Status::Paused
                 } else if failure.is_some() {
@@ -595,11 +639,21 @@ impl Manager {
                 } else {
                     Status::Completed
                 };
-                job.error = if token.is_cancelled() { None } else { failure };
+                job.failure_reason = if token.is_cancelled() {
+                    None
+                } else {
+                    failure.as_ref().map(|error| error.reason.clone())
+                };
+                job.error = if token.is_cancelled() {
+                    None
+                } else {
+                    failure.map(|error| error.message)
+                };
                 if let Err(error) = save(&state, &job) {
                     // This live failure is not durable; retain the last saved checkpoint.
                     job.status = Status::Failed;
                     job.error = Some(unsaved_error(error));
+                    job.failure_reason = Some(FailureReason::Storage);
                 }
                 state.jobs[index] = job.clone();
             }
@@ -677,7 +731,7 @@ impl Manager {
         &self,
         builder: reqwest::RequestBuilder,
         token: &CancellationToken,
-    ) -> Result<(reqwest::Response, tokio::sync::OwnedSemaphorePermit)> {
+    ) -> retry::TransferResult<(reqwest::Response, tokio::sync::OwnedSemaphorePermit)> {
         let mut request = builder.build().map_err(network_error)?;
         for _ in 0..=10 {
             let slots = self.host_slots(request.url().as_str());
@@ -765,6 +819,6 @@ fn unsaved_error(error: String) -> String {
 fn json_error(_: serde_json::Error) -> String {
     "Invalid state document".into()
 }
-fn network_error(error: reqwest::Error) -> String {
-    format!("Network request failed: {}", error.without_url())
+fn network_error(error: reqwest::Error) -> retry::Failure {
+    retry::Failure::network(error)
 }

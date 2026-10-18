@@ -56,6 +56,14 @@ checkpoints. Free space, allow writes or restore the folder, then retry. Valid
 parts are reused; existing output files are kept. Physical full-volume behavior
 has not been exercised on the current unelevated verification host.
 
+The development version limits automatic retries to three attempts. Temporary
+network/server failures and rate limiting may retry; authentication, TLS,
+invalid requests and storage problems need your attention. Download details show
+the localized reason, attempt and next retry time. A valid Retry-After from a
+429/503 response is honored up to 30 seconds. Pause, cancel and closing the app
+interrupt the wait; reopening leaves interrupted work paused, and Retry starts
+a new bounded sequence. Certificate and file-validation checks remain enabled.
+
 Settings control one to four simultaneous downloads, one to four connections per
 download, a shared speed limit (0 means unlimited), the default folder and
 language. The language button switches English/LTR and Arabic/RTL. Closing the

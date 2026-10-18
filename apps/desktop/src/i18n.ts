@@ -92,6 +92,21 @@ const en = {
   local: "Files stay on this device",
   storage: "Use an NTFS destination. Temporary assembly can need twice the file size.",
   storageEstimate: "Peak storage estimate",
+  attempt: "Attempt",
+  nextRetry: "Next retry",
+  reasonNetwork: "Connection interrupted. Check your network; automatic attempts are limited.",
+  reasonServer: "The server is temporarily unavailable. Try later if the bounded retries finish.",
+  reasonRateLimited: "The server asked to slow down. Wait until the next retry time.",
+  reasonHttp: "The server rejected the request. Check the direct download link, then retry.",
+  reasonAuthentication:
+    "Access denied or authentication required. Check the link and its permissions.",
+  reasonTls:
+    "Secure connection failed. Check the server certificate and device clock; certificate validation stays enabled.",
+  reasonInput: "This request is invalid or unsupported. Check the direct HTTP/HTTPS link.",
+  reasonIntegrity:
+    "File validation failed. Check the link before retrying; existing files and saved checkpoints are kept.",
+  reasonConflict:
+    "The destination or recovery evidence conflicts with this download. Restore the original evidence or use a new download with a free filename.",
   storageUnknown:
     "Size is unknown until the server responds. Space estimates are not reserved capacity.",
   storageCaution:
@@ -197,6 +212,20 @@ const ar: Record<keyof typeof en, string> = {
   local: "الملفات تبقى على جهازك",
   storage: "استخدم مجلدًا على NTFS. تجميع الملف المؤقت قد يحتاج ضعف حجمه.",
   storageEstimate: "تقدير أقصى مساحة للتنزيل",
+  attempt: "المحاولة",
+  nextRetry: "المحاولة التالية",
+  reasonNetwork: "انقطع الاتصال. تحقق من الشبكة؛ عدد المحاولات التلقائية محدود.",
+  reasonServer: "الخادم غير متاح مؤقتًا. حاول لاحقًا إذا انتهت المحاولات المحدودة.",
+  reasonRateLimited: "طلب الخادم تخفيف الطلبات. انتظر موعد المحاولة التالية.",
+  reasonHttp: "رفض الخادم الطلب. تحقق من رابط التنزيل المباشر ثم أعد المحاولة.",
+  reasonAuthentication: "رُفض الوصول أو يلزم تسجيل دخول. تحقق من الرابط وصلاحياته.",
+  reasonTls:
+    "فشل الاتصال الآمن. تحقق من شهادة الخادم وساعة الجهاز؛ يبقى التحقق من الشهادات مفعّلًا.",
+  reasonInput: "الطلب غير صالح أو غير مدعوم. تحقق من رابط HTTP/HTTPS المباشر.",
+  reasonIntegrity:
+    "فشل التحقق من الملف. راجع الرابط قبل إعادة المحاولة؛ نحتفظ بالملفات الموجودة والتقدم المحفوظ.",
+  reasonConflict:
+    "تعارضت الوجهة أو أدلة الاستعادة مع التنزيل. استعد الأدلة الأصلية أو أضف تنزيلًا جديدًا باسم متاح.",
   storageUnknown: "الحجم غير معروف حتى يستجيب الخادم. تقديرات المساحة لا تحجز سعة على القرص.",
   storageCaution: "التقدير لا يضمن المساحة المتاحة؛ قد تستهلك ملفات أخرى السعة أثناء التنزيل.",
   storageFull: "مساحة الحفظ غير كافية. وفر مساحة ثم أعد المحاولة؛ نحتفظ بالتقدم المحفوظ.",

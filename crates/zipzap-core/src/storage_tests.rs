@@ -123,13 +123,15 @@ async fn file_failures_stop_and_reuse_validated_checkpoints_after_repair() {
         let folder = tempfile::tempdir().unwrap();
         let database = folder.path().join("state.sqlite");
         let manager = Manager::open(&database).unwrap();
+        let destination = folder.path().join("downloads");
+        std::fs::create_dir(&destination).unwrap();
         manager
             .set_settings(Settings {
                 connections: 1,
                 ..Settings::default()
             })
             .unwrap();
-        let job = manager.add(&server.url, folder.path(), None).unwrap();
+        let job = manager.add(&server.url, &destination, None).unwrap();
         manager
             .update(&job.id, |j| j.status = Status::Downloading)
             .unwrap();
@@ -156,6 +158,27 @@ async fn file_failures_stop_and_reuse_validated_checkpoints_after_repair() {
             "storage error retried automatically"
         );
         drop(manager);
+        if phase == "write" {
+            let offline = folder.path().join("offline");
+            assert_eq!(destination.parent(), Some(folder.path()));
+            assert_eq!(offline.parent(), Some(folder.path()));
+            std::fs::rename(&destination, &offline).unwrap();
+            let manager = Manager::open(&database).unwrap();
+            manager.action(&job.id, "resume").unwrap();
+            manager
+                .update(&job.id, |j| j.status = Status::Downloading)
+                .unwrap();
+            manager.worker(&job.id, CancellationToken::new()).await;
+            let failed = manager.job(&job.id).unwrap();
+            assert_eq!(
+                failed.failure_reason,
+                Some(FailureReason::DestinationMissing)
+            );
+            assert_eq!(failed.segments[0].done, saved);
+            assert_eq!(server.ranges.lock().unwrap().len(), 2);
+            drop(manager);
+            std::fs::rename(&offline, &destination).unwrap();
+        }
         let manager = Manager::open(&database).unwrap();
         assert_eq!(manager.job(&job.id).unwrap().segments[0].done, saved);
         manager.action(&job.id, "resume").unwrap();

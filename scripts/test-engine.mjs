@@ -27,6 +27,8 @@ let revision = 1;
 let active = 0;
 let peak = 0;
 let retries = 0;
+let segmentRetried = false;
+const retryCounts = new Map();
 const requests = [];
 const handler = async (request, response) => {
   active++;
@@ -42,6 +44,39 @@ const handler = async (request, response) => {
   response.once("close", finish);
   const route = request.url.split("?")[0];
   requests.push({ route, range: request.headers.range, ifRange: request.headers["if-range"] });
+  if (request.headers["if-range"]) {
+    if (route === "/segment-auth") {
+      response.writeHead(403).end();
+      return;
+    }
+    if (route === "/segment-retry" && !segmentRetried) {
+      segmentRetried = true;
+      response.writeHead(429, { "Retry-After": "1" }).end();
+      return;
+    }
+  }
+  if (route.startsWith("/retry-")) {
+    const count = retryCounts.get(route) || 0;
+    retryCounts.set(route, count + 1);
+    if (route === "/retry-cap" || count === 0) {
+      const retryAfter =
+        route === "/retry-date"
+          ? new Date(Date.now() + 2000).toUTCString()
+          : route === "/retry-malformed"
+            ? "not-a-date"
+            : route === "/retry-cap"
+              ? "99999999999999999999999999999"
+              : "1";
+      response
+        .writeHead(route === "/retry-seconds" ? 429 : 503, { "Retry-After": retryAfter })
+        .end();
+      return;
+    }
+  }
+  if (route === "/auth") {
+    response.writeHead(403).end();
+    return;
+  }
   if (route === "/redirect") {
     response.writeHead(302, { Location: "/range" }).end();
     return;
@@ -262,12 +297,62 @@ try {
     await complete(await add(route, `${route.slice(1)}.bin`));
     passed.push(`${route}: safe completion`);
   }
+  for (const route of ["/retry-seconds", "/retry-date", "/retry-malformed", "/segment-retry"]) {
+    const started = Date.now();
+    const delayed = await add(route, `${route.slice(1)}.bin`);
+    const waiting = await until(delayed.id, (j) => j.next_retry !== null);
+    assert.equal(waiting.attempt, 1);
+    assert.equal(
+      waiting.failure_reason,
+      ["/retry-seconds", "/segment-retry"].includes(route) ? "rate_limited" : "server",
+    );
+    assert.ok(waiting.next_retry >= Date.now() - 100);
+    const completeRetry = await complete(delayed);
+    assert.equal(completeRetry.attempt, 2);
+    assert.equal(completeRetry.next_retry, null);
+    assert.ok(Date.now() - started >= (route === "/retry-malformed" ? 400 : 900));
+    passed.push(`${route}: bounded retry deadline and exact completion`);
+  }
+  for (const control of ["pause", "cancel", "shutdown"]) {
+    const delayed = await add(`/retry-cap?token=DO_NOT_LEAK`, `retry-cap-${control}.bin`);
+    const waiting = await until(delayed.id, (j) => j.next_retry !== null);
+    assert.ok(waiting.next_retry <= Date.now() + 30000);
+    assert.equal(waiting.attempt, 1);
+    assert.ok(!waiting.error.includes("DO_NOT_LEAK"));
+    const count = retryCounts.get("/retry-cap");
+    const started = Date.now();
+    if (control === "shutdown") {
+      await stop();
+      start();
+    } else await action(delayed, control);
+    const state = await get(delayed.id);
+    assert.equal(state.status, control === "cancel" ? "cancelled" : "paused");
+    assert.equal(state.next_retry, null);
+    assert.ok(Date.now() - started < 3000, `${control} did not interrupt backoff`);
+    await delay(150);
+    assert.equal(retryCounts.get("/retry-cap"), count);
+    passed.push(`${control} interrupts excessive capped Retry-After promptly`);
+  }
+  const denied = await add("/auth?token=DO_NOT_LEAK", "denied.bin");
+  const deniedFailure = await until(denied.id, (j) => j.status === "failed");
+  assert.equal(deniedFailure.failure_reason, "authentication");
+  assert.equal(deniedFailure.attempt, 1);
+  assert.equal(deniedFailure.next_retry, null);
+  assert.ok(!deniedFailure.error.includes("DO_NOT_LEAK"));
+  passed.push("permanent authentication refusal stops after one attempt without leaking the URL");
+  const segmentDenied = await add("/segment-auth", "segment-denied.bin");
+  const segmentFailure = await until(segmentDenied.id, (j) => j.status === "failed");
+  assert.equal(segmentFailure.failure_reason, "authentication");
+  assert.equal(segmentFailure.attempt, 1);
+  await assert.rejects(readFile(segmentDenied.destination), { code: "ENOENT" });
+  passed.push("permanent segment refusal stops without single-stream fallback");
   await complete(await add("/empty", "empty.bin"), Buffer.alloc(0));
   passed.push("zero-byte file");
   for (const route of ["/error", "/truncated", "/unsafe"]) {
     const job = await add(`${route}?token=DO_NOT_LEAK`, `${route.slice(1)}.bin`);
     const failed = await until(job.id, (j) => j.status === "failed");
     assert.ok(!failed.error.includes("DO_NOT_LEAK"));
+    assert.equal(failed.attempt, route === "/truncated" ? 3 : 1);
     await assert.rejects(readFile(job.destination), { code: "ENOENT" });
     passed.push(`${route}: error without publishing or leaking URL`);
   }
@@ -476,11 +561,14 @@ try {
   start(false);
   const untrusted = await ask({
     command: "add",
-    url: `${tlsBase}/range`,
+    url: `${tlsBase}/range?token=DO_NOT_LEAK`,
     folder: directory,
     filename: "untrusted.bin",
   });
-  await until(untrusted.id, (j) => j.status === "failed");
+  const tlsFailure = await until(untrusted.id, (j) => j.status === "failed");
+  assert.equal(tlsFailure.failure_reason, "tls");
+  assert.equal(tlsFailure.attempt, 1);
+  assert.ok(!tlsFailure.error.includes("DO_NOT_LEAK"));
   await assert.rejects(readFile(untrusted.destination), { code: "ENOENT" });
   passed.push("untrusted TLS certificate rejected");
   await stop();

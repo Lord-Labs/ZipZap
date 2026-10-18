@@ -46,13 +46,16 @@ test.beforeEach(async ({ page }) => {
           const job = state.jobs.find((j) => j.id === args.id);
           if (!job) throw new Error("Unknown job");
           if (args.action === "remove") state.jobs = state.jobs.filter((j) => j.id !== args.id);
-          else
+          else {
             job.status =
               args.action === "resume"
                 ? "downloading"
                 : args.action === "pause"
                   ? "paused"
                   : "cancelled";
+            job.next_retry = null;
+            job.failure_reason = null;
+          }
           return;
         }
         if (command === "open_download") return;
@@ -152,6 +155,39 @@ test("storage estimates and repair guidance remain localized and accessible", as
   await expect(page.locator("#storage-help")).toContainText("NTFS");
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   await page.screenshot({ path: ".research-local/ui/storage-recovery-ar.png", fullPage: true });
+});
+
+test("retry status exposes attempts, deadline and localized cause without blocking controls", async ({
+  page,
+}) => {
+  await seed(page, [
+    {
+      ...sample("retry.zip", "downloading"),
+      error: "Server returned HTTP 429",
+      attempt: 1,
+      next_retry: Date.now() + 30000,
+      failure_reason: "rate_limited",
+    } as ReturnType<typeof sample>,
+  ]);
+  await page.getByRole("button", { name: "retry.zip", exact: true }).click();
+  const details = page.locator(".selection-details");
+  await expect(details).toContainText("Attempt");
+  await expect(details).toContainText("1 / 3");
+  await expect(details).toContainText("Next retry");
+  await expect(details).toContainText("server asked to slow down");
+  await page.getByRole("button", { name: "العربية", exact: true }).click();
+  await expect(details).toContainText("المحاولة التالية");
+  await expect(details).toContainText("طلب الخادم تخفيف الطلبات");
+  await details.focus();
+  await expect(details).toBeFocused();
+  await page.getByRole("button", { name: "إيقاف مؤقت", exact: true }).click();
+  await expect(details).not.toContainText("المحاولة التالية");
+  expect(
+    (await calls(page)).some(
+      (call: any) => call.command === "download_action" && call.args.action === "pause",
+    ),
+  ).toBeTruthy();
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
 });
 
 test("selection drives toolbar actions and clears when a file is hidden or removed", async ({
