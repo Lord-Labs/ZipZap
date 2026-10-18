@@ -48,6 +48,14 @@ upgrade qualification remains pending. Publication evidence upgrades the databas
 to schema 2, which older ZipZap versions cannot open; use a compatible app or a
 coherent pre-upgrade backup, never edit the schema number to force a downgrade.
 
+The add dialog shows that file size is initially unknown and recommends NTFS.
+Download details estimate peak storage at up to twice the known size; this does
+not reserve or guarantee capacity. If storage fills, becomes read-only or goes
+offline, the development version shows repair instructions and keeps saved
+checkpoints. Free space, allow writes or restore the folder, then retry. Valid
+parts are reused; existing output files are kept. Physical full-volume behavior
+has not been exercised on the current unelevated verification host.
+
 Settings control one to four simultaneous downloads, one to four connections per
 download, a shared speed limit (0 means unlimited), the default folder and
 language. The language button switches English/LTR and Arabic/RTL. Closing the

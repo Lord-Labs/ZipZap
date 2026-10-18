@@ -194,6 +194,8 @@ pub(super) async fn download(
         .map_err(io_error)?;
     for index in 0..job.segments.len() {
         let mut source = File::open(part(&job, index)).await.map_err(io_error)?;
+        #[cfg(test)]
+        manager.file_failure("assembly", 0)?;
         tokio::io::copy(&mut source, &mut assembled)
             .await
             .map_err(io_error)?;
@@ -344,6 +346,8 @@ async fn receive(
             if expected.is_some_and(|length| done + bytes.len() as u64 > length) {
                 return Err("Response exceeds the expected byte count".into());
             }
+            #[cfg(test)]
+            manager.file_failure("write", done)?;
             file.write_all(bytes).await.map_err(io_error)?;
             hash.update(bytes);
             done += bytes.len() as u64;
@@ -369,6 +373,8 @@ async fn checkpoint_file(
     done: u64,
     hash: &Sha256,
 ) -> Result<()> {
+    #[cfg(test)]
+    manager.file_failure("flush", done)?;
     file.flush().await.map_err(io_error)?;
     file.sync_data().await.map_err(io_error)?;
     let digest = digest(hash);

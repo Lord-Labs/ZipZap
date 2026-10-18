@@ -428,7 +428,8 @@ try {
   await rm(unavailable, { recursive: true });
   start();
   await action(job, "resume");
-  await until(job.id, (j) => j.status === "failed");
+  const missingDestination = await until(job.id, (j) => j.status === "failed");
+  assert.match(missingDestination.error, /^Storage error: missing\./);
   await assert.rejects(readFile(job.destination), { code: "ENOENT" });
   await mkdir(unavailable);
   await action(job, "resume");

@@ -91,6 +91,38 @@ live database/WAL pair separately. No additional snapshot is needed for this
 transactional upgrade. Keep databases private and preserve completed files;
 installer upgrade/downgrade qualification remains part of #47.
 
+## Storage failures (development version)
+
+File-operation errors distinguish insufficient space/quota, read-only/access
+failure, missing destinations and other storage problems. They stop automatic
+retries and retain the last saved segment hashes/counts and owned parts. Repair
+the destination and retry explicitly. Bytes after the saved checkpoint are
+validated/truncated by the existing resume path; assembly errors keep complete
+segments available for reuse. A storage repair does not authorize replacing an
+existing output file.
+
+The add dialog explains that size is initially unknown. Selected download details
+show an unknown estimate or a conservative peak of twice the known total, with
+NTFS guidance in English and Arabic. This is not a free-space reservation or a
+promise of capacity; it does not query the URL again. Other jobs/files may consume
+space while a transfer runs.
+
+`storage_tests` uses a bounded 3 MiB local HTTP fixture with test-only per-Manager
+write, flush and assembly faults. It verifies no automatic retry, retained durable
+prefixes after reopen, validated range reuse and exact final bytes after repair.
+The HTTP integration fixture separately removes/restores an isolated destination.
+UI tests verify localized errors, known/unknown estimates and accessible dialogs.
+
+On the 2026-10-18 Windows verification host, the process token is not elevated and
+`New-VHD` is unavailable. An isolated NTFS volume full-disk check and actual
+read-only-volume behavior were **not exercised**, not passed. Injected StorageFull
+and ReadOnlyFilesystem errors are deterministic behavior coverage, not physical
+storage evidence. Release qualification must record these limits and, on a host
+that supports it, repeat using a small disposable NTFS VHD with its state database
+outside that volume. Fill only that bounded volume, repair its capacity, then
+verify retained checkpoints, output SHA-256 and no-clobber behavior. Never fill
+the system disk or change a personal drive's permissions for this check.
+
 ## Verify
 
 ```sh

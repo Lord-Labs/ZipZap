@@ -91,6 +91,18 @@ const en = {
   invalidUrl: "Enter a valid HTTP or HTTPS link without a username or password.",
   local: "Files stay on this device",
   storage: "Use an NTFS destination. Temporary assembly can need twice the file size.",
+  storageEstimate: "Peak storage estimate",
+  storageUnknown:
+    "Size is unknown until the server responds. Space estimates are not reserved capacity.",
+  storageCaution:
+    "Estimates do not guarantee free space. Other files can use capacity while downloading.",
+  storageFull: "Not enough destination space. Free space, then retry; saved checkpoints are kept.",
+  storageAccess:
+    "The destination is read-only or access was denied. Allow writes, then retry; saved checkpoints are kept.",
+  storageMissing:
+    "The destination folder is unavailable. Reconnect or restore it, then retry; saved checkpoints are kept.",
+  storageOther:
+    "Check the destination drive and NTFS support, then retry; saved checkpoints are kept.",
 };
 const ar: Record<keyof typeof en, string> = {
   downloads: "التنزيلات",
@@ -184,6 +196,15 @@ const ar: Record<keyof typeof en, string> = {
   invalidUrl: "أدخل رابط HTTP أو HTTPS صالحًا بدون اسم مستخدم أو كلمة مرور.",
   local: "الملفات تبقى على جهازك",
   storage: "استخدم مجلدًا على NTFS. تجميع الملف المؤقت قد يحتاج ضعف حجمه.",
+  storageEstimate: "تقدير أقصى مساحة للتنزيل",
+  storageUnknown: "الحجم غير معروف حتى يستجيب الخادم. تقديرات المساحة لا تحجز سعة على القرص.",
+  storageCaution: "التقدير لا يضمن المساحة المتاحة؛ قد تستهلك ملفات أخرى السعة أثناء التنزيل.",
+  storageFull: "مساحة الحفظ غير كافية. وفر مساحة ثم أعد المحاولة؛ نحتفظ بالتقدم المحفوظ.",
+  storageAccess:
+    "وجهة الحفظ للقراءة فقط أو رُفض الوصول. اسمح بالكتابة ثم أعد المحاولة؛ نحتفظ بالتقدم المحفوظ.",
+  storageMissing:
+    "مجلد الحفظ غير متاح. أعد توصيله أو استعده ثم أعد المحاولة؛ نحتفظ بالتقدم المحفوظ.",
+  storageOther: "تحقق من قرص الحفظ ودعم NTFS ثم أعد المحاولة؛ نحتفظ بالتقدم المحفوظ.",
 };
 export type Language = "en" | "ar";
 export const dictionary = (language: Language) => (language === "ar" ? ar : en);
