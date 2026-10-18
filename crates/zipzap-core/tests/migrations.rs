@@ -202,6 +202,33 @@ fn malformed_publication_evidence_rolls_back_the_schema_upgrade() {
 }
 
 #[test]
+fn saved_backoff_reopens_paused_without_restarting_a_retry_deadline() {
+    let (_folder, database, db, jobs, _) = fixture(2);
+    let mut job = serde_json::to_value(&jobs[1]).unwrap();
+    job["attempt"] = json!(2);
+    job["next_retry"] = json!(u64::MAX);
+    job["failure_reason"] = json!("network");
+    db.execute(
+        "UPDATE jobs SET data=?1 WHERE id=?2",
+        params![job.to_string(), jobs[1].id],
+    )
+    .unwrap();
+    for _ in 0..2 {
+        let manager = Manager::open(&database).unwrap();
+        let recovered = &manager.jobs()[1];
+        assert_eq!(recovered.status, Status::Paused);
+        assert_eq!(recovered.attempt, 2);
+        assert_eq!(recovered.next_retry, None);
+        assert_eq!(
+            recovered.failure_reason,
+            Some(zipzap_core::FailureReason::Network)
+        );
+        assert_eq!(manager.jobs()[0].attempt, 0);
+        assert_eq!(manager.jobs()[0].failure_reason, None);
+    }
+}
+
+#[test]
 fn interrupted_upgrade_child_process() {
     let Some(database) = std::env::var_os("ZIPZAP_MIGRATION_CRASH_DB") else {
         return;

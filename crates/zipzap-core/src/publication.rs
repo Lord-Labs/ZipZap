@@ -148,6 +148,8 @@ fn completed(job: &mut Job) {
     job.total = Some(bytes);
     job.speed = 0;
     job.error = None;
+    job.failure_reason = None;
+    job.next_retry = None;
 }
 
 pub(super) fn recover(job: &mut Job) -> Result<Option<(File, File)>> {

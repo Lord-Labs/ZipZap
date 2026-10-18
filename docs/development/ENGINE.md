@@ -91,6 +91,31 @@ live database/WAL pair separately. No additional snapshot is needed for this
 transactional upgrade. Keep databases private and preserve completed files;
 installer upgrade/downgrade qualification remains part of #47.
 
+## Retry policy (development version)
+
+The shared worker classifies transient network failures, HTTP 408/500/502/503/504
+and rate limiting separately from permanent HTTP/authentication, TLS, input,
+integrity, storage and publication conflicts. There are at most three attempts.
+One safe single-stream fallback after rejected ranges counts toward that bound;
+certificate, bounds and representation validation stay enabled.
+
+HTTP 429/503 may supply Retry-After seconds or an HTTP date. Valid delays are
+capped at 30 seconds; past dates use zero, malformed values use the normal
+500 ms then 1 second backoff. Excessive digit values are capped without integer
+overflow. Errors never copy raw Retry-After values or complete private URLs.
+TLS source errors are recognized through the existing native-tls backend;
+HTTP dates use httpdate rather than a handwritten parser. Both dependencies
+are pinned and their MIT/Apache-2.0 notices are collected during packaging.
+
+Jobs expose serde-defaulted `attempt`, `next_retry` (Unix milliseconds) and
+`failure_reason` through the existing CLI/desktop snapshot. Details show localized
+actionable reasons, the attempt and retry time. Pause/cancel/shutdown interrupt
+waits and clear the deadline. Reopening pauses active work and clears old retry
+deadlines; explicit resume starts a new bounded attempt sequence. These display
+fields are compatible with schema 2 and do not create a durable retry scheduler.
+A missing destination is rejected before changing its saved transfer plan; an
+inaccessible prefix is retained for repair instead of being discarded.
+
 ## Storage failures (development version)
 
 File-operation errors distinguish insufficient space/quota, read-only/access

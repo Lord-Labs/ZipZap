@@ -18,6 +18,9 @@
     total: number | null;
     speed: number;
     error: string | null;
+    attempt?: number;
+    next_retry?: number | null;
+    failure_reason?: string | null;
   };
 
   type Settings = {
@@ -50,6 +53,21 @@
   let language: Language = "en";
 
   $: text = dictionary(language);
+  $: failureMessages = {
+    network: text.reasonNetwork,
+    server: text.reasonServer,
+    rate_limited: text.reasonRateLimited,
+    http: text.reasonHttp,
+    authentication: text.reasonAuthentication,
+    tls: text.reasonTls,
+    storage_full: text.storageFull,
+    storage_access: text.storageAccess,
+    destination_missing: text.storageMissing,
+    storage: text.storageOther,
+    input: text.reasonInput,
+    integrity: text.reasonIntegrity,
+    conflict: text.reasonConflict,
+  } as Record<string, string>;
 
   let folder = "";
 
@@ -611,7 +629,9 @@
                       ><Icon name={fileCategory(job.destination)} /><bdi
                         >{basename(job.destination)}</bdi
                       ></button
-                    >{#if job.error}<p class="job-error">{errorMessage(job.error)}</p>{/if}</td
+                    >{#if job.error}<p class="job-error">
+                        {failureMessages[job.failure_reason || ""] || errorMessage(job.error)}
+                      </p>{/if}</td
                   >
                   <td
                     ><bdi dir="ltr">{job.total !== null ? bytes(job.total) : text.unknown}</bdi></td
@@ -660,7 +680,8 @@
         </div>
       </section>
 
-      <section class="selection-details" aria-label={text.details}>
+      <!-- svelte-ignore a11y_no_noninteractive_tabindex (Keyboard users need to scroll the download details.) -->
+      <section class="selection-details" aria-label={text.details} tabindex="0">
         {#if selected}
           <div>
             <strong>{text.destination}</strong><bdi dir="ltr">{pathLabel(selected.destination)}</bdi
@@ -679,8 +700,20 @@
             >
           </div>
           <p class="helper">{text.storage} {text.storageCaution}</p>
+          {#if selected.attempt}<div>
+              <strong>{text.attempt}</strong><bdi dir="ltr"
+                >{new Intl.NumberFormat(language).format(selected.attempt)} / {new Intl.NumberFormat(
+                  language,
+                ).format(3)}</bdi
+              >
+            </div>{/if}
+          {#if selected.next_retry}<div role="status">
+              <strong>{text.nextRetry}</strong><bdi dir="ltr"
+                >{new Date(selected.next_retry).toLocaleTimeString(language)}</bdi
+              >
+            </div>{/if}
           {#if selected.error}<p class="job-error" role="status">
-              {errorMessage(selected.error)}
+              {failureMessages[selected.failure_reason || ""] || errorMessage(selected.error)}
             </p>{/if}
         {:else}<p>{text.selectHint}</p>{/if}
       </section>

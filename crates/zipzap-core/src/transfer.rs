@@ -1,3 +1,4 @@
+use super::retry::{Failure, TransferResult as Result};
 use super::*;
 use reqwest::{Response, StatusCode, header};
 use sha2::{Digest, Sha256};
@@ -53,13 +54,21 @@ pub(super) async fn download(
     single: bool,
 ) -> Result<()> {
     let mut job = manager.job(id)?;
+    let parent = job
+        .destination
+        .parent()
+        .ok_or("Missing destination folder")?;
+    if !fs::metadata(parent).await.map_err(io_error)?.is_dir() {
+        return Err(io_error(std::io::Error::from(std::io::ErrorKind::NotADirectory)).into());
+    }
     if job.publication.is_some() {
         let m = Arc::clone(&manager);
         let id = id.to_owned();
         let token = token.clone();
         return tokio::task::spawn_blocking(move || publication::publish(&m, &id, &token))
             .await
-            .map_err(|_| "Publication worker stopped unexpectedly".to_owned())?;
+            .map_err(|_| "Publication worker stopped unexpectedly".to_owned())?
+            .map_err(Failure::from);
     }
     if job.destination.symlink_metadata().is_ok() {
         return Err("Destination already exists; no file was replaced".into());
@@ -75,11 +84,11 @@ pub(super) async fn download(
             .headers()
             .get(header::CONTENT_RANGE)
             .is_some_and(|v| v == "bytes */0");
-    if (!probe.status().is_success() && !empty) || !encoding_ok(&probe) {
-        return Err(format!(
-            "Server returned HTTP {} or unsupported encoding",
-            probe.status().as_u16()
-        ));
+    if !probe.status().is_success() && !empty {
+        return Err(Failure::response(&probe));
+    }
+    if !encoding_ok(&probe) {
+        return Err("Unsupported content encoding".into());
     }
     let validator = identity(&probe);
     let total = if empty {
@@ -122,9 +131,22 @@ pub(super) async fn download(
         && !job.segments.is_empty();
     if reusable {
         for (index, segment) in job.segments.iter().enumerate() {
-            if checked_prefix(&part(&job, index), segment).await.is_err() {
-                reusable = false;
-                break;
+            match checked_prefix(&part(&job, index), segment).await {
+                Ok(_) => {}
+                Err(error)
+                    if matches!(
+                        error.reason,
+                        FailureReason::StorageAccess
+                            | FailureReason::StorageFull
+                            | FailureReason::Storage
+                    ) =>
+                {
+                    return Err(error);
+                }
+                Err(_) => {
+                    reusable = false;
+                    break;
+                }
             }
         }
     }
@@ -172,7 +194,7 @@ pub(super) async fn download(
     }
     while let Some(result) = tasks.join_next().await {
         let outcome = result
-            .map_err(|_| "Transfer worker stopped unexpectedly".to_owned())
+            .map_err(|_| Failure::from("Transfer worker stopped unexpectedly"))
             .and_then(|r| r);
         if let Err(error) = outcome {
             tasks.abort_all();
@@ -213,6 +235,7 @@ pub(super) async fn download(
     tokio::task::spawn_blocking(move || publication::publish(&manager, &id, &token))
         .await
         .map_err(|_| "Publication worker stopped unexpectedly".to_owned())?
+        .map_err(Failure::from)
 }
 
 async fn checked_prefix(path: &Path, segment: &Segment) -> Result<Sha256> {
@@ -280,6 +303,11 @@ async fn receive(
             );
     }
     let (mut response, _permit) = manager.send(request, token).await?;
+    if !response.status().is_success()
+        && !(ranged && response.status() == StatusCode::RANGE_NOT_SATISFIABLE)
+    {
+        return Err(Failure::response(&response));
+    }
     if ranged {
         if !bounds(
             &response,
@@ -291,11 +319,10 @@ async fn receive(
         {
             return Err("Range rejected: response bounds or resource identity changed".into());
         }
-    } else if response.status() != StatusCode::OK || !encoding_ok(&response) {
-        return Err(format!(
-            "Server returned HTTP {} or unsupported encoding",
-            response.status().as_u16()
-        ));
+    } else if response.status() != StatusCode::OK {
+        return Err(Failure::response(&response));
+    } else if !encoding_ok(&response) {
+        return Err("Unsupported content encoding".into());
     }
     let expected = if ranged {
         segment.end.map(|e| e - segment.start + 1)
@@ -378,10 +405,12 @@ async fn checkpoint_file(
     file.flush().await.map_err(io_error)?;
     file.sync_data().await.map_err(io_error)?;
     let digest = digest(hash);
-    manager.update(&job.id, |j| {
-        j.segments[index].done = done;
-        j.segments[index].hash = digest;
-    })
+    manager
+        .update(&job.id, |j| {
+            j.segments[index].done = done;
+            j.segments[index].hash = digest;
+        })
+        .map_err(Failure::from)
 }
 
 fn digest(hash: &Sha256) -> String {

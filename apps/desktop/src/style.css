@@ -43,7 +43,8 @@ button:focus-visible,
 a:focus-visible,
 input:focus-visible,
 select:focus-visible,
-.table-scroll:focus-visible {
+.table-scroll:focus-visible,
+.selection-details:focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: -2px;
 }
