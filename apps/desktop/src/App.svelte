@@ -127,6 +127,18 @@
 
   const pathLabel = (value: string) => (value.startsWith("\\\\?\\") ? value.slice(4) : value);
 
+  const errorMessage = (value: unknown) => {
+    const raw = value instanceof Error ? value.message : String(value);
+    const reason = /^Storage error: (full|access|missing|other)\./.exec(raw)?.[1];
+    const messages: Record<string, string> = {
+      full: text.storageFull,
+      access: text.storageAccess,
+      missing: text.storageMissing,
+      other: text.storageOther,
+    };
+    return reason ? messages[reason] : raw;
+  };
+
   const bytes = (value: number) => {
     const units = ["B", "KiB", "MiB", "GiB", "TiB"];
 
@@ -228,7 +240,7 @@
       connected = !value.native_error;
       ready = true;
 
-      if (value.notice) error = value.notice;
+      if (value.notice) error = errorMessage(value.notice);
     } catch {
       error = text.missing;
     } finally {
@@ -283,7 +295,7 @@
       search = "";
       await refresh();
     } catch (e) {
-      formError = String(e);
+      formError = errorMessage(e);
     } finally {
       busy = false;
     }
@@ -302,7 +314,7 @@
         else destination = result;
       }
     } catch (e) {
-      formError = String(e);
+      formError = errorMessage(e);
     }
   }
 
@@ -316,7 +328,7 @@
       await refresh();
       return true;
     } catch (e) {
-      error = String(e);
+      error = errorMessage(e);
       return false;
     } finally {
       const next = new Set(busyIds);
@@ -344,7 +356,7 @@
     try {
       await invoke("open_download", { id: job.id, reveal });
     } catch (e) {
-      error = String(e);
+      error = errorMessage(e);
     }
   }
 
@@ -371,7 +383,7 @@
       await refresh();
       notice = text.success;
     } catch (e) {
-      formError = String(e);
+      formError = errorMessage(e);
     } finally {
       busy = false;
     }
@@ -385,7 +397,7 @@
         await invoke("save_settings", { settings: { ...settings, language } });
         await refresh();
       } catch (e) {
-        error = String(e);
+        error = errorMessage(e);
       }
     }
   }
@@ -396,7 +408,7 @@
       connected = true;
       notice = text.connected;
     } catch (e) {
-      formError = String(e);
+      formError = errorMessage(e);
     }
   }
 </script>
@@ -599,7 +611,7 @@
                       ><Icon name={fileCategory(job.destination)} /><bdi
                         >{basename(job.destination)}</bdi
                       ></button
-                    >{#if job.error}<p class="job-error">{job.error}</p>{/if}</td
+                    >{#if job.error}<p class="job-error">{errorMessage(job.error)}</p>{/if}</td
                   >
                   <td
                     ><bdi dir="ltr">{job.total !== null ? bytes(job.total) : text.unknown}</bdi></td
@@ -661,7 +673,15 @@
                 : ""}</bdi
             ><span>{text[selected.status]}</span>
           </div>
-          {#if selected.error}<p class="job-error" role="status">{selected.error}</p>{/if}
+          <div>
+            <strong>{text.storageEstimate}</strong><bdi dir="ltr"
+              >{selected.total === null ? text.unknown : bytes(selected.total * 2)}</bdi
+            >
+          </div>
+          <p class="helper">{text.storage} {text.storageCaution}</p>
+          {#if selected.error}<p class="job-error" role="status">
+              {errorMessage(selected.error)}
+            </p>{/if}
         {:else}<p>{text.selectHint}</p>{/if}
       </section>
     </main>
@@ -710,13 +730,20 @@
       maxlength="180"
     /><label for="destination">{text.destination}</label>
     <div class="folder-picker">
-      <input id="destination" value={pathLabel(destination)} readonly dir="ltr" /><button
+      <input
+        id="destination"
+        value={pathLabel(destination)}
+        readonly
+        dir="ltr"
+        aria-describedby="storage-help"
+      /><button
         type="button"
         class="secondary"
         onclick={() => chooseFolder()}
         aria-label={text.browse}><Icon name="folder" /></button
       >
     </div>
+    <p id="storage-help" class="helper">{text.storageUnknown} {text.storage}</p>
     {#if formError}<p class="form-error" role="alert">{formError}</p>{/if}
     <div class="dialog-actions">
       <button type="button" class="secondary" onclick={() => addDialog.close()}>{text.close}</button

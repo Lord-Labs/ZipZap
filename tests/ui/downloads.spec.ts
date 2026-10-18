@@ -131,6 +131,29 @@ async function calls(page: Page) {
   return page.evaluate(() => (window as any).zipzapTest.calls);
 }
 
+test("storage estimates and repair guidance remain localized and accessible", async ({ page }) => {
+  await seed(page, [
+    { ...sample("space.zip", "failed"), error: "Storage error: full. fixture failure" },
+    sample("unknown.bin", "paused", null),
+  ]);
+  await page.getByRole("button", { name: "space.zip", exact: true }).click();
+  const details = page.locator(".selection-details");
+  await expect(details).toContainText("Peak storage estimate");
+  await expect(details).toContainText("2 MiB");
+  await expect(details).toContainText("Free space, then retry");
+  await expect(details).toContainText("Estimates do not guarantee free space");
+  await page.getByRole("button", { name: "العربية", exact: true }).click();
+  await expect(details).toContainText("وفر مساحة ثم أعد المحاولة");
+  await page.getByRole("button", { name: "unknown.bin", exact: true }).click();
+  await expect(details).toContainText("حجم غير معروف");
+  await page.setViewportSize({ width: 780, height: 560 });
+  await page.getByRole("button", { name: "تنزيل جديد", exact: true }).click();
+  await expect(page.locator("#storage-help")).toContainText("الحجم غير معروف");
+  await expect(page.locator("#storage-help")).toContainText("NTFS");
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await page.screenshot({ path: ".research-local/ui/storage-recovery-ar.png", fullPage: true });
+});
+
 test("selection drives toolbar actions and clears when a file is hidden or removed", async ({
   page,
 }) => {

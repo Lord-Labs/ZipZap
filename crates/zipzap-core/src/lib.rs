@@ -4,6 +4,8 @@ mod persistence_tests;
 mod publication;
 #[cfg(test)]
 mod publication_tests;
+#[cfg(test)]
+mod storage_tests;
 mod transfer;
 
 use reqwest::{Client, Url};
@@ -122,6 +124,8 @@ pub struct Manager {
     limit_changed: tokio::sync::Notify,
     _owner: std::fs::File,
     hosts: Mutex<HashMap<String, Arc<tokio::sync::Semaphore>>>,
+    #[cfg(test)]
+    file_fault: Mutex<Option<(&'static str, u64, std::io::ErrorKind)>>,
 }
 
 pub fn validate_url(value: &str) -> Result<Url> {
@@ -324,6 +328,8 @@ impl Manager {
             limit_changed: tokio::sync::Notify::new(),
             _owner: owner,
             hosts: Mutex::new(HashMap::new()),
+            #[cfg(test)]
+            file_fault: Mutex::new(None),
         }))
     }
 
@@ -559,7 +565,8 @@ impl Manager {
                     break;
                 }
                 Err(error) => {
-                    let storage_failed = error.starts_with("State database error:");
+                    let storage_failed = error.starts_with("State database error:")
+                        || error.starts_with("Storage error:");
                     if error.starts_with("Range rejected") {
                         single = true;
                     }
@@ -728,7 +735,24 @@ fn save(state: &State, job: &Job) -> Result<()> {
     Ok(())
 }
 fn io_error(error: std::io::Error) -> String {
-    format!("File operation failed: {error}")
+    use std::io::ErrorKind;
+    let (reason, recovery) = match error.kind() {
+        ErrorKind::StorageFull | ErrorKind::QuotaExceeded => {
+            ("full", "Free space on the destination drive, then retry")
+        }
+        ErrorKind::PermissionDenied | ErrorKind::ReadOnlyFilesystem => {
+            ("access", "Allow writes to the destination, then retry")
+        }
+        ErrorKind::NotFound | ErrorKind::NotADirectory => (
+            "missing",
+            "Reconnect or restore the destination folder, then retry",
+        ),
+        _ => (
+            "other",
+            "Check the destination drive and NTFS support, then retry",
+        ),
+    };
+    format!("Storage error: {reason}. {recovery}. Saved checkpoints are retained. ({error})")
 }
 fn db_error(error: rusqlite::Error) -> String {
     format!("State database error: {error}")
