@@ -330,15 +330,41 @@ try {
       "failed",
     );
     db.exec("DROP TRIGGER reject_completion;");
-    // Publication reconciliation belongs to #32; keep the verified output for manual recovery.
-    await rename(job.destination, `${job.destination}.verified`);
+    const beforeRecovery = requests.length;
     await action(job, "resume");
     await complete(job);
+    assert.equal(requests.length, beforeRecovery, "publication recovery downloaded again");
     await stop();
     start();
     assert.equal((await get(job.id)).status, "completed");
     passed.push(
-      "completion save failure never reports success, keeps output/parts, and permits a safe retry",
+      "completion save failure retains output/evidence, then retries without another HTTP request",
+    );
+
+    db.exec(`CREATE TRIGGER reject_completion BEFORE UPDATE ON jobs
+      WHEN json_extract(NEW.data, '$.status') = 'completed'
+      BEGIN SELECT RAISE(ABORT, 'injected completion save failure'); END;`);
+    job = await add("/range", "publication-conflict.bin");
+    await until(job.id, (j) => j.status === "failed");
+    db.exec("DROP TRIGGER reject_completion;");
+    await rename(job.destination, `${job.destination}.owned`);
+    await writeFile(job.destination, bytes);
+    const beforeConflict = requests.length;
+    await action(job, "resume");
+    const conflict = await until(job.id, (j) => j.status === "failed");
+    assert.match(conflict.error, /^Published file conflict:/);
+    assert.equal(digest(await readFile(job.destination)), digest(bytes));
+    assert.ok((await readdir(directory)).includes(`.zipzap-${job.id}.part4`));
+    await stop();
+    start();
+    assert.match((await get(job.id)).error, /^Published file conflict:/);
+    await rm(job.destination);
+    await rename(`${job.destination}.owned`, job.destination);
+    await action(job, "resume");
+    await complete(job);
+    assert.equal(requests.length, beforeConflict, "conflict recovery downloaded again");
+    passed.push(
+      "byte-identical replacement is rejected across reopen and recovers after restoring the owned file",
     );
   } finally {
     db.close();

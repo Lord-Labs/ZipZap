@@ -1,6 +1,9 @@
 //! Download state, integrity, durable checkpoints, and one bounded queue.
 #[cfg(test)]
 mod persistence_tests;
+mod publication;
+#[cfg(test)]
+mod publication_tests;
 mod transfer;
 
 use reqwest::{Client, Url};
@@ -36,6 +39,19 @@ pub struct Segment {
     pub hash: String,
 }
 
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
+pub struct FileIdentity {
+    pub volume: u64,
+    pub index: [u8; 16],
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
+pub struct Publication {
+    pub bytes: u64,
+    pub sha256: String,
+    pub identity: FileIdentity,
+}
+
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Job {
     pub id: String,
@@ -50,6 +66,8 @@ pub struct Job {
     pub validator: Option<String>,
     pub effective_url: Option<String>,
     pub created_at: u64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub publication: Option<Publication>,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -177,7 +195,7 @@ impl Manager {
         let schema: i64 = db
             .pragma_query_value(None, "user_version", |r| r.get(0))
             .map_err(db_error)?;
-        if schema > 1 {
+        if schema > 2 {
             return Err("Database was created by a newer ZipZap version".into());
         }
         db.pragma_update(None, "journal_mode", "WAL")
@@ -224,6 +242,22 @@ impl Manager {
                     .iter()
                     .try_fold(0u64, |total, segment| total.checked_add(segment.done))
                     .ok_or("Invalid saved checkpoint; database retained for recovery")?;
+                if job.publication.as_ref().is_some_and(|p| {
+                    !job.destination.is_absolute()
+                        || job.destination.file_name().is_none()
+                        || p.bytes != job.downloaded
+                        || job.total.is_some_and(|t| t != p.bytes)
+                        || job.segments.is_empty()
+                        || p.sha256.len() != 64
+                        || !p
+                            .sha256
+                            .bytes()
+                            .all(|b| b.is_ascii_hexdigit() && !b.is_ascii_uppercase())
+                }) {
+                    return Err(
+                        "Invalid saved publication evidence; database retained for recovery".into(),
+                    );
+                }
                 jobs.push(job);
             }
         }
@@ -250,6 +284,17 @@ impl Manager {
             client
         };
         let client = client.build().map_err(network_error)?;
+        let mut publication_guards = Vec::new();
+        for job in &mut jobs {
+            match publication::recover(job) {
+                Ok(Some(guards)) => publication_guards.push(guards),
+                Ok(None) => {}
+                Err(error) => {
+                    job.status = Status::Failed;
+                    job.error = Some(error);
+                }
+            }
+        }
         // Recovery and the schema marker become durable together before workers can start.
         for job in &jobs {
             tx.execute(
@@ -258,9 +303,13 @@ impl Manager {
             )
             .map_err(db_error)?;
         }
-        tx.pragma_update(None, "user_version", 1)
+        tx.pragma_update(None, "user_version", 2)
             .map_err(db_error)?;
         tx.commit().map_err(db_error)?;
+        drop(publication_guards);
+        for job in &jobs {
+            publication::cleanup(job);
+        }
         Ok(Arc::new(Self {
             state: Mutex::new(State {
                 db,
@@ -372,6 +421,7 @@ impl Manager {
                 .duration_since(std::time::UNIX_EPOCH)
                 .unwrap_or_default()
                 .as_secs(),
+            publication: None,
         };
         state
             .db
@@ -514,7 +564,12 @@ impl Manager {
                         single = true;
                     }
                     failure = Some(error);
-                    if token.is_cancelled() || storage_failed {
+                    if token.is_cancelled()
+                        || storage_failed
+                        || failure
+                            .as_ref()
+                            .is_some_and(|e| e.starts_with("Published file conflict:"))
+                    {
                         break;
                     }
                     tokio::select! { _ = token.cancelled() => break, _ = tokio::time::sleep(Duration::from_millis(500 * (1 << attempt))) => {} }

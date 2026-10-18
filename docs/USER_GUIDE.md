@@ -24,10 +24,18 @@ These workspace changes are not included in the published first beta.
 The development version also keeps a rejected pause/resume/cancel action from
 changing the download when its database save fails. If a worker cannot save its
 final state, it shows Failed with a **last saved state retained** message. Repair
-the storage problem, then retry; reopening uses the last saved checkpoint. If a
-complete file already exists after this error, keep it and choose another name
-or move the verified file before retrying; ZipZap never replaces it. See
+the storage problem, then retry; reopening uses the last saved checkpoint. For
+new downloads, a file published just before a failed completion save can be
+recognized on reopening or retrying from its saved digest and file identity. A
+modified, replaced or unverifiable file shows **Published file conflict** and is
+kept with its recovery data. Restore the original file/evidence or move the
+conflicting file, then retry; ZipZap never replaces it. Legacy downloads without
+saved publication proof still require manual verification. See
 [recovery limits](development/ENGINE.md).
+
+If the retained assembly itself is damaged or missing, preserve any output and
+add a fresh download with a free filename. Retrying cannot rebuild missing
+ownership evidence; removing failed history keeps the final file.
 
 In the development version, opening first-beta saved state recovers the queue and
 settings in one transaction. If recovery fails, the database and download files
@@ -36,7 +44,9 @@ is rejected without resetting it. Do not lower its schema number or delete it
 to make an older app start; use the compatible app or restore a coherent backup
 with all instances closed. A saved folder on an offline drive does not prevent
 opening history. These changes are not in the published first beta; installer
-upgrade qualification remains pending.
+upgrade qualification remains pending. Publication evidence upgrades the database
+to schema 2, which older ZipZap versions cannot open; use a compatible app or a
+coherent pre-upgrade backup, never edit the schema number to force a downgrade.
 
 Settings control one to four simultaneous downloads, one to four connections per
 download, a shared speed limit (0 means unlimited), the default folder and

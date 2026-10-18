@@ -38,3 +38,7 @@ path. Once a later feature raises the schema, an older binary must reject it.
 Restore a coherent pre-upgrade SQLite backup with all instances closed, or use
 the compatible newer binary; never lower `user_version` by hand. Completed files
 remain separate from the database and must be kept.
+
+[ADR 0004](0004-publication-recovery.md) extends this contract for schema 2:
+validated publication recovery may clean owned temporary data after the entire
+startup transaction commits. Completed user files remain untouched.
