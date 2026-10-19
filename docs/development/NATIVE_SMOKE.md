@@ -88,3 +88,37 @@ were checked visually. This baseline is not a full screen-reader certification.
 External editor rendering, actual browser handoff, installer lifecycle and other
 Windows versions were not tested here. No blocking product defect was observed
 in this bounded baseline. Hosted checks were skipped by [policy](WORKFLOW.md).
+
+## Pending lifecycle qualification: issue #41
+
+The lifecycle implementation has automated Rust and mocked IPC UI coverage.
+No native tray/notification scenario below has been completed. A local smoke
+build was prepared and launched, but native inspection was interrupted before
+verification. On 2026-10-19 the maintainer requested continued implementation
+without controlling the device. Native UI and OS session/power checks are
+therefore **unexercised**, not passing. The #29 results above predate this code.
+
+When a suitable isolated Windows test environment is available:
+
+1. Start with fresh smoke state. Verify both preferences default off; closing
+   checkpoints and exits. Reopen and verify saved bytes and output hashes.
+2. Opt into close-to-tray, close during a bounded transfer and verify it keeps
+   progressing. Show the window using the icon and menu, then launch the same
+   executable again; verify one Manager/queue and no duplicate worker. Exercise
+   Hold/Start from both UI and tray, including English/Arabic menu labels.
+3. Quit through the tray and Settings during active work and retry waits;
+   verify process exit, durable paused checkpoints and safe resume. Verify
+   unavailable-tray/hide failures take the quit path where fault injection is
+   available; automated UI fallback coverage alone is not native evidence.
+4. Opt into notifications in isolated installed-app state. Complete/fail local
+   fixtures and verify localized count-only payloads, five-second batching and
+   no repeat on polling, opt-in or restart. Check Windows suppression and app
+   identity separately; a debug toast or successful preparation is insufficient.
+5. In a disposable Windows session/VM, test sleep/resume and sign-out/restart
+   during transfer and retry wait. Reopen, inspect recovery and compare hashes.
+   Record actual OS behavior and any defects. Never suspend, restart or sign out
+   the maintainer's active host just to obtain evidence.
+
+Keep #41 open and its PR in draft until the required native evidence is supplied
+or a maintainer records an explicit scope/verification change. Release #47 must
+carry these gaps; do not substitute headless, process-kill or mocked tests.

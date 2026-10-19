@@ -115,6 +115,30 @@ run/hold and waiting IDs in priority order. Keyboard move controls show waiting
 rank independently of table sorting. Ineligible hosts can be skipped under the
 existing per-host limit; global/host limits and old-worker exit guards remain.
 
+## Desktop lifecycle (development version)
+
+Tauri owns one tray for the existing single-instance Manager. The serde-defaulted
+`close_to_tray` and `notifications` settings are false; they do not change schema 3. Older schema-3 builds ignore these fields and retain checkpointed quit with
+no notifications. Close hides only after opt-in, successful tray creation and
+successful hiding. Otherwise it takes the shared quit path. Explicit quit and
+exit requests use a re-entrant guard and await Manager shutdown before exit.
+Tray hold/start calls the same durable queue commands as the desktop.
+
+The Rust notification plugin supplies Windows delivery without exposing a JS
+notification capability. A one-second watcher seeds recovered state, tracks
+status changes while disabled, prunes removed jobs and batches terminal results
+at most once per five seconds. Payloads contain only localized counts; no job
+URLs, filenames or paths. Preparing a notification does not prove Windows
+displayed it. Debug builds may use PowerShell notification branding; installed
+application identity and suppression behavior need native qualification.
+
+Automated tests cover notification deduplication/batching and saved opt-in UI
+behavior, including unavailable-tray fallback. They do not establish actual
+Windows tray, second-instance, notifications or OS session/power behavior. See
+the pending [native scenarios](NATIVE_SMOKE.md). Forced OS termination may still
+require ordinary checkpoint recovery; there is no service, autostart or wake
+mechanism, and tray mode does not prevent sleep.
+
 ## Filename metadata (development version)
 
 `Manager::suggest` and the CLI `suggest` command inspect headers through the same

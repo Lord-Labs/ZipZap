@@ -12,10 +12,13 @@ test.beforeEach(async ({ page }) => {
         speed_limit: 0,
         language: "en",
         download_folder: "C:\\Downloads",
+        close_to_tray: false,
+        notifications: false,
       },
       folder: "C:\\Downloads",
       version: "0.1.0-beta.1",
       native_error: null,
+      tray_available: true,
       notice: null,
     };
     const calls: { command: string; args: any }[] = [];
@@ -111,6 +114,7 @@ test.beforeEach(async ({ page }) => {
         if (command === "open_download") return;
         if (command === "select_folder") return "C:\\Downloads";
         if (command === "connect_browser") return;
+        if (command === "quit_app") return;
         throw new Error("Unexpected mock command");
       },
     };
@@ -294,6 +298,40 @@ test("add for later remains paused and queue controls have Arabic labels", async
   await expect(page.getByRole("status").filter({ hasText: "الطابور معلّق" })).toBeVisible();
   await page.setViewportSize({ width: 780, height: 560 });
   await page.screenshot({ path: ".research-local/ui/queue-controls-ar.png", fullPage: true });
+});
+
+test("tray and notification preferences require explicit opt-in and unavailable tray stays disabled", async ({
+  page,
+}) => {
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  const closeToTray = page.getByLabel(
+    "Keep downloads running in the system tray when closing the window",
+    { exact: true },
+  );
+  const notifications = page.getByLabel("Notify me about completed or failed downloads", {
+    exact: true,
+  });
+  await expect(closeToTray).not.toBeChecked();
+  await expect(notifications).not.toBeChecked();
+  await closeToTray.check();
+  await notifications.check();
+  await page.getByRole("button", { name: "Save settings", exact: true }).click();
+  await expect(page.locator("footer")).toContainText("keeps ZipZap running in the system tray");
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await expect(closeToTray).toBeChecked();
+  await expect(notifications).toBeChecked();
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await page.getByRole("button", { name: "Quit ZipZap", exact: true }).click();
+  expect((await calls(page)).some((call) => call.command === "quit_app")).toBeTruthy();
+  await page.keyboard.press("Escape");
+  await page.evaluate(() => {
+    (window as any).zipzapTest.state.tray_available = false;
+  });
+  await expect(page.locator("footer")).toContainText("pauses active downloads");
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await expect(page.locator("dialog[open]")).toContainText("system tray is unavailable");
+  await closeToTray.uncheck();
+  await expect(closeToTray).toBeDisabled();
 });
 
 test("Arabic switches direction and settings persist", async ({ page }) => {
