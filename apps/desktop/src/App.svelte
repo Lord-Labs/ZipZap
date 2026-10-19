@@ -38,6 +38,8 @@
     speed_limit: number;
     language: Language;
     download_folder: string | null;
+    close_to_tray: boolean;
+    notifications: boolean;
     categories: Category[];
     view: typeof defaultView;
   };
@@ -49,6 +51,7 @@
     folder: string;
     version: string;
     native_error: string | null;
+    tray_available: boolean;
     notice: string | null;
     browser_review?: { url: string; destination: string; suggestion: Suggestion } | null;
   };
@@ -71,6 +74,8 @@
     speed_limit: 0,
     language: "en",
     download_folder: null,
+    close_to_tray: false,
+    notifications: false,
     categories: structuredClone(defaultCategories),
     view: structuredClone(defaultView),
   };
@@ -148,6 +153,7 @@
   let notice = "";
 
   let connected = false;
+  let trayAvailable = false;
 
   let refreshing = false;
 
@@ -215,6 +221,8 @@
     )
       return text.categoryInvalid;
     if (raw.startsWith("Browser destination is occupied;")) return text.browserReviewHint;
+    if (raw.startsWith("System tray")) return text.trayUnavailable;
+    if (raw.startsWith("Windows notification could not")) return text.notificationFailed;
     if (raw.startsWith("Pause the download and wait")) return text.replaceWait;
     if (raw.startsWith("Repair or finish the pending file publication"))
       return text.replacePublication;
@@ -425,6 +433,7 @@
       folder = value.folder;
       version = value.version;
       connected = !value.native_error;
+      trayAvailable = value.tray_available;
       ready = true;
 
       if (value.notice) error = errorMessage(value.notice);
@@ -1247,7 +1256,7 @@
     <span><span class="status-dot"></span>{ready ? text.ready : text.loading}</span><span
       >{text.active}: {activeCount}</span
     ><span>{text.speed}: <bdi dir="ltr">{bytes(totalSpeed)}/s</bdi></span><span class="footer-note"
-      >{text.footer}</span
+      >{settings.close_to_tray && trayAvailable ? text.footerTray : text.footer}</span
     >
   </footer>
 </div>
@@ -1573,6 +1582,16 @@
           })}>{text.resetColumns}</button
       >
     </fieldset>
+    <label
+      ><input
+        type="checkbox"
+        bind:checked={draft.close_to_tray}
+        disabled={!trayAvailable && !draft.close_to_tray}
+      />{text.closeToTray}</label
+    >
+    <p class="helper">{trayAvailable ? text.trayHint : text.trayUnavailable}</p>
+    <label><input type="checkbox" bind:checked={draft.notifications} />{text.notifications}</label>
+    <p class="helper">{text.notificationHint}</p>
     <label for="language">{text.language}</label><select id="language" bind:value={draft.language}
       ><option value="en">English</option><option value="ar">العربية</option></select
     ><label for="default-folder">{text.defaultFolder}</label>
@@ -1699,6 +1718,12 @@
     </div>
     {#if formError}<p class="form-error" role="alert">{formError}</p>{/if}
     <div class="dialog-actions">
+      <button
+        type="button"
+        class="secondary"
+        onclick={() => invoke("quit_app").catch((e) => (formError = errorMessage(e)))}
+        >{text.quitApp}</button
+      >
       <button type="button" class="secondary" onclick={() => settingsDialog.close()}
         >{text.close}</button
       ><button type="submit" class="primary" disabled={busy}>{text.save}</button>

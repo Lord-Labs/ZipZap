@@ -8,7 +8,11 @@ fn view_preferences_persist_without_changing_jobs_and_rejected_values_keep_prior
     let job = manager
         .add_for_later("https://example.com/a.zip", folder.path(), None)
         .unwrap();
-    let mut settings = Settings::default();
+    let mut settings = Settings {
+        close_to_tray: true,
+        notifications: true,
+        ..Settings::default()
+    };
     settings.view.appearance = "system".into();
     settings.view.columns[0].width = 440;
     settings.view.columns[5].visible = false;
@@ -33,8 +37,12 @@ fn view_preferences_persist_without_changing_jobs_and_rejected_values_keep_prior
     changed.view.appearance = "light".into();
     assert!(manager.set_settings(changed).is_err());
     assert_eq!(manager.settings().view, settings.view);
+    assert!(manager.settings().close_to_tray);
+    assert!(manager.settings().notifications);
     drop(manager);
     let reopened = Manager::open(&database).unwrap();
     assert_eq!(reopened.settings().view, settings.view);
+    assert!(reopened.settings().close_to_tray);
+    assert!(reopened.settings().notifications);
     assert_eq!(reopened.jobs()[0].destination, job.destination);
 }

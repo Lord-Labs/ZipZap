@@ -79,6 +79,8 @@ fn first_beta_state_recovers_order_validators_parts_and_settings_on_reopen() {
             );
             assert_eq!(snapshot(&db).0, 4);
             assert_eq!(manager.queue().running, schema < 3);
+            assert!(!manager.settings().close_to_tray);
+            assert!(!manager.settings().notifications);
             assert_eq!(
                 std::fs::read(folder.path().join(format!(".zipzap-{}.part0", jobs[1].id))).unwrap(),
                 b"prefix"

@@ -142,16 +142,31 @@ fn rejected_settings_save_keeps_rules_and_schema_upgrade_rejects_corruption_atom
     let folder = tempfile::tempdir().unwrap();
     let database = folder.path().join("state.sqlite");
     let manager = Manager::open(&database).unwrap();
-    manager.set_settings(Settings::default()).unwrap();
+    manager
+        .set_settings(Settings {
+            close_to_tray: true,
+            notifications: true,
+            ..Settings::default()
+        })
+        .unwrap();
     let before = manager.settings().categories;
     let db = rusqlite::Connection::open(&database).unwrap();
     db.execute_batch("CREATE TRIGGER reject_rules BEFORE INSERT ON settings BEGIN SELECT RAISE(ABORT, 'rule save failed'); END;").unwrap();
     let mut changed = manager.settings();
     changed.categories[0].name = "Archives".into();
+    changed.close_to_tray = false;
+    changed.notifications = false;
     assert!(manager.set_settings(changed).is_err());
     assert_eq!(manager.settings().categories, before);
+    assert!(manager.settings().close_to_tray);
+    assert!(manager.settings().notifications);
     drop(manager);
     db.execute_batch("DROP TRIGGER reject_rules;").unwrap();
+    let reopened = Manager::open(&database).unwrap();
+    assert_eq!(reopened.settings().categories, before);
+    assert!(reopened.settings().close_to_tray);
+    assert!(reopened.settings().notifications);
+    drop(reopened);
     let mut invalid = serde_json::to_value(Settings::default()).unwrap();
     invalid["categories"][0]["extensions"] = serde_json::json!(["PDF"]);
     let raw = invalid.to_string();
