@@ -4,6 +4,7 @@
   import { invoke } from "@tauri-apps/api/core";
 
   import Icon from "./Icon.svelte";
+  import BatchDialog from "./BatchDialog.svelte";
 
   import { dictionary, type Language } from "./i18n";
 
@@ -82,7 +83,14 @@
   let filter = "all";
 
   let category = "all";
-  let selectedId: string | null = null;
+  let selectedIds = new Set<string>();
+  let selectionAnchor = "";
+  let bulkBusy = false;
+  let bulkResults: { id: string; name: string; result: string }[] = [];
+  let confirmDialog: HTMLDialogElement;
+  let confirmTargets: Job[] = [];
+  let confirmValue = "";
+  let batchDialog: BatchDialog;
   let sortKey: "recent" | "filename" | "total" | "status" = "recent";
   let descending = false;
   let pausingAll = false;
@@ -236,14 +244,85 @@
       return left.localeCompare(right, language, { numeric: true }) * (descending ? -1 : 1);
     });
 
-  $: if (selectedId && !filtered.some((job) => job.id === selectedId)) selectedId = null;
-  $: selected = filtered.find((job) => job.id === selectedId);
-  $: selectedBusy = !selected || busyIds.has(selected.id) || pausingAll;
+  $: if ([...selectedIds].some((id) => !filtered.some((job) => job.id === id)))
+    selectedIds = new Set([...selectedIds].filter((id) => filtered.some((job) => job.id === id)));
+  $: selectedJobs = filtered.filter((job) => selectedIds.has(job.id));
+  $: selected = selectedJobs.length === 1 ? selectedJobs[0] : undefined;
+  $: selectedBusy = !selected || busyIds.has(selected.id) || pausingAll || bulkBusy;
   $: canPause = selected && ["queued", "downloading"].includes(selected.status);
   $: canResume = selected && ["paused", "failed"].includes(selected.status);
   $: canCancel = selected && ["queued", "downloading", "paused"].includes(selected.status);
   $: canRemove = selected && ["completed", "failed", "cancelled"].includes(selected.status);
   $: queueIndex = selected ? queue.waiting.indexOf(selected.id) : -1;
+
+  function selectJob(job: Job, event: MouseEvent) {
+    if (bulkBusy) return;
+    const anchor = filtered.findIndex((item) => item.id === selectionAnchor);
+    const index = filtered.indexOf(job);
+    if (event.shiftKey && anchor >= 0) {
+      selectedIds = new Set(
+        filtered.slice(Math.min(anchor, index), Math.max(anchor, index) + 1).map((item) => item.id),
+      );
+    } else if (event.ctrlKey || event.metaKey) {
+      toggleSelection(job.id);
+    } else {
+      selectedIds = new Set([job.id]);
+    }
+    selectionAnchor = job.id;
+  }
+
+  function toggleSelection(id: string) {
+    const next = new Set(selectedIds);
+    if (!next.delete(id)) next.add(id);
+    selectedIds = next;
+    selectionAnchor = id;
+  }
+
+  const eligible = (job: Job, value: string) =>
+    value === "pause"
+      ? ["queued", "downloading"].includes(job.status)
+      : value === "resume"
+        ? ["paused", "failed"].includes(job.status)
+        : value === "remove"
+          ? ["completed", "failed", "cancelled"].includes(job.status)
+          : ["queued", "downloading", "paused"].includes(job.status);
+
+  function selectedAction(value: string) {
+    const targets = selectedJobs.filter((job) => eligible(job, value));
+    if (["cancel", "remove"].includes(value)) {
+      confirmTargets = [...targets];
+      confirmValue = value;
+      confirmDialog.showModal();
+    } else void bulkAction(value, targets);
+  }
+
+  async function bulkAction(value: string, targets: Job[]) {
+    bulkBusy = true;
+    bulkResults = [];
+    try {
+      for (const target of targets) {
+        const current = jobs.find((job) => job.id === target.id);
+        let result = text.actionUnavailable;
+        if (current && eligible(current, value)) {
+          const saved = await action(current, value);
+          result = saved ? text.actionDone : error;
+        }
+        bulkResults = [
+          ...bulkResults,
+          { id: target.id, name: basename(target.destination), result },
+        ];
+      }
+    } finally {
+      bulkBusy = false;
+    }
+  }
+
+  async function batchAdded() {
+    filter = "all";
+    category = "all";
+    search = "";
+    await refresh();
+  }
 
   function sortBy(key: "filename" | "total" | "status") {
     descending = sortKey === key ? !descending : false;
@@ -628,6 +707,9 @@
       <button class="tool add-tool" onclick={newDownload} aria-haspopup="dialog"
         ><Icon name="plus" /><span>{text.add}</span></button
       >
+      <button class="tool" onclick={() => batchDialog.open()} aria-haspopup="dialog"
+        ><Icon name="plus" /><span>{text.batchAdd}</span></button
+      >
       <span class="tool-divider" aria-hidden="true"></span>
       <button
         class="tool green"
@@ -650,7 +732,7 @@
       >
       <button
         class="tool orange"
-        disabled={!activeCount || pausingAll || busyIds.size > 0}
+        disabled={!activeCount || pausingAll || bulkBusy || busyIds.size > 0}
         onclick={pauseAll}><Icon name="pauseAll" /><span>{text.pauseAll}</span></button
       >
       <button
@@ -783,6 +865,40 @@
           >
         </div>
 
+        <div class="selection-controls">
+          <label
+            ><input
+              type="checkbox"
+              aria-label={text.selectVisible}
+              checked={filtered.length > 0 && selectedJobs.length === filtered.length}
+              indeterminate={selectedJobs.length > 0 && selectedJobs.length < filtered.length}
+              disabled={!filtered.length || bulkBusy || pausingAll || busyIds.size > 0}
+              onchange={(event) =>
+                (selectedIds = new Set(
+                  event.currentTarget.checked ? filtered.map((job) => job.id) : [],
+                ))}
+            />{text.selectedCount}: {selectedJobs.length}</label
+          >
+          {#if selectedJobs.length > 1}
+            {#each [{ value: "pause", label: text.pauseSelected }, { value: "resume", label: text.resumeSelected }, { value: "cancel", label: text.cancelSelected }, { value: "remove", label: text.removeSelected }] as item}
+              <button
+                class="secondary"
+                disabled={bulkBusy ||
+                  pausingAll ||
+                  busyIds.size > 0 ||
+                  !selectedJobs.some((job) => eligible(job, item.value))}
+                onclick={() => selectedAction(item.value)}>{item.label}</button
+              >
+            {/each}
+          {/if}
+        </div>
+        <p class="selection-help helper">{text.selectionHelp}</p>
+        {#if bulkResults.length}<ul class="bulk-results" aria-live="polite">
+            {#each bulkResults as result (result.id)}<li>
+                <bdi>{result.name}</bdi>: {result.result}
+              </li>{/each}
+          </ul>{/if}
+
         <!-- svelte-ignore a11y_no_noninteractive_tabindex (Keyboard users need to scroll the table horizontally.) -->
         <div class="table-scroll" tabindex="0" role="region" aria-label={text.downloadTable}>
           <table>
@@ -811,17 +927,28 @@
             >
             <tbody>
               {#each filtered as job (job.id)}
-                <tr class:selected={selectedId === job.id} class:failed={job.status === "failed"}>
+                <tr class:selected={selectedIds.has(job.id)} class:failed={job.status === "failed"}>
                   <td class="filename-cell"
-                    ><button
-                      class="file-select"
-                      aria-pressed={selectedId === job.id}
-                      onclick={() => (selectedId = job.id)}
-                      title={basename(job.destination)}
-                      ><Icon name={fileCategory(job.destination)} /><bdi
-                        >{basename(job.destination)}</bdi
-                      ></button
-                    >{#if job.error}<p class="job-error">
+                    ><div class="file-choice">
+                      <input
+                        type="checkbox"
+                        aria-label={`${text.selectFile} ${basename(job.destination)}`}
+                        checked={selectedIds.has(job.id)}
+                        disabled={bulkBusy || pausingAll || busyIds.has(job.id)}
+                        onchange={() => toggleSelection(job.id)}
+                      />
+                      <button
+                        class="file-select"
+                        aria-pressed={selectedIds.has(job.id)}
+                        disabled={bulkBusy}
+                        onclick={(event) => selectJob(job, event)}
+                        title={basename(job.destination)}
+                        ><Icon name={fileCategory(job.destination)} /><bdi
+                          >{basename(job.destination)}</bdi
+                        ></button
+                      >
+                    </div>
+                    {#if job.error}<p class="job-error">
                         {failureMessages[job.failure_reason || ""] || errorMessage(job.error)}
                       </p>{/if}</td
                   >
@@ -937,6 +1064,37 @@
     >
   </footer>
 </div>
+
+<BatchDialog
+  bind:this={batchDialog}
+  {language}
+  {folder}
+  desktop={isDesktop()}
+  message={errorMessage}
+  onadded={batchAdded}
+/>
+
+<dialog bind:this={confirmDialog} aria-labelledby="bulk-title">
+  <form
+    onsubmit={(event) => {
+      event.preventDefault();
+      confirmDialog.close();
+      void bulkAction(confirmValue, confirmTargets);
+    }}
+  >
+    <h2 id="bulk-title">{text.bulkConfirm} ({confirmTargets.length})</h2>
+    <p>{confirmValue === "cancel" ? text.bulkCancelHint : text.bulkRemoveHint}</p>
+    <ul>
+      {#each confirmTargets as job (job.id)}<li><bdi>{basename(job.destination)}</bdi></li>{/each}
+    </ul>
+    <div class="dialog-actions">
+      <button type="button" class="secondary" onclick={() => confirmDialog.close()}
+        >{text.close}</button
+      >
+      <button type="submit" class="primary">{text.confirmAction}</button>
+    </div>
+  </form>
+</dialog>
 
 <dialog bind:this={addDialog} aria-labelledby="add-title" onclose={cancelProbe}>
   <form onsubmit={addDownload}>

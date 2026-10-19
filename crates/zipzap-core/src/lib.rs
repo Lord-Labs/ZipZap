@@ -425,7 +425,17 @@ impl Manager {
     }
 
     pub fn add_for_later(&self, value: &str, folder: &Path, filename: Option<&str>) -> Result<Job> {
-        self.add_with_mode(value, folder, filename, &Uuid::new_v4().to_string(), true)
+        self.add_for_later_with_id(value, folder, filename, &Uuid::new_v4().to_string())
+    }
+
+    pub fn add_for_later_with_id(
+        &self,
+        value: &str,
+        folder: &Path,
+        filename: Option<&str>,
+        id: &str,
+    ) -> Result<Job> {
+        self.add_with_mode(value, folder, filename, id, true)
     }
 
     /// A stable request ID makes native inbox replay idempotent across crashes.
