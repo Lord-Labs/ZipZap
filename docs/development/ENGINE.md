@@ -37,7 +37,8 @@ that output as described below.
 
 ## Saved-state upgrades (development version)
 
-Startup accepts schemas 0/1/2/3 and upgrades to schema 3 for durable queue control
+Startup accepts schemas 0/1/2/3/4 and upgrades to schema 4 for category destination
+rules. Schema 3 introduced durable queue control
 in [ADR 0005](../architecture/0005-durable-queue.md). Schema 2 introduced the
 optional publication evidence in [ADR 0004](../architecture/0004-publication-recovery.md).
 [ADR 0003](../architecture/0003-atomic-state-upgrades.md) defines the atomic upgrade
@@ -146,6 +147,39 @@ restarting can discard this advisory review; resend the browser link if needed.
 Native receipt remains separate from enqueue success until #43. The synchronous
 `add` API retains the safe URL fallback when callers omit a filename; callers
 wanting server metadata use `suggest` before `add`.
+
+## Category rules (development version)
+
+Settings stores 1–16 categories with unique IDs, a bounded display name, up to
+32 literal extensions and an optional absolute folder. The required Other rule
+has no extensions and handles unknown/no-extension names. Shared JSON defaults
+preserve the six built-in groups; empty built-in names use English/Arabic labels.
+Custom names stay as entered. Matching ignores case and chooses the longest
+dot-prefixed suffix: tar.gz wins over gz. Duplicate normalized extensions are
+rejected across rules. Literal Unicode letters/numbers, dots, hyphens and
+underscores are allowed; paths, wildcards, controls and empty dot parts are not.
+
+Newly assigned category folders must exist. Unchanged offline rule folders are
+retained on reopen/settings updates; using one for a new download fails clearly
+until repaired or explicitly overridden. The usual settings save commits before
+live rules change. Editing/restoring rules changes filtering and future
+suggestions, never persisted job destinations or files.
+
+`suggest_auto` resolves metadata and then the shared category destination before
+checking names in that folder. Explicit `suggest` keeps its supplied folder;
+both return the resolved folder/category with the advisory name. Manual auto
+suggestions display a changed folder for review before enqueue. Browser inbox
+requests use the same auto resolution and ordinary add validation. Batch preview
+keeps its displayed common folder explicit, including attempted replay payloads.
+No file reservation or network/body behavior beyond the existing probe is added.
+
+Schema 4 prevents older builds from silently ignoring saved destination rules.
+Legacy settings receive the original defaults during atomic startup recovery;
+malformed rules roll back recovery. Core tests cover Unicode/longest-suffix
+matching, ambiguity, failed settings saves, offline repair/explicit override,
+retained files and schema-3 upgrade rollback. The HTTP fixture exercises a
+server-selected name routed into its category folder with an exact output hash.
+These are local automated checks, separate from native release qualification.
 
 ## Batch enqueue (development version)
 

@@ -6,6 +6,8 @@ pub struct Suggestion {
     pub filename: String,
     pub total: Option<u64>,
     pub alternative: Option<String>,
+    pub destination: PathBuf,
+    pub category: String,
 }
 
 impl Manager {
@@ -17,11 +19,29 @@ impl Manager {
         filename: Option<&str>,
         token: &CancellationToken,
     ) -> Result<Suggestion> {
+        self.suggest_in(value, folder, filename, token, false).await
+    }
+
+    pub async fn suggest_auto(
+        &self,
+        value: &str,
+        fallback: &Path,
+        filename: Option<&str>,
+        token: &CancellationToken,
+    ) -> Result<Suggestion> {
+        self.suggest_in(value, fallback, filename, token, true)
+            .await
+    }
+
+    async fn suggest_in(
+        &self,
+        value: &str,
+        folder: &Path,
+        filename: Option<&str>,
+        token: &CancellationToken,
+        automatic: bool,
+    ) -> Result<Suggestion> {
         let url = validate_url(value)?;
-        let folder = folder.canonicalize().map_err(io_error)?;
-        if !folder.is_dir() {
-            return Err("Destination must be an existing folder".into());
-        }
         let (name, total) = if let Some(name) = filename {
             validate_filename(name)?;
             (name.to_owned(), None)
@@ -77,6 +97,25 @@ impl Manager {
             (name, total)
         };
         let state = self.state.lock().expect("state lock");
+        let category = state
+            .settings
+            .category(&name)
+            .ok_or("Invalid category settings")?;
+        let destination = if automatic {
+            category
+                .download_folder
+                .as_deref()
+                .map(Path::new)
+                .unwrap_or(folder)
+        } else {
+            folder
+        };
+        let folder = destination.canonicalize().map_err(
+            |_| "Category or destination folder is unavailable; choose an existing folder",
+        )?;
+        if !folder.is_dir() {
+            return Err("Destination must be an existing folder".into());
+        }
         let occupied = |name: &str| {
             let path = folder.join(name);
             path.symlink_metadata().is_ok() || destination_queued(&state, &path)
@@ -111,6 +150,8 @@ impl Manager {
             filename: name,
             total,
             alternative,
+            destination: folder,
+            category: category.id.clone(),
         })
     }
 }

@@ -1,5 +1,7 @@
 //! Download state, integrity, durable checkpoints, and one bounded queue.
+mod categories;
 mod metadata;
+pub use categories::{Category, default_categories};
 pub use metadata::Suggestion;
 mod link_refresh;
 pub use link_refresh::LinkReplacement;
@@ -96,6 +98,8 @@ pub struct Settings {
     pub language: String,
     #[serde(default)]
     pub download_folder: Option<String>,
+    #[serde(default = "default_categories")]
+    pub categories: Vec<Category>,
 }
 impl Default for Settings {
     fn default() -> Self {
@@ -105,6 +109,7 @@ impl Default for Settings {
             speed_limit: 0,
             language: "en".into(),
             download_folder: None,
+            categories: default_categories(),
         }
     }
 }
@@ -121,7 +126,7 @@ impl Settings {
         {
             return Err("Invalid queue settings".into());
         }
-        Ok(())
+        categories::validate(&self.categories)
     }
 }
 
@@ -224,7 +229,7 @@ impl Manager {
         let schema: i64 = db
             .pragma_query_value(None, "user_version", |r| r.get(0))
             .map_err(db_error)?;
-        if schema > 3 {
+        if schema > 4 {
             return Err("Database was created by a newer ZipZap version".into());
         }
         db.pragma_update(None, "journal_mode", "WAL")
@@ -364,7 +369,7 @@ impl Manager {
             )
             .map_err(db_error)?;
         }
-        tx.pragma_update(None, "user_version", 3)
+        tx.pragma_update(None, "user_version", 4)
             .map_err(db_error)?;
         tx.commit().map_err(db_error)?;
         drop(publication_guards);
@@ -407,6 +412,16 @@ impl Manager {
             return Err("Invalid queue settings".into());
         }
         let mut state = self.state.lock().expect("state lock");
+        for category in &settings.categories {
+            if let Some(folder) = &category.download_folder
+                && !state.settings.categories.iter().any(|old| {
+                    old.id == category.id && old.download_folder.as_ref() == Some(folder)
+                })
+                && !Path::new(folder).is_dir()
+            {
+                return Err("Category folder is unavailable; choose an existing folder".into());
+            }
+        }
         state
             .db
             .execute(

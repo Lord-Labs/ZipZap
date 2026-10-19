@@ -722,6 +722,24 @@ dialog label {
   padding-top: 18px;
   margin-top: 20px;
 }
+.category-rules fieldset {
+  min-width: 0;
+  border: 1px solid var(--border);
+  margin: 12px 0;
+  padding: 12px;
+}
+.category-rules legend {
+  overflow-wrap: anywhere;
+}
+.category-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+.category-children span {
+  overflow-wrap: anywhere;
+}
 .browser-setting h3 {
   font-size: 14px;
 }
