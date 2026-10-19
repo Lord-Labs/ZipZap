@@ -1103,6 +1103,15 @@ test("keyboard context actions use validated commands, expose failures and retur
   await page.getByRole("button", { name: "done.zip", exact: true }).click({ button: "right" });
   await context.getByRole("button", { name: "Remove from history", exact: true }).click();
   await expect(context).not.toBeVisible();
+  const confirmation = page.getByRole("dialog", { name: "Confirm affected downloads (1)" });
+  await expect(confirmation.locator("li")).toHaveText(["done.zip"]);
+  expect((await calls(page)).filter((call) => call.args?.action === "remove")).toHaveLength(0);
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("button", { name: "done.zip", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "done.zip", exact: true }).click({ button: "right" });
+  await context.getByRole("button", { name: "Remove from history", exact: true }).click();
+  await confirmation.getByRole("button", { name: "Confirm action", exact: true }).click();
+  await expect(page.getByRole("button", { name: "done.zip", exact: true })).toHaveCount(0);
   await expect(page.getByRole("region", { name: "Download table", exact: true })).toBeFocused();
   await page.keyboard.press("Control+f");
   await expect(page.getByRole("searchbox")).toBeFocused();
@@ -1113,6 +1122,31 @@ test("keyboard context actions use validated commands, expose failures and retur
   await page.keyboard.press("Control+n");
   await expect(page.locator("#url")).toBeFocused();
   await page.keyboard.press("Escape");
+});
+
+test("context cancellation confirms only the chosen file before discarding partial data", async ({
+  page,
+}) => {
+  await seed(page, [sample("active.zip", "downloading"), sample("other.zip", "paused")]);
+  const file = page.getByRole("button", { name: "active.zip", exact: true });
+  const context = page.getByRole("dialog", { name: "File actions", exact: true });
+  const confirmation = page.getByRole("dialog", { name: "Confirm affected downloads (1)" });
+  await file.click({ button: "right" });
+  await context.getByRole("button", { name: "Cancel download", exact: true }).click();
+  await expect(confirmation.locator("li")).toHaveText(["active.zip"]);
+  await expect(confirmation).toContainText("discard their partial data");
+  await page.keyboard.press("Escape");
+  expect((await calls(page)).filter((call) => call.command === "download_action")).toHaveLength(0);
+  await file.focus();
+  await page.keyboard.press("Shift+F10");
+  await context.getByRole("button", { name: "Cancel download", exact: true }).click();
+  await confirmation.getByRole("button", { name: "Confirm action", exact: true }).click();
+  await expect(page.locator(".bulk-results li")).toHaveCount(1);
+  expect(
+    (await calls(page))
+      .filter((call) => call.command === "download_action")
+      .map((call) => call.args),
+  ).toEqual([{ id: "active.zip", action: "cancel" }]);
 });
 
 test("light RTL long filenames remain operable at minimum size and doubled render scale", async ({

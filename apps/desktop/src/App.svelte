@@ -461,6 +461,11 @@
   }
 
   async function contextAction(value: string) {
+    if (contextJob && ["cancel", "remove"].includes(value)) {
+      contextDialog.close();
+      selectedAction(value);
+      return;
+    }
     if (contextJob && (await action(contextJob, value))) contextDialog.close();
   }
 
