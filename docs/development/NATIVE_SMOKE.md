@@ -88,3 +88,19 @@ were checked visually. This baseline is not a full screen-reader certification.
 External editor rendering, actual browser handoff, installer lifecycle and other
 Windows versions were not tested here. No blocking product defect was observed
 in this bounded baseline. Hosted checks were skipped by [policy](WORKFLOW.md).
+
+## Windows provenance qualification: issue #44
+
+Local Windows tests exercise actual alternate streams on temporary NTFS files:
+publication with unchanged bytes, preservation of Restricted zone 4, stream-access
+failure with a completed payload/advisory warning, reopen, and crash recovery that
+restores a missing stream on the verified file. The engine fixture also checks
+the exact marker and payload hash on every completed Windows download.
+
+The native unmarked-file Open warning (confirm/cancel, English/Arabic) still needs
+an isolated WebView2/platform session. Automated UI tests check the completed-byte
+warning independently of transfer failure and preserve the explicit reveal path;
+they mock IPC and do not certify native dialog behavior or SmartScreen/AV safety.
+Keep the PR draft until that native open/cancel/reveal path is exercised. Do not
+change Windows security settings, remove markers from personal files, or execute
+downloaded programs merely to obtain evidence. Use owned harmless text fixtures.

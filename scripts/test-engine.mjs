@@ -249,6 +249,13 @@ async function complete(job, expected = bytes) {
   const done = await until(job.id, (j) => ["completed", "failed"].includes(j.status));
   assert.equal(done.status, "completed", done.error);
   assert.equal(digest(await readFile(done.destination)), digest(expected));
+  if (process.platform === "win32") {
+    assert.equal(done.provenance, "internet");
+    assert.equal(
+      await readFile(`${done.destination}:Zone.Identifier`, "utf8"),
+      "[ZoneTransfer]\r\nZoneId=3\r\n",
+    );
+  }
   return done;
 }
 async function stop(kill = false) {

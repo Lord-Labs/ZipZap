@@ -9,7 +9,9 @@ mod queue;
 pub use queue::QueueState;
 #[cfg(test)]
 mod persistence_tests;
+mod provenance;
 mod publication;
+pub use provenance::{Provenance, has_internet_zone};
 #[cfg(test)]
 mod publication_tests;
 mod retry;
@@ -88,6 +90,8 @@ pub struct Job {
     pub next_retry: Option<u64>,
     #[serde(default)]
     pub failure_reason: Option<FailureReason>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub provenance: Option<Provenance>,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -533,6 +537,7 @@ impl Manager {
             attempt: 0,
             next_retry: None,
             failure_reason: None,
+            provenance: None,
         };
         state
             .db
