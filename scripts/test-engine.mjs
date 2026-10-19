@@ -28,6 +28,9 @@ let active = 0;
 let peak = 0;
 let retries = 0;
 let segmentRetried = false;
+let refreshExpired = false;
+let refreshRevision = 1;
+let refreshWeak = false;
 const retryCounts = new Map();
 const requests = [];
 const handler = async (request, response) => {
@@ -44,6 +47,11 @@ const handler = async (request, response) => {
   response.once("close", finish);
   const route = request.url.split("?")[0];
   requests.push({ route, range: request.headers.range, ifRange: request.headers["if-range"] });
+  if (["/refresh-old", "/refresh-new"].includes(route)) {
+    if (route === "/refresh-old" && refreshExpired) response.writeHead(403).end();
+    else response.writeHead(302, { Location: "/refresh-resource" }).end();
+    return;
+  }
   if (route === "/metadata-redirect") {
     response.writeHead(302, { Location: "/metadata-star" }).end();
     return;
@@ -105,10 +113,19 @@ const handler = async (request, response) => {
     response.writeHead(503).end();
     return;
   }
-  let data = route === "/mutable" && revision === 2 ? changed : bytes;
+  let data =
+    (route === "/mutable" && revision === 2) ||
+    (route === "/refresh-resource" && refreshRevision === 2)
+      ? changed
+      : bytes;
   if (route === "/small") data = bytes.subarray(0, 256 * 1024);
   if (route === "/empty") data = Buffer.alloc(0);
-  const etag = route === "/mutable" ? `"v${revision}"` : '"v1"';
+  const etag =
+    route === "/refresh-resource"
+      ? `${refreshWeak ? "W/" : ""}"v${refreshRevision}"`
+      : route === "/mutable"
+        ? `"v${revision}"`
+        : '"v1"';
   let start = 0;
   let end = data.length - 1;
   const range = /^bytes=(\d+)-(\d*)$/.exec(request.headers.range ?? "");
@@ -140,7 +157,8 @@ const handler = async (request, response) => {
   }
   for (let offset = start; offset <= end && !response.destroyed; offset += 32768) {
     response.write(data.subarray(offset, Math.min(offset + 32768, end + 1)));
-    if (offset + 32768 <= end) await delay(route === "/slow" || route === "/mutable" ? 10 : 1);
+    if (offset + 32768 <= end)
+      await delay(["/slow", "/mutable", "/refresh-resource"].includes(route) ? 10 : 1);
   }
   response.end();
 };
@@ -355,6 +373,64 @@ try {
   passed.push(
     "metadata headers, Unicode, safe fallbacks, redirects and duplicate alternatives stay advisory",
   );
+  for (const reason of ["same", "changed", "weak", "different-url", "different-query"]) {
+    refreshExpired = false;
+    refreshRevision = 1;
+    refreshWeak = false;
+    const original = await add("/refresh-old", `refresh-${reason}.bin`);
+    await until(original.id, (job) => job.downloaded > 256 * 1024);
+    await action(original, "pause");
+    await stop();
+    start();
+    refreshExpired = true;
+    if (reason === "same") {
+      await action(original, "resume");
+      await until(original.id, (job) => job.status === "failed");
+    }
+    const before = await get(original.id);
+    const savedBytes = before.segments.reduce((sum, segment) => sum + segment.done, 0);
+    assert.ok(savedBytes > 0);
+    if (reason === "changed") refreshRevision = 2;
+    if (reason === "weak") refreshWeak = true;
+    const replacementUrl = `${base}/${reason === "different-url" ? "refresh-other" : reason === "different-query" ? "refresh-resource" : "refresh-new"}?token=PRIVATE_QUERY`;
+    const replace = (restart = false) =>
+      ask({ command: "replace_link", id: original.id, url: replacementUrl, restart });
+    let result = await replace();
+    if (reason === "same") assert.equal(result.retained_bytes, savedBytes);
+    else {
+      assert.equal(result.status, "restart_required");
+      assert.deepEqual(await get(original.id), before);
+      result = await replace(true);
+      assert.equal(result.retained_bytes, 0);
+      assert.deepEqual((await get(original.id)).segments, []);
+    }
+    assert.equal(result.status, "updated");
+    assert.ok(!JSON.stringify(result).includes("PRIVATE_QUERY"));
+    assert.equal((await get(original.id)).destination, before.destination);
+    assert.equal((await get(original.id)).status, "paused");
+    await stop();
+    start();
+    assert.equal((await get(original.id)).url, replacementUrl);
+    const requestStart = requests.length;
+    await action(original, "resume");
+    await complete(original, reason === "changed" ? changed : bytes);
+    if (reason === "same")
+      assert.ok(
+        requests
+          .slice(requestStart)
+          .some((request) =>
+            before.segments.some(
+              (segment) =>
+                segment.done > 0 &&
+                request.range === `bytes=${segment.start + segment.done}-${segment.end}`,
+            ),
+          ),
+      );
+    passed.push(`link replacement ${reason}: explicit identity/restart decision and exact output`);
+  }
+  refreshExpired = false;
+  refreshRevision = 1;
+  refreshWeak = false;
   await complete(await add("/range", "range.bin"));
   passed.push("segmented transfer matches full digest");
   assert.ok(requests.some((r) => r.range?.startsWith("bytes=2097152-") && r.ifRange));
@@ -473,6 +549,14 @@ try {
     const unpublished = await until(job.id, (j) => j.status === "failed");
     assert.match(unpublished.error, /injected completion save failure/);
     assert.equal(unpublished.speed, 0);
+    const beforeReplacement = requests.length;
+    await assert.rejects(
+      ask({ command: "replace_link", id: job.id, url: `${base}/range`, restart: true }),
+      /pending file publication/,
+    );
+    assert.deepEqual(await get(job.id), unpublished);
+    assert.equal(requests.length, beforeReplacement);
+    passed.push("link replacement cannot discard pending publication evidence or output");
     assert.equal(digest(await readFile(job.destination)), digest(bytes));
     assert.ok((await readdir(directory)).includes(`.zipzap-${job.id}.part0`));
     assert.equal(

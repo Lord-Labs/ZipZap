@@ -219,3 +219,166 @@ async fn scheduler_save_failure_keeps_saved_queue_and_does_not_start_a_worker() 
     manager.action(&job.id, "resume").unwrap();
     assert_eq!(saved(&db, &job.id)["status"], "queued");
 }
+
+#[tokio::test]
+async fn link_replacement_save_failure_and_cancellation_preserve_the_old_job_and_parts() {
+    use std::io::{Read, Write};
+    let (_folder, manager, db, job) = fixture(Status::Paused);
+    let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+    let url = format!(
+        "http://{}/replacement?token=PRIVATE",
+        listener.local_addr().unwrap()
+    );
+    let server = std::thread::spawn(move || {
+        for _ in 0..2 {
+            let (mut socket, _) = listener.accept().unwrap();
+            socket
+                .set_read_timeout(Some(Duration::from_secs(3)))
+                .unwrap();
+            let mut request = Vec::new();
+            let mut byte = [0];
+            while !request.ends_with(b"\r\n\r\n") {
+                assert_eq!(socket.read(&mut byte).unwrap(), 1);
+                request.push(byte[0]);
+            }
+            socket.write_all(b"HTTP/1.1 206 Partial Content\r\nConnection: close\r\nContent-Length: 1\r\nContent-Range: bytes 0-0/12\r\nETag: \"v1\"\r\n\r\nx").unwrap();
+        }
+    });
+    let cancelled = CancellationToken::new();
+    cancelled.cancel();
+    assert!(
+        manager
+            .replace_link(&job.id, &url, true, &cancelled)
+            .await
+            .unwrap_err()
+            .contains("cancelled")
+    );
+    assert!(
+        manager
+            .replace_link(&job.id, "file:///private", true, &CancellationToken::new())
+            .await
+            .is_err()
+    );
+    manager
+        .state
+        .lock()
+        .unwrap()
+        .running
+        .insert(job.id.clone(), CancellationToken::new());
+    assert!(
+        manager
+            .replace_link(&job.id, &url, true, &CancellationToken::new())
+            .await
+            .unwrap_err()
+            .contains("worker")
+    );
+    manager.state.lock().unwrap().running.remove(&job.id);
+    reject_updates(&db);
+    let error = manager
+        .replace_link(&job.id, &url, true, &CancellationToken::new())
+        .await
+        .unwrap_err();
+    assert!(error.contains("injected update failure"));
+    assert!(!error.contains("PRIVATE"));
+    assert_eq!(manager.job(&job.id).unwrap(), job);
+    assert_eq!(saved(&db, &job.id), serde_json::to_value(&job).unwrap());
+    assert_eq!(std::fs::read(transfer::part(&job, 0)).unwrap(), b"prefix");
+    db.execute_batch("DROP TRIGGER reject_update").unwrap();
+    assert_eq!(
+        manager
+            .replace_link(&job.id, &url, true, &CancellationToken::new())
+            .await
+            .unwrap(),
+        LinkReplacement::Updated { retained_bytes: 0 }
+    );
+    let updated = manager.job(&job.id).unwrap();
+    assert_eq!(updated.id, job.id);
+    assert_eq!(updated.destination, job.destination);
+    assert_eq!(updated.url, url);
+    assert_eq!(updated.status, Status::Paused);
+    assert!(updated.segments.is_empty());
+    assert!(!transfer::part(&job, 0).exists());
+    server.join().unwrap();
+}
+
+#[tokio::test]
+async fn cancelling_link_replacement_while_the_probe_body_stalls_keeps_recovery() {
+    use std::io::{Read, Write};
+    let (_folder, manager, db, job) = fixture(Status::Failed);
+    let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+    let url = format!("http://{}/replacement", listener.local_addr().unwrap());
+    let (ready, waiting) = tokio::sync::oneshot::channel();
+    let server = std::thread::spawn(move || {
+        let (mut socket, _) = listener.accept().unwrap();
+        socket
+            .set_read_timeout(Some(Duration::from_secs(3)))
+            .unwrap();
+        let mut request = Vec::new();
+        let mut byte = [0];
+        while !request.ends_with(b"\r\n\r\n") {
+            assert_eq!(socket.read(&mut byte).unwrap(), 1);
+            request.push(byte[0]);
+        }
+        socket.write_all(b"HTTP/1.1 206 Partial Content\r\nContent-Length: 1\r\nContent-Range: bytes 0-0/12\r\nETag: \"v1\"\r\n\r\n").unwrap();
+        ready.send(()).unwrap();
+        assert_eq!(socket.read(&mut byte).unwrap(), 0);
+    });
+    let owner = Arc::clone(&manager);
+    let id = job.id.clone();
+    let token = CancellationToken::new();
+    let child = token.clone();
+    let operation = tokio::spawn(async move { owner.replace_link(&id, &url, true, &child).await });
+    waiting.await.unwrap();
+    token.cancel();
+    let result = tokio::time::timeout(Duration::from_secs(2), operation)
+        .await
+        .unwrap()
+        .unwrap();
+    assert!(result.unwrap_err().contains("cancelled"));
+    assert_eq!(manager.job(&job.id).unwrap(), job);
+    assert_eq!(saved(&db, &job.id), serde_json::to_value(&job).unwrap());
+    assert_eq!(std::fs::read(transfer::part(&job, 0)).unwrap(), b"prefix");
+    server.join().unwrap();
+}
+
+#[tokio::test]
+async fn link_replacement_rechecks_the_job_after_an_inflight_probe() {
+    use std::io::{Read, Write};
+    let (_folder, manager, db, job) = fixture(Status::Paused);
+    let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+    let url = format!("http://{}/replacement", listener.local_addr().unwrap());
+    let (ready, waiting) = tokio::sync::oneshot::channel();
+    let (release, released) = std::sync::mpsc::channel();
+    let server = std::thread::spawn(move || {
+        let (mut socket, _) = listener.accept().unwrap();
+        socket
+            .set_read_timeout(Some(Duration::from_secs(3)))
+            .unwrap();
+        let mut request = Vec::new();
+        let mut byte = [0];
+        while !request.ends_with(b"\r\n\r\n") {
+            assert_eq!(socket.read(&mut byte).unwrap(), 1);
+            request.push(byte[0]);
+        }
+        ready.send(()).unwrap();
+        released.recv_timeout(Duration::from_secs(3)).unwrap();
+        socket
+            .write_all(b"HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Length: 12\r\n\r\n")
+            .unwrap();
+    });
+    let owner = Arc::clone(&manager);
+    let id = job.id.clone();
+    let operation = tokio::spawn(async move {
+        owner
+            .replace_link(&id, &url, true, &CancellationToken::new())
+            .await
+    });
+    waiting.await.unwrap();
+    manager.action(&job.id, "resume").unwrap();
+    release.send(()).unwrap();
+    assert!(operation.await.unwrap().unwrap_err().contains("changed"));
+    assert_eq!(manager.job(&job.id).unwrap().url, job.url);
+    assert_eq!(saved(&db, &job.id)["status"], "queued");
+    assert_eq!(std::fs::read(transfer::part(&job, 0)).unwrap(), b"prefix");
+    server.join().unwrap();
+}

@@ -63,6 +63,17 @@ async fn main() {
 
 async fn dispatch(manager: &Manager, value: &Value) -> Result<Value, String> {
     match value["command"].as_str().unwrap_or("") {
+        "replace_link" => manager
+            .replace_link(
+                value["id"].as_str().ok_or("Missing ID")?,
+                value["url"].as_str().ok_or("Missing URL")?,
+                value["restart"].as_bool().unwrap_or(false),
+                &zipzap_core::CancellationToken::new(),
+            )
+            .await
+            .and_then(|result| {
+                serde_json::to_value(result).map_err(|_| "Serialization failed".into())
+            }),
         "suggest" => manager
             .suggest(
                 value["url"].as_str().ok_or("Missing URL")?,

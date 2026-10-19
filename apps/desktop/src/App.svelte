@@ -118,6 +118,12 @@
   let addDialog: HTMLDialogElement;
 
   let settingsDialog: HTMLDialogElement;
+  let linkDialog: HTMLDialogElement;
+  let linkInput: HTMLInputElement;
+  let linkTarget: Job | null = null;
+  let replacementUrl = "";
+  let restartRequired = false;
+  let confirmRestart = false;
 
   let urlInput: HTMLInputElement;
 
@@ -153,6 +159,10 @@
   const errorMessage = (value: unknown) => {
     const raw = value instanceof Error ? value.message : String(value);
     if (raw.startsWith("Browser destination is occupied;")) return text.browserReviewHint;
+    if (raw.startsWith("Pause the download and wait")) return text.replaceWait;
+    if (raw.startsWith("Repair or finish the pending file publication"))
+      return text.replacePublication;
+    if (raw.startsWith("Download changed while checking")) return text.replaceChanged;
     const reason = /^Storage error: (full|access|missing|other)\./.exec(raw)?.[1];
     const messages: Record<string, string> = {
       full: text.storageFull,
@@ -299,9 +309,22 @@
     busy = false;
   }
 
+  function validUrl(value: string) {
+    try {
+      const parsed = new URL(value);
+      return ["http:", "https:"].includes(parsed.protocol) && !parsed.username && !parsed.password;
+    } catch {
+      return false;
+    }
+  }
+
   async function checkName() {
     formError = "";
     suggestion = null;
+    if (!validUrl(url)) {
+      formError = text.invalidUrl;
+      return null;
+    }
     if (!isDesktop()) {
       formError = text.preview;
       return null;
@@ -347,11 +370,7 @@
     event.preventDefault();
     formError = "";
 
-    try {
-      const parsed = new URL(url);
-      if (!["http:", "https:"].includes(parsed.protocol) || parsed.username || parsed.password)
-        throw new Error(text.invalidUrl);
-    } catch {
+    if (!validUrl(url)) {
       formError = text.invalidUrl;
       return;
     }
@@ -377,6 +396,55 @@
       formError = errorMessage(e);
     } finally {
       busy = false;
+    }
+  }
+
+  async function showLinkReplacement() {
+    if (!selected || !canResume) return;
+    linkTarget = selected;
+    replacementUrl = "";
+    restartRequired = false;
+    confirmRestart = false;
+    formError = "";
+    linkDialog.showModal();
+    await tick();
+    linkInput.focus();
+  }
+
+  async function replaceLink(event: SubmitEvent) {
+    event.preventDefault();
+    if (!linkTarget || (restartRequired && !confirmRestart)) return;
+    formError = "";
+    if (!validUrl(replacementUrl)) {
+      formError = text.invalidUrl;
+      return;
+    }
+    const id = crypto.randomUUID();
+    probeId = id;
+    busy = true;
+    try {
+      const result = await invoke<{ status: "updated" | "restart_required" }>("replace_link", {
+        probeId: id,
+        id: linkTarget.id,
+        url: replacementUrl,
+        restart: confirmRestart,
+      });
+      if (probeId !== id) return;
+      if (result.status === "restart_required") {
+        restartRequired = true;
+        confirmRestart = false;
+      } else {
+        linkDialog.close();
+        notice = text.linkUpdated;
+        await refresh();
+      }
+    } catch (e) {
+      if (probeId === id) formError = `${text.replaceFailed} ${errorMessage(e)}`;
+    } finally {
+      if (probeId === id) {
+        probeId = "";
+        busy = false;
+      }
     }
   }
 
@@ -534,6 +602,12 @@
         disabled={selectedBusy || !canPause}
         onclick={() => selected && action(selected, "pause")}
         ><Icon name="pause" /><span>{text.pause}</span></button
+      >
+      <button
+        class="tool blue"
+        disabled={selectedBusy || !canResume}
+        onclick={showLinkReplacement}
+        aria-haspopup="dialog"><Icon name="globe" /><span>{text.replaceLink}</span></button
       >
       <button
         class="tool orange"
@@ -875,6 +949,58 @@
       <button type="button" class="secondary" onclick={() => addDialog.close()}>{text.close}</button
       ><button type="submit" class="primary" disabled={busy}
         ><Icon name="download" />{text.start}</button
+      >
+    </div>
+  </form>
+</dialog>
+
+<dialog bind:this={linkDialog} aria-labelledby="replace-title" onclose={cancelProbe}>
+  <form onsubmit={replaceLink}>
+    <div class="dialog-title">
+      <h2 id="replace-title">{text.replaceLink}</h2>
+      <button
+        type="button"
+        class="icon-button"
+        onclick={() => linkDialog.close()}
+        aria-label={text.close}><Icon name="close" /></button
+      >
+    </div>
+    <p><bdi>{linkTarget ? basename(linkTarget.destination) : ""}</bdi></p>
+    <p id="replace-help" class="helper">{text.replaceHelp}</p>
+    <label for="replacement-url">{text.newLink}</label><input
+      id="replacement-url"
+      type="url"
+      bind:this={linkInput}
+      bind:value={replacementUrl}
+      dir="ltr"
+      autocomplete="off"
+      required
+      maxlength="16384"
+      disabled={busy}
+      aria-describedby="replace-help"
+      oninput={() => {
+        restartRequired = false;
+        confirmRestart = false;
+      }}
+    />
+    {#if restartRequired}<p role="alert">{text.restartRequired}</p>
+      <label class="helper"
+        ><input
+          type="checkbox"
+          bind:checked={confirmRestart}
+          disabled={busy}
+        />{text.confirmRestart}</label
+      >{/if}
+    {#if formError}<p class="form-error" role="alert">{formError}</p>{/if}
+    <div class="dialog-actions">
+      <button type="button" class="secondary" onclick={() => linkDialog.close()}
+        >{text.close}</button
+      ><button type="submit" class="primary" disabled={busy || (restartRequired && !confirmRestart)}
+        >{busy
+          ? text.checkingName
+          : restartRequired
+            ? text.restartAndReplace
+            : text.checkAndReplace}</button
       >
     </div>
   </form>

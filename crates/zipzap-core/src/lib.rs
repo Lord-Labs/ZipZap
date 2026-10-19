@@ -1,6 +1,8 @@
 //! Download state, integrity, durable checkpoints, and one bounded queue.
 mod metadata;
 pub use metadata::Suggestion;
+mod link_refresh;
+pub use link_refresh::LinkReplacement;
 #[cfg(test)]
 mod persistence_tests;
 mod publication;
@@ -37,7 +39,7 @@ pub enum Status {
     Failed,
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub struct Segment {
     pub start: u64,
     pub end: Option<u64>,
@@ -58,7 +60,7 @@ pub struct Publication {
     pub identity: FileIdentity,
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub struct Job {
     pub id: String,
     pub url: String,

@@ -73,57 +73,13 @@ pub(super) async fn download(
     if job.destination.symlink_metadata().is_ok() {
         return Err("Destination already exists; no file was replaced".into());
     }
-    let request = manager
-        .client
-        .get(&job.url)
-        .header(header::ACCEPT_ENCODING, "identity")
-        .header(header::RANGE, "bytes=0-0");
-    let (mut probe, probe_permit) = manager.send(request, token).await?;
-    let empty = probe.status() == StatusCode::RANGE_NOT_SATISFIABLE
-        && probe
-            .headers()
-            .get(header::CONTENT_RANGE)
-            .is_some_and(|v| v == "bytes */0");
-    if !probe.status().is_success() && !empty {
-        return Err(Failure::response(&probe));
-    }
-    if !encoding_ok(&probe) {
-        return Err("Unsupported content encoding".into());
-    }
-    let validator = identity(&probe);
-    let total = if empty {
-        Some(0)
-    } else if probe.status() == StatusCode::PARTIAL_CONTENT {
-        probe
-            .headers()
-            .get(header::CONTENT_RANGE)
-            .and_then(|v| v.to_str().ok())
-            .and_then(|v| v.strip_prefix("bytes 0-0/"))
-            .and_then(|v| v.parse::<u64>().ok())
-            .filter(|v| *v > 0)
-    } else {
-        probe.content_length()
-    };
-    let ranged =
-        !single && total.is_some_and(|t| t > 0 && bounds(&probe, 0, 0, t)) && validator.is_some();
-    let effective = probe.url().to_string();
-    if probe.status() == StatusCode::PARTIAL_CONTENT
-        && total.is_some_and(|t| bounds(&probe, 0, 0, t))
-    {
-        let mut received = 0;
-        while let Some(bytes) = tokio::select! { _ = token.cancelled() => return Err("Paused".into()), r = probe.chunk() => r.map_err(network_error)? }
-        {
-            received += bytes.len();
-            if received > 1 {
-                return Err("Range rejected: probe body exceeds one byte".into());
-            }
-        }
-        if received != 1 {
-            return Err("Range rejected: truncated probe body".into());
-        }
-    }
-    drop(probe);
-    drop(probe_permit);
+    let Probe {
+        total,
+        validator,
+        ranged,
+        effective,
+    } = probe(&manager, &job.url, token).await?;
+    let ranged = ranged && !single;
     let mut reusable = ranged
         && job.validator == validator
         && job.effective_url.as_ref() == Some(&effective)
@@ -236,6 +192,76 @@ pub(super) async fn download(
         .await
         .map_err(|_| "Publication worker stopped unexpectedly".to_owned())?
         .map_err(Failure::from)
+}
+
+pub(super) struct Probe {
+    pub total: Option<u64>,
+    pub validator: Option<String>,
+    pub ranged: bool,
+    pub effective: String,
+}
+
+pub(super) async fn probe(
+    manager: &Manager,
+    url: &str,
+    token: &CancellationToken,
+) -> Result<Probe> {
+    let request = manager
+        .client
+        .get(url)
+        .header(header::ACCEPT_ENCODING, "identity")
+        .header(header::RANGE, "bytes=0-0");
+    let (mut probe, probe_permit) = manager.send(request, token).await?;
+    let empty = probe.status() == StatusCode::RANGE_NOT_SATISFIABLE
+        && probe
+            .headers()
+            .get(header::CONTENT_RANGE)
+            .is_some_and(|v| v == "bytes */0");
+    if !probe.status().is_success() && !empty {
+        return Err(Failure::response(&probe));
+    }
+    if !encoding_ok(&probe) {
+        return Err("Unsupported content encoding".into());
+    }
+    let validator = identity(&probe);
+    let total = if empty {
+        Some(0)
+    } else if probe.status() == StatusCode::PARTIAL_CONTENT {
+        probe
+            .headers()
+            .get(header::CONTENT_RANGE)
+            .and_then(|v| v.to_str().ok())
+            .and_then(|v| v.strip_prefix("bytes 0-0/"))
+            .and_then(|v| v.parse::<u64>().ok())
+            .filter(|v| *v > 0)
+    } else {
+        probe.content_length()
+    };
+    let ranged = total.is_some_and(|t| t > 0 && bounds(&probe, 0, 0, t)) && validator.is_some();
+    let effective = probe.url().to_string();
+    if probe.status() == StatusCode::PARTIAL_CONTENT
+        && total.is_some_and(|t| bounds(&probe, 0, 0, t))
+    {
+        let mut received = 0;
+        while let Some(bytes) = tokio::select! { _ = token.cancelled() => return Err("Paused".into()), r = probe.chunk() => r.map_err(network_error)? }
+        {
+            received += bytes.len();
+            if received > 1 {
+                return Err("Range rejected: probe body exceeds one byte".into());
+            }
+        }
+        if received != 1 {
+            return Err("Range rejected: truncated probe body".into());
+        }
+    }
+    drop(probe);
+    drop(probe_permit);
+    Ok(Probe {
+        total,
+        validator,
+        ranged,
+        effective,
+    })
 }
 
 async fn checked_prefix(path: &Path, segment: &Segment) -> Result<Sha256> {
