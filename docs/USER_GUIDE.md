@@ -21,6 +21,15 @@ Click Filename, Total size or Status to sort; click again to reverse. Unknown
 sizes stay last. Selecting a status filter clears the file-category filter.
 These workspace changes are not included in the published first beta.
 
+The development version shows the queue's saved running/held state. **Hold queue**
+stops new starts while active downloads finish. Browser additions wait too;
+explicit metadata checks can still inspect headers. **Start queue** enables
+dispatch without resuming individually paused files. **Add for later** creates
+a paused download; resume it explicitly when ready. Select a waiting download to
+see its priority and use **Move up/down in queue** with keyboard or mouse. Moves
+and hold survive restart; sorting the table does not change dispatch priority.
+Resumed jobs keep their priority, and host limits can defer an earlier job.
+
 In the development version, **Check filename** previews a safe server suggestion
 without downloading the file. Starting with an empty name also previews first;
 review or edit the name and press Start again. An explicit filename is kept.
@@ -53,8 +62,9 @@ is rejected without resetting it. Do not lower its schema number or delete it
 to make an older app start; use the compatible app or restore a coherent backup
 with all instances closed. A saved folder on an offline drive does not prevent
 opening history. These changes are not in the published first beta; installer
-upgrade qualification remains pending. Publication evidence upgrades the database
-to schema 2, which older ZipZap versions cannot open; use a compatible app or a
+upgrade qualification remains pending. The development database uses schema 3
+for durable queue control (schema 2 introduced publication evidence). Older
+ZipZap versions cannot open it; use a compatible app or a
 coherent pre-upgrade backup, never edit the schema number to force a downgrade.
 
 The add dialog shows that file size is initially unknown and recommends NTFS.

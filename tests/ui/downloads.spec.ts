@@ -5,6 +5,7 @@ test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     const state = {
       jobs: [] as any[],
+      queue: { running: true },
       settings: {
         max_concurrent: 2,
         connections: 2,
@@ -28,7 +29,14 @@ test.beforeEach(async ({ page }) => {
     };
     (window as any).__TAURI_INTERNALS__ = {
       invoke: async (command: string, args: any) => {
-        if (command === "snapshot") return structuredClone(state);
+        if (command === "snapshot")
+          return structuredClone({
+            ...state,
+            queue: {
+              running: state.queue.running,
+              waiting: state.jobs.filter((job) => job.status === "queued").map((job) => job.id),
+            },
+          });
         calls.push({ command, args: structuredClone(args) });
         if (command === "save_settings") {
           state.settings = args.settings;
@@ -39,8 +47,8 @@ test.beforeEach(async ({ page }) => {
             id: "test",
             url: args.url,
             destination: `C:\\Downloads\\${args.filename || "sample.zip"}`,
-            status: "completed",
-            downloaded: 1048576,
+            status: args.later ? "paused" : "completed",
+            downloaded: args.later ? 0 : 1048576,
             total: 1048576,
             speed: 0,
             error: null,
@@ -58,6 +66,21 @@ test.beforeEach(async ({ page }) => {
           );
         }
         if (command === "cancel_probe") return;
+        if (command === "set_queue_running") {
+          if ((window as any).zipzapTest.failAction === "queue")
+            throw new Error("Storage unavailable");
+          state.queue.running = args.running;
+          return;
+        }
+        if (command === "move_waiting") {
+          const waiting = state.jobs.filter((job) => job.status === "queued");
+          const current = waiting.findIndex((job) => job.id === args.id);
+          const other = current + (args.direction === "up" ? -1 : 1);
+          const left = state.jobs.indexOf(waiting[current]);
+          const right = state.jobs.indexOf(waiting[other]);
+          [state.jobs[left], state.jobs[right]] = [state.jobs[right], state.jobs[left]];
+          return;
+        }
         if (command === "replace_link") {
           if ((window as any).zipzapTest.holdProbe) await new Promise(() => {});
           if ((window as any).zipzapTest.restartRequired && !args.restart)
@@ -222,6 +245,55 @@ test("Arabic link replacement is accessible and cancelling the dialog cancels it
   await expect
     .poll(async () => (await calls(page)).some((call) => call.command === "cancel_probe"))
     .toBeTruthy();
+});
+
+test("queue priority uses keyboard moves independently of sorting and hold is saved", async ({
+  page,
+}) => {
+  await seed(page, [
+    sample("z.zip", "queued"),
+    sample("a.zip", "queued"),
+    sample("paused.zip", "paused"),
+  ]);
+  await page.getByRole("button", { name: "a.zip", exact: true }).click();
+  const details = page.locator(".selection-details");
+  await expect(details).toContainText("2 / 2");
+  await page.getByRole("button", { name: "Filename", exact: true }).click();
+  expect((await calls(page)).filter((call) => call.command === "move_waiting")).toHaveLength(0);
+  const up = page.getByRole("button", { name: "Move up in queue", exact: true });
+  await up.focus();
+  await page.keyboard.press("Enter");
+  await expect(details).toContainText("1 / 2");
+  await expect(up).toBeDisabled();
+  await page.getByRole("button", { name: "Hold queue", exact: true }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Queue held" })).toBeVisible();
+  await page.getByRole("button", { name: "paused.zip", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Move up in queue", exact: true })).toHaveCount(0);
+  await page.getByRole("button", { name: "Start queue", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Resume", exact: true })).toBeEnabled();
+  await page.evaluate(() => {
+    (window as any).zipzapTest.failAction = "queue";
+  });
+  await page.getByRole("button", { name: "Hold queue", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("Could not save the queue change");
+  await expect(page.getByRole("status").filter({ hasText: "Queue running" })).toBeVisible();
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+});
+
+test("add for later remains paused and queue controls have Arabic labels", async ({ page }) => {
+  await page.getByRole("button", { name: "العربية", exact: true }).click();
+  await page.getByRole("button", { name: "تعليق الطابور", exact: true }).click();
+  await page.getByRole("button", { name: "تنزيل جديد", exact: true }).click();
+  await page.locator("#url").fill("https://example.com/file");
+  await page.locator("#filename").fill("later.zip");
+  await page.getByLabel("إضافة لوقت لاحق (متوقف حتى تختار الاستئناف)", { exact: true }).check();
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await page.getByRole("button", { name: "إضافة لوقت لاحق", exact: true }).click();
+  await page.getByRole("button", { name: "later.zip", exact: true }).click();
+  await expect(page.getByRole("button", { name: "استكمال", exact: true })).toBeEnabled();
+  await expect(page.getByRole("status").filter({ hasText: "الطابور معلّق" })).toBeVisible();
+  await page.setViewportSize({ width: 780, height: 560 });
+  await page.screenshot({ path: ".research-local/ui/queue-controls-ar.png", fullPage: true });
 });
 
 test("Arabic switches direction and settings persist", async ({ page }) => {

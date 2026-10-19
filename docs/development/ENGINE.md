@@ -37,8 +37,9 @@ that output as described below.
 
 ## Saved-state upgrades (development version)
 
-Startup accepts schemas 0/1/2 and upgrades to schema 2 for the optional publication
-evidence in [ADR 0004](../architecture/0004-publication-recovery.md).
+Startup accepts schemas 0/1/2/3 and upgrades to schema 3 for durable queue control
+in [ADR 0005](../architecture/0005-durable-queue.md). Schema 2 introduced the
+optional publication evidence in [ADR 0004](../architecture/0004-publication-recovery.md).
 [ADR 0003](../architecture/0003-atomic-state-upgrades.md) defines the atomic upgrade
 contract. Table creation, job validation/recovery
 and the schema marker commit in one SQLite transaction before any worker starts.
@@ -74,7 +75,7 @@ startup transaction commits. Repeated reopening also retries interrupted cleanup
 guarded by the assembly's recorded identity, while retaining completed user files.
 Windows validation handles block writes/deletion until the completion save ends.
 Full-file digest verification uses bounded memory and can add recovery time for
-large files. Older binaries reject schema 2; do not lower its schema marker.
+large files. Older binaries reject unsupported schema versions; do not lower the marker.
 
 Core tests kill child processes at test-only points immediately before linking,
 after linking/before saving Completed, and after saving/before cleanup. They cover
@@ -90,6 +91,29 @@ coherent pre-upgrade SQLite backup with all ZipZap instances closed. Never copy 
 live database/WAL pair separately. No additional snapshot is needed for this
 transactional upgrade. Keep databases private and preserve completed files;
 installer upgrade/downgrade qualification remains part of #47.
+
+## Durable queue (development version)
+
+The single queue has a persisted run/hold flag separate from settings. Hold stops
+new dispatch; active transfers continue to completion. New manual/browser jobs
+wait while held (explicit metadata checks may still inspect response headers).
+Start does not unpause individually paused jobs. Add for later creates a normal
+Paused job; Resume makes it wait for dispatch without changing its priority.
+
+Each job has a unique `queue_order`. Legacy rowid order is migrated atomically;
+reopening sorts the existing vector by persisted order. Adjacent waiting jobs
+can move up/down in one transaction; active/paused/finished jobs and worker
+tokens are kept. Failed saves leave the prior live and durable order/hold intact.
+Missing/malformed queue state, duplicate positions and exhausted integer order
+are rejected without resetting state. Older apps reject schema 3 rather than
+ignoring a held queue.
+
+CLI `queue` reads state or sets a Boolean `running`; `move_waiting` takes an ID
+and `up`/`down`. CLI `add` accepts Boolean `later`; the core's `add_for_later`
+uses the same insertion/validation as manual/browser requests. Snapshots expose
+run/hold and waiting IDs in priority order. Keyboard move controls show waiting
+rank independently of table sorting. Ineligible hosts can be skipped under the
+existing per-host limit; global/host limits and old-worker exit guards remain.
 
 ## Filename metadata (development version)
 

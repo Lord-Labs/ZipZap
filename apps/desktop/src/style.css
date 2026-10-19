@@ -64,6 +64,15 @@ select {
 input::placeholder {
   color: var(--muted);
 }
+input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  padding: 0;
+  margin-inline-end: 8px;
+  vertical-align: middle;
+  accent-color: var(--primary);
+}
 h1,
 h2,
 h3,
@@ -290,6 +299,24 @@ main {
   min-height: 100px;
   border: 1px solid var(--border);
   background: var(--surface);
+}
+.queue-controls {
+  display: flex;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px 12px;
+  padding: 6px 10px;
+  margin-bottom: 5px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+.queue-controls .helper {
+  flex-basis: 100%;
+  margin: 0;
+}
+.selection-details .queue-position {
+  flex-wrap: wrap;
 }
 .panel-toolbar {
   display: flex;

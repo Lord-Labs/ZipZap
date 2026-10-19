@@ -16,7 +16,8 @@ fn fixture(schema: u32) -> (tempfile::TempDir, PathBuf, Connection, Vec<Job>, Se
     let mut data: Value =
         serde_json::from_str(include_str!("fixtures/first-beta-state.json")).unwrap();
     let mut jobs: Vec<Job> = serde_json::from_value(data["jobs"].take()).unwrap();
-    for job in &mut jobs {
+    for (index, job) in jobs.iter_mut().enumerate() {
+        job.queue_order = index as u64;
         job.destination = folder.path().join(&job.destination);
         db.execute(
             "INSERT INTO jobs VALUES(?1, ?2)",
@@ -73,7 +74,8 @@ fn first_beta_state_recovers_order_validators_parts_and_settings_on_reopen() {
                 serde_json::to_value(manager.settings()).unwrap(),
                 serde_json::to_value(&settings).unwrap()
             );
-            assert_eq!(snapshot(&db).0, 2);
+            assert_eq!(snapshot(&db).0, 3);
+            assert!(manager.queue().running);
             assert_eq!(
                 std::fs::read(folder.path().join(format!(".zipzap-{}.part0", jobs[1].id))).unwrap(),
                 b"prefix"
@@ -85,13 +87,22 @@ fn first_beta_state_recovers_order_validators_parts_and_settings_on_reopen() {
 
 #[test]
 fn failed_recovery_rolls_back_every_row_and_schema_then_retries() {
-    for schema in [0, 1] {
+    for schema in [0, 1, 2] {
         let (folder, database, db, jobs, _) = fixture(schema);
         db.execute_batch(&format!("CREATE TRIGGER reject_migration BEFORE UPDATE ON jobs WHEN OLD.id='{}' BEGIN SELECT RAISE(ABORT, 'injected migration failure'); END;", jobs[2].id)).unwrap();
         let before = snapshot(&db);
         let error = Manager::open(&database).err().unwrap();
         assert!(error.contains("injected migration failure"), "{error}");
         assert_eq!(snapshot(&db), before);
+        assert_eq!(
+            db.query_row(
+                "SELECT COUNT(*) FROM sqlite_master WHERE name='queue'",
+                [],
+                |row| row.get::<_, i64>(0)
+            )
+            .unwrap(),
+            0
+        );
         assert_eq!(
             std::fs::read(folder.path().join(format!(".zipzap-{}.part0", jobs[1].id))).unwrap(),
             b"prefix"
@@ -150,7 +161,7 @@ fn mismatched_identity_and_overflowing_prefix_are_rejected_without_writes() {
 
 #[test]
 fn newer_schema_is_rejected_before_journal_or_record_changes() {
-    let (_folder, database, db, _, _) = fixture(3);
+    let (_folder, database, db, _, _) = fixture(4);
     let before = snapshot(&db);
     assert_eq!(
         db.pragma_query_value(None, "journal_mode", |r| r.get::<_, String>(0))
@@ -225,6 +236,52 @@ fn saved_backoff_reopens_paused_without_restarting_a_retry_deadline() {
         );
         assert_eq!(manager.jobs()[0].attempt, 0);
         assert_eq!(manager.jobs()[0].failure_reason, None);
+    }
+}
+
+#[test]
+fn malformed_queue_state_and_order_are_rejected_without_resetting_saved_jobs() {
+    for invalid in ["missing", "boolean", "duplicate", "overflow"] {
+        let (_folder, database, db, jobs, _) = fixture(3);
+        if invalid != "missing" {
+            db.execute_batch("CREATE TABLE queue(id INTEGER PRIMARY KEY, running INTEGER); INSERT INTO queue VALUES(1,0);").unwrap();
+        }
+        if invalid == "boolean" {
+            db.execute("UPDATE queue SET running=9", []).unwrap();
+        }
+        if invalid == "duplicate" {
+            db.execute("UPDATE jobs SET data=json_set(data,'$.queue_order',0)", [])
+                .unwrap();
+        }
+        if invalid == "overflow" {
+            let mut job = serde_json::to_value(&jobs[2]).unwrap();
+            job["queue_order"] = json!(u64::MAX);
+            db.execute(
+                "UPDATE jobs SET data=?1 WHERE id=?2",
+                params![job.to_string(), jobs[2].id],
+            )
+            .unwrap();
+        }
+        let before = snapshot(&db);
+        assert!(Manager::open(&database).is_err(), "{invalid}");
+        assert_eq!(snapshot(&db), before);
+        if invalid == "missing" {
+            assert_eq!(
+                db.query_row(
+                    "SELECT COUNT(*) FROM sqlite_master WHERE name='queue'",
+                    [],
+                    |row| row.get::<_, i64>(0)
+                )
+                .unwrap(),
+                0
+            );
+        } else {
+            assert_eq!(
+                db.query_row("SELECT running FROM queue", [], |row| row.get::<_, i64>(0))
+                    .unwrap(),
+                if invalid == "boolean" { 9 } else { 0 }
+            );
+        }
     }
 }
 

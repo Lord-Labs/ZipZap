@@ -18,7 +18,15 @@ struct AppState {
 
 #[tauri::command]
 fn snapshot(state: State<AppState>) -> serde_json::Value {
-    serde_json::json!({"jobs":state.manager.jobs(),"settings":state.manager.settings(),"folder":folder(&state),"version":env!("CARGO_PKG_VERSION"),"native_error":*state.native.lock().expect("native lock"),"notice":state.notice.lock().expect("notice lock").take(),"browser_review":state.browser_review.lock().expect("review lock").take()})
+    serde_json::json!({"jobs":state.manager.jobs(),"queue":state.manager.queue(),"settings":state.manager.settings(),"folder":folder(&state),"version":env!("CARGO_PKG_VERSION"),"native_error":*state.native.lock().expect("native lock"),"notice":state.notice.lock().expect("notice lock").take(),"browser_review":state.browser_review.lock().expect("review lock").take()})
+}
+#[tauri::command]
+fn set_queue_running(running: bool, state: State<AppState>) -> Result<(), String> {
+    state.manager.set_queue_running(running)
+}
+#[tauri::command]
+fn move_waiting(id: String, direction: String, state: State<AppState>) -> Result<(), String> {
+    state.manager.move_waiting(&id, &direction)
 }
 #[tauri::command]
 async fn suggest_download(
@@ -93,16 +101,21 @@ fn add_download(
     url: String,
     filename: Option<String>,
     destination: String,
+    later: bool,
     state: State<AppState>,
 ) -> Result<String, String> {
-    state
-        .manager
-        .add(
-            &url,
-            Path::new(&destination),
-            filename.as_deref().filter(|v| !v.is_empty()),
-        )
-        .map(|job| job.id)
+    let add = if later {
+        Manager::add_for_later
+    } else {
+        Manager::add
+    };
+    add(
+        &state.manager,
+        &url,
+        Path::new(&destination),
+        filename.as_deref().filter(|v| !v.is_empty()),
+    )
+    .map(|job| job.id)
 }
 #[tauri::command]
 fn download_action(id: String, action: String, state: State<AppState>) -> Result<(), String> {
@@ -263,6 +276,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             snapshot,
             add_download,
+            set_queue_running,
+            move_waiting,
             suggest_download,
             replace_link,
             cancel_probe,
