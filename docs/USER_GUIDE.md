@@ -198,7 +198,8 @@ temporary review is dismissed or the app restarts. Metadata failures appear in
 the app notice and return a sanitized rejection to the development extension.
 Local results contain no links or filenames, expire after 24 hours and retain
 at most 100 receipts. Replays reuse the same job while its receipt/history is
-retained. These changes still need real Chrome/Edge qualification and are not
+retained. Native acceptance is [reported by the maintainer](development/NATIVE_SMOKE.md);
+release-candidate qualification remains with #47. These changes are not
 part of the published first beta.
 
 No cookies, browser history or tabs are read. Authenticated sessions, blob/data

@@ -1,6 +1,6 @@
 # ADR 0006: Report browser enqueue outcomes through local result files
 
-- Status: accepted for issue #43; native qualification remains required.
+- Status: accepted for issue #43; maintainer-reported native acceptance is recorded in [the smoke log](../development/NATIVE_SMOKE.md).
 - Date: 2026-10-19.
 
 Keep the explicit native messaging handoff and single Manager. Version 2 sends

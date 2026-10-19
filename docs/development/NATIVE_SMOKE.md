@@ -89,14 +89,16 @@ External editor rendering, actual browser handoff, installer lifecycle and other
 Windows versions were not tested here. No blocking product defect was observed
 in this bounded baseline. Hosted checks were skipped by [policy](WORKFLOW.md).
 
-## Pending browser-result qualification: issue #43
+## Browser-result qualification: issue #43
 
 Version 2 receipt/queued/rejected feedback has protocol, core/desktop and mocked
 extension coverage, plus an actual host-process check of a missing companion
-application using a temporary profile. Actual isolated Chrome/Edge profiles,
-successful app launch and desktop enqueue/digest flows are **unexercised** here.
-Keep its PR draft and #43 open. The first-beta browser evidence and #29 native
-baseline do not establish the new protocol's platform acceptance.
+application using a temporary profile. On 2026-10-19 the maintainer reported
+personally testing all requested manual scenarios, including Chrome/Edge
+handoff with the app open and closed. This is maintainer-reported acceptance,
+not agent-observed browser or Computer Use evidence. Further Computer Use was
+prohibited. The first-beta browser evidence and #29 baseline are separate;
+repeat the following checks against release #47's candidate.
 
 Use the isolated identity/profile procedure with matching test host registration,
 preserving normal registrations. In both Chrome and Edge and both languages,
