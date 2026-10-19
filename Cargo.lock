@@ -5273,6 +5273,7 @@ dependencies = [
  "tauri-plugin-dialog",
  "tauri-plugin-opener",
  "tauri-plugin-single-instance",
+ "tempfile",
  "tokio",
  "zipzap-core",
  "zipzap-native",

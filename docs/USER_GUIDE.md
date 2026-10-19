@@ -176,16 +176,30 @@ The extension is distributed as source/a ZIP, not through browser stores yet.
 
 Requests use the app's default folder. The app starts if it is closed. If the
 host is missing, open ZipZap settings and choose **Connect Chrome / Edge**. A
-red extension badge/error means the request was not accepted by the host. An
-accepted handoff can still fail in the app (for example, duplicate filename or
-unavailable destination); inspect the app's error notice and queue.
+red extension badge/error shows a handoff problem; inspect its message and the
+app's queue. The published first beta confirms only native receipt.
+
+The development extension and host use a versioned receipt: **Received locally**
+means the request is saved, **Added to the queue** confirms the app accepted it,
+and rejection explains an occupied filename or asks you to inspect the app.
+A held queue still accepts jobs but waits for you to start it. No handoff message
+means the file has finished downloading. Missing/incompatible hosts require
+repair/update and reconnection in Settings. Startup failure and a 15-second
+confirmation timeout are distinct; after timeout the request may still be queued,
+so check the app before sending again. Closing the popup stops its feedback;
+it does not cancel a request already received. Context-menu feedback appears in
+the extension badge/title. Feedback is available in English and Arabic.
 
 The development version checks server filenames with the same rules as the
 manual dialog. A duplicate browser destination is rejected; **Review filename**
 offers the latest rejected link as a new editable download with an available
 alternative. The original request was not queued. Resend the link if this
 temporary review is dismissed or the app restarts. Metadata failures appear in
-the app notice; native receipt still does not confirm enqueue success.
+the app notice and return a sanitized rejection to the development extension.
+Local results contain no links or filenames, expire after 24 hours and retain
+at most 100 receipts. Replays reuse the same job while its receipt/history is
+retained. These changes still need real Chrome/Edge qualification and are not
+part of the published first beta.
 
 No cookies, browser history or tabs are read. Authenticated sessions, blob/data
 URLs, protected players and HLS/DASH are unsupported. Signed direct links may

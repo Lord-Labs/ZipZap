@@ -88,3 +88,21 @@ were checked visually. This baseline is not a full screen-reader certification.
 External editor rendering, actual browser handoff, installer lifecycle and other
 Windows versions were not tested here. No blocking product defect was observed
 in this bounded baseline. Hosted checks were skipped by [policy](WORKFLOW.md).
+
+## Pending browser-result qualification: issue #43
+
+Version 2 receipt/queued/rejected feedback has protocol, core/desktop and mocked
+extension coverage, plus an actual host-process check of a missing companion
+application using a temporary profile. Actual isolated Chrome/Edge profiles,
+successful app launch and desktop enqueue/digest flows are **unexercised** here.
+Keep its PR draft and #43 open. The first-beta browser evidence and #29 native
+baseline do not establish the new protocol's platform acceptance.
+
+Use the isolated identity/profile procedure with matching test host registration,
+preserving normal registrations. In both Chrome and Edge and both languages,
+test app closed/open, held queue, occupied destination/review, missing host,
+unavailable app binary, receipt timeout and repeat delivery of one UUID. Confirm
+receipt is visible before enqueue, held jobs wait and accepted output has the
+fixture hash. Result files must contain only the version/UUID/state/safe code;
+no private URL query, name or path. Close the popup during receipt and confirm
+the app still consumes the request. Restore all isolated registrations afterward.
