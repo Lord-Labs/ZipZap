@@ -98,6 +98,10 @@ pub struct Settings {
     pub language: String,
     #[serde(default)]
     pub download_folder: Option<String>,
+    #[serde(default)]
+    pub close_to_tray: bool,
+    #[serde(default)]
+    pub notifications: bool,
     #[serde(default = "default_categories")]
     pub categories: Vec<Category>,
 }
@@ -109,6 +113,8 @@ impl Default for Settings {
             speed_limit: 0,
             language: "en".into(),
             download_folder: None,
+            close_to_tray: false,
+            notifications: false,
             categories: default_categories(),
         }
     }

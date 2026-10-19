@@ -88,3 +88,39 @@ were checked visually. This baseline is not a full screen-reader certification.
 External editor rendering, actual browser handoff, installer lifecycle and other
 Windows versions were not tested here. No blocking product defect was observed
 in this bounded baseline. Hosted checks were skipped by [policy](WORKFLOW.md).
+
+## Lifecycle qualification: issue #41
+
+The lifecycle implementation has automated Rust and mocked IPC UI coverage.
+Before review, native inspection was interrupted and these scenarios were
+recorded as unexercised. On 2026-10-19 the maintainer reported testing the
+Windows interface personally and confirmed all requested manual scenarios,
+including tray close/show/quit, notifications and sleep/resume. This is
+maintainer-reported acceptance, not agent-observed Computer Use evidence.
+The maintainer prohibited further Computer Use. The #29 results above predate
+this code; release #47 must qualify its own candidate, including OS sessions.
+
+Repeat against the release candidate in an isolated Windows environment:
+
+1. Start with fresh smoke state. Verify both preferences default off; closing
+   checkpoints and exits. Reopen and verify saved bytes and output hashes.
+2. Opt into close-to-tray, close during a bounded transfer and verify it keeps
+   progressing. Show the window using the icon and menu, then launch the same
+   executable again; verify one Manager/queue and no duplicate worker. Exercise
+   Hold/Start from both UI and tray, including English/Arabic menu labels.
+3. Quit through the tray and Settings during active work and retry waits;
+   verify process exit, durable paused checkpoints and safe resume. Verify
+   unavailable-tray/hide failures take the quit path where fault injection is
+   available; automated UI fallback coverage alone is not native evidence.
+4. Opt into notifications in isolated installed-app state. Complete/fail local
+   fixtures and verify localized count-only payloads, five-second batching and
+   no repeat on polling, opt-in or restart. Check Windows suppression and app
+   identity separately; a debug toast or successful preparation is insufficient.
+5. In a disposable Windows session/VM, test sleep/resume and sign-out/restart
+   during transfer and retry wait. Reopen, inspect recovery and compare hashes.
+   Record actual OS behavior and any defects. Never suspend, restart or sign out
+   the maintainer's active host just to obtain evidence.
+
+The maintainer's manual acceptance permits implementation review to finish.
+Release #47 must retain this evidence distinction and repeat its candidate's
+checks; headless, process-kill and mocked tests are not native observations.
