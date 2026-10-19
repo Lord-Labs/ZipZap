@@ -267,7 +267,9 @@ async fn enqueue_browser(
 
 pub fn run() {
     tauri::Builder::default()
-        .plugin(tauri_plugin_single_instance::init(|app, _, _| lifecycle::show(app)))
+        .plugin(tauri_plugin_single_instance::init(|app, _, _| {
+            lifecycle::show(app)
+        }))
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_notification::init())
@@ -289,7 +291,8 @@ pub fn run() {
                 lifecycle: lifecycle::Lifecycle::default(),
             });
             if lifecycle::init(app.handle()).is_err() {
-                *app.state::<AppState>().notice.lock().expect("notice lock") = Some("System tray unavailable; closing the window will quit ZipZap".into());
+                *app.state::<AppState>().notice.lock().expect("notice lock") =
+                    Some("System tray unavailable; closing the window will quit ZipZap".into());
             }
             lifecycle::watch(app.handle().clone());
             let handle = app.handle().clone();
@@ -375,7 +378,11 @@ pub fn run() {
                 api.prevent_close();
                 let app = window.app_handle().clone();
                 if app.state::<AppState>().manager.settings().close_to_tray
-                    && app.state::<AppState>().lifecycle.available() && window.hide().is_ok() { return; }
+                    && app.state::<AppState>().lifecycle.available()
+                    && window.hide().is_ok()
+                {
+                    return;
+                }
                 lifecycle::quit(app);
             }
         })
@@ -398,7 +405,8 @@ pub fn run() {
         .expect("ZipZap could not start")
         .run(|app, event| {
             if let tauri::RunEvent::ExitRequested { api, .. } = event
-                && !app.state::<AppState>().lifecycle.ready_to_exit() {
+                && !app.state::<AppState>().lifecycle.ready_to_exit()
+            {
                 api.prevent_exit();
                 lifecycle::quit(app.clone());
             }
