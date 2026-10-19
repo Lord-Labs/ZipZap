@@ -499,7 +499,13 @@ try {
   for (const control of ["pause", "cancel", "shutdown"]) {
     const delayed = await add(`/retry-cap?token=DO_NOT_LEAK`, `retry-cap-${control}.bin`);
     const waiting = await until(delayed.id, (j) => j.next_retry !== null);
-    assert.ok(waiting.next_retry <= Date.now() + 30000);
+    const observedNow = Date.now();
+    // Windows Node/V8 and Rust wall clocks can differ by one coarse system-clock tick.
+    const clockResolution = process.platform === "win32" ? 20 : 0;
+    assert.ok(
+      waiting.next_retry <= observedNow + 30000 + clockResolution,
+      `${control}: deadline=${waiting.next_retry}, observed=${observedNow}, remaining=${waiting.next_retry - observedNow}ms`,
+    );
     assert.equal(waiting.attempt, 1);
     assert.ok(!waiting.error.includes("DO_NOT_LEAK"));
     const count = retryCounts.get("/retry-cap");
