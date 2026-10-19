@@ -1,11 +1,56 @@
 {
-  "name": { "message": "ZipZap Download Manager" },
-  "description": { "message": "Send a download link to your local ZipZap application." },
-  "menu": { "message": "Download with ZipZap" },
-  "link": { "message": "Download link" },
-  "send": { "message": "Send to ZipZap" },
-  "sent": { "message": "Sent to ZipZap. Open the app to check the download." },
-  "missing": { "message": "Open ZipZap and connect the browser in Settings." },
-  "invalid": { "message": "Use an HTTP/HTTPS link without embedded credentials." },
-  "privacy": { "message": "No page tracking. No cookies exported. Explicit links only." }
+  "name": {
+    "message": "ZipZap Download Manager"
+  },
+  "description": {
+    "message": "Send a download link to your local ZipZap application."
+  },
+  "menu": {
+    "message": "Download with ZipZap"
+  },
+  "link": {
+    "message": "Download link"
+  },
+  "send": {
+    "message": "Send to ZipZap"
+  },
+  "sent": {
+    "message": "Added to the ZipZap queue. A held queue waits until you start it. This does not mean the download is complete."
+  },
+  "received": {
+    "message": "Received locally. Waiting for ZipZap to confirm the queue."
+  },
+  "timeout": {
+    "message": "ZipZap has not confirmed in time. The request may still be queued; check the app before sending again."
+  },
+  "protocol": {
+    "message": "The local host could not confirm this request. Update ZipZap and reconnect the browser in Settings."
+  },
+  "destination": {
+    "message": "Not queued: that filename is occupied. Open ZipZap and review a different filename."
+  },
+  "app_rejected": {
+    "message": "Not queued: ZipZap rejected the request. Open the app to check the link, destination and queue limits."
+  },
+  "app_start_failed": {
+    "message": "ZipZap could not start. Open or repair the app, then check its queue before sending again."
+  },
+  "expired": {
+    "message": "The local receipt is unavailable or expired. Check ZipZap before sending again."
+  },
+  "missing": {
+    "message": "Open ZipZap and connect the browser in Settings."
+  },
+  "invalid": {
+    "message": "Use an HTTP/HTTPS link without embedded credentials."
+  },
+  "privacy": {
+    "message": "No page tracking. No cookies exported. Explicit links only."
+  },
+  "inbox_full": {
+    "message": "Not received: the local inbox is full. Open ZipZap and check pending requests before sending again."
+  },
+  "host_rejected": {
+    "message": "The local host could not confirm receipt. Open ZipZap, check its queue and available storage, then reconnect the browser."
+  }
 }
