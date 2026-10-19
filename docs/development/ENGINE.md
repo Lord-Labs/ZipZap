@@ -148,6 +148,17 @@ Native receipt remains separate from enqueue success until #43. The synchronous
 `add` API retains the safe URL fallback when callers omit a filename; callers
 wanting server metadata use `suggest` before `add`.
 
+## Workspace preferences (development version)
+
+Serde-defaulted `Settings.view` stores only the used appearance, six fixed-order
+column widths/visibility and sort key/direction, with shared JSON defaults. Core
+validation keeps Filename visible, bounds widths, rejects unknown/reordered
+columns and invalid theme/sort values, and saves before live settings change.
+Purely visual preferences remain compatible with schema 4; older compatible
+builds ignoring them retain safe queue and destination behavior. No transfer/job
+fields or dependencies are added. Core tests cover persistence, rejected values
+and failed settings saves without changing job destinations.
+
 ## Category rules (development version)
 
 Settings stores 1–16 categories with unique IDs, a bounded display name, up to

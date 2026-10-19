@@ -1013,6 +1013,132 @@ test("manual category folder is reviewed before add and explicit folder choice t
   await expect(page.locator("tbody tr")).toHaveCount(2);
 });
 
+test("appearance, keyboard column resizing, visibility and sort choices save and reset", async ({
+  page,
+}) => {
+  await seed(page, [sample("a.zip", "completed"), sample("b.zip", "paused")]);
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await page.getByLabel("Appearance", { exact: true }).selectOption("light");
+  await expect(
+    page.getByRole("checkbox", { name: "Show column Filename", exact: true }),
+  ).toBeDisabled();
+  await page.getByRole("checkbox", { name: "Show column Website", exact: true }).uncheck();
+  await page.getByRole("slider", { name: /Column width Filename/ }).focus();
+  await page.keyboard.press("End");
+  await page.getByRole("button", { name: "Save settings", exact: true }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  await expect(page.getByRole("columnheader", { name: "Website", exact: true })).toHaveCount(0);
+  await expect(page.locator("th").first()).toHaveCSS("width", "800px");
+  await page
+    .getByRole("columnheader", { name: /Filename/ })
+    .getByRole("button")
+    .click();
+  await expect(page.locator("tbody .file-select")).toHaveText(["a.zip", "b.zip"]);
+  await page
+    .getByRole("columnheader", { name: /Filename/ })
+    .getByRole("button")
+    .click();
+  await expect(page.locator("tbody .file-select")).toHaveText(["b.zip", "a.zip"]);
+  expect(await page.evaluate(() => (window as any).zipzapTest.state.settings.view.descending)).toBe(
+    true,
+  );
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await expect(page.getByRole("slider", { name: /Column width Filename/ })).toHaveValue("800");
+  await page.getByRole("button", { name: "Reset columns and sorting", exact: true }).click();
+  await page.getByRole("button", { name: "Save settings", exact: true }).click();
+  await expect(page.getByRole("columnheader", { name: "Website", exact: true })).toBeVisible();
+  expect(await page.evaluate(() => (window as any).zipzapTest.state.settings.view.sort)).toBe(
+    "recent",
+  );
+});
+
+test("system appearance follows media changes and failed sort saves retain the previous order", async ({
+  page,
+}) => {
+  await seed(page, [sample("a.zip", "completed"), sample("b.zip", "completed")]);
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await page.getByLabel("Appearance", { exact: true }).selectOption("system");
+  await page.getByRole("button", { name: "Save settings", exact: true }).click();
+  for (const colorScheme of ["dark", "light"] as const) {
+    await page.emulateMedia({ colorScheme });
+    await expect(page.locator("html")).toHaveAttribute("data-theme", colorScheme);
+    expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  }
+  await page.evaluate(() => {
+    (window as any).zipzapTest.failSettings = "Storage unavailable";
+  });
+  await page
+    .getByRole("columnheader", { name: /Filename/ })
+    .getByRole("button")
+    .click();
+  await expect(page.getByRole("alert")).toContainText("Storage unavailable");
+  await expect(page.locator("tbody .file-select")).toHaveText(["b.zip", "a.zip"]);
+  expect(await page.evaluate(() => (window as any).zipzapTest.state.settings.view.sort)).toBe(
+    "recent",
+  );
+});
+
+test("keyboard context actions use validated commands, expose failures and return focus after removal", async ({
+  page,
+}) => {
+  await seed(page, [sample("active.zip", "downloading"), sample("done.zip", "completed")]);
+  const active = page.getByRole("button", { name: "active.zip", exact: true });
+  await active.focus();
+  await page.keyboard.press("Shift+F10");
+  const context = page.getByRole("dialog", { name: "File actions", exact: true });
+  await expect(context).toBeVisible();
+  await expect(context.getByRole("button", { name: "Open file", exact: true })).toBeDisabled();
+  await page.evaluate(() => {
+    (window as any).zipzapTest.failAction = "pause";
+  });
+  await context.getByRole("button", { name: "Pause", exact: true }).click();
+  await expect(context.getByRole("alert")).toContainText("Storage unavailable");
+  await page.evaluate(() => {
+    (window as any).zipzapTest.failAction = "";
+  });
+  await context.getByRole("button", { name: "Pause", exact: true }).click();
+  await expect(context).not.toBeVisible();
+  await expect(active).toBeFocused();
+  await page.getByRole("button", { name: "done.zip", exact: true }).click({ button: "right" });
+  await context.getByRole("button", { name: "Remove from history", exact: true }).click();
+  await expect(context).not.toBeVisible();
+  await expect(page.getByRole("region", { name: "Download table", exact: true })).toBeFocused();
+  await page.keyboard.press("Control+f");
+  await expect(page.getByRole("searchbox")).toBeFocused();
+  await page.getByRole("searchbox").fill("active");
+  await page.keyboard.press("Control+a");
+  expect(await page.getByRole("searchbox").inputValue()).toBe("active");
+  await page.getByRole("region", { name: "Download table", exact: true }).focus();
+  await page.keyboard.press("Control+n");
+  await expect(page.locator("#url")).toBeFocused();
+  await page.keyboard.press("Escape");
+});
+
+test("light RTL long filenames remain operable at minimum size and doubled render scale", async ({
+  page,
+}) => {
+  const name = "ملف-طويل-".repeat(8) + ".zip";
+  await seed(page, [sample(name, "failed")]);
+  await page.getByRole("button", { name: "العربية", exact: true }).click();
+  await page.getByRole("button", { name: "الإعدادات", exact: true }).click();
+  await page.getByLabel("المظهر", { exact: true }).selectOption("light");
+  await page.getByRole("button", { name: "حفظ الإعدادات", exact: true }).click();
+  await page.setViewportSize({ width: 780, height: 560 });
+  await page.evaluate(() => {
+    document.body.style.zoom = "2";
+  });
+  const file = page.getByRole("button", { name, exact: true });
+  await file.focus();
+  await page.keyboard.press("Shift+F10");
+  const dialog = page.getByRole("dialog", { name: "إجراءات الملف", exact: true });
+  await expect(dialog.getByRole("button", { name: "إعادة المحاولة", exact: true })).toBeEnabled();
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await page.keyboard.press("Escape");
+  await expect(file).toBeFocused();
+  await page.screenshot({ path: test.info().outputPath("workspace-light-rtl-2x.png") });
+});
+
 test("populated table is accessible in English and Arabic, including narrow viewports", async ({
   page,
 }) => {

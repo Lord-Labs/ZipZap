@@ -198,6 +198,28 @@ recover them. Remove the unpacked extension separately through your browser.
 
 ## Keyboard and accessibility
 
+The development version offers **Appearance** in Settings: Dark (the default),
+Light or Follow system. System mode follows color-scheme changes while running.
+**Columns and sorting** saves each existing column's width/visibility; resize
+with the sliders or their arrow keys. Filename stays visible. Wide tables retain
+horizontal scrolling. **Reset columns and sorting** edits the draft; Save
+commits it. Clicking a sortable header saves its choice only after a successful
+settings write. These visual preferences do not change download destinations.
+
+Right-click a filename, press Shift+F10 or the context-menu key for **File
+actions**. The dialog exposes the same available pause/resume/retry/cancel,
+history removal, link replacement, Open file and Show in folder commands as the
+workspace. Errors remain visible for retry; Escape returns to the file, or the
+table when its opener was removed. Removing history returns focus to the table.
+Ctrl+N opens New download, Ctrl+F focuses search, Ctrl+A selects visible files
+and Delete opens the affected-set history-removal confirmation. Text fields and
+open dialogs keep their normal keys. Hidden/filtered rows are deselected.
+
+Automated browser tests cover both themes, saved choices, focus, RTL and doubled
+CSS render scale. Actual WebView2 keyboard/accessibility and Windows text-scale
+qualification for these changes remains pending; the development PR stays draft
+until that evidence is available. These changes are not in the published beta.
+
 Tab/Shift+Tab move focus; Enter/Space activate buttons; Escape closes a dialog.
 Select a filename with Enter/Space to use the toolbar. Tab to the table region
 and use arrow keys to scroll when columns do not fit. Dialogs keep focus inside

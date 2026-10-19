@@ -6,6 +6,7 @@
   import Icon from "./Icon.svelte";
   import BatchDialog from "./BatchDialog.svelte";
   import defaultCategories from "../../../config/categories.json";
+  import defaultView from "../../../config/view.json";
 
   import { dictionary, type Language } from "./i18n";
 
@@ -38,6 +39,7 @@
     language: Language;
     download_folder: string | null;
     categories: Category[];
+    view: typeof defaultView;
   };
 
   type Snapshot = {
@@ -70,6 +72,7 @@
     language: "en",
     download_folder: null,
     categories: structuredClone(defaultCategories),
+    view: structuredClone(defaultView),
   };
 
   let language: Language = "en";
@@ -108,6 +111,16 @@
   let batchDialog: BatchDialog;
   let sortKey: "recent" | "filename" | "total" | "status" = "recent";
   let descending = false;
+  let viewBusy = false;
+  let systemDark = false;
+  let searchInput: HTMLInputElement;
+  let contextDialog: HTMLDialogElement;
+  let contextId = "";
+  $: contextJob = jobs.find((job) => job.id === contextId);
+  $: sortKey = settings.view.sort as typeof sortKey;
+  $: descending = settings.view.descending;
+  $: visibleColumns = settings.view.columns.filter((column) => column.visible);
+  $: tableWidth = visibleColumns.reduce((sum, column) => sum + column.width, 0);
   let pausingAll = false;
 
   $: categories = settings.categories;
@@ -190,6 +203,7 @@
 
   const errorMessage = (value: unknown) => {
     const raw = value instanceof Error ? value.message : String(value);
+    if (raw.startsWith("Invalid appearance or column")) return text.columnHint;
     if (raw.startsWith("An extension belongs")) return text.categoryDuplicate;
     if (raw.startsWith("Use literal extensions")) return text.categoryExtensionsError;
     if (raw.startsWith("Category folder") || raw.startsWith("Category or destination folder"))
@@ -354,14 +368,34 @@
     await refresh();
   }
 
-  function sortBy(key: "filename" | "total" | "status") {
-    descending = sortKey === key ? !descending : false;
-    sortKey = key;
+  async function sortBy(key: "filename" | "total" | "status") {
+    if (viewBusy) return;
+    const next = {
+      ...settings,
+      view: { ...settings.view, sort: key, descending: sortKey === key ? !descending : false },
+    };
+    viewBusy = true;
+    try {
+      if (isDesktop()) {
+        await invoke("save_settings", { settings: next });
+        await refresh();
+      } else settings = next;
+    } catch (e) {
+      error = errorMessage(e);
+    } finally {
+      viewBusy = false;
+    }
   }
 
   $: if (typeof document !== "undefined") {
     document.documentElement.lang = language;
     document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
+    document.documentElement.dataset.theme =
+      settings.view.appearance === "system"
+        ? systemDark
+          ? "dark"
+          : "light"
+        : settings.view.appearance;
   }
 
   async function refresh() {
@@ -385,6 +419,7 @@
       settings = {
         ...value.settings,
         categories: value.settings.categories ?? structuredClone(defaultCategories),
+        view: value.settings.view ?? structuredClone(defaultView),
       };
       language = value.settings.language;
       folder = value.folder;
@@ -402,13 +437,73 @@
   }
 
   onMount(() => {
+    const media = matchMedia("(prefers-color-scheme: dark)");
+    const themeChanged = () => (systemDark = media.matches);
+    themeChanged();
+    media.addEventListener("change", themeChanged);
     if (!isDesktop()) {
       ready = true;
       notice = text.preview;
     } else void refresh();
     const timer = setInterval(() => void refresh(), 750);
-    return () => clearInterval(timer);
+    return () => {
+      clearInterval(timer);
+      media.removeEventListener("change", themeChanged);
+    };
   });
+
+  function showContext(job: Job, event: Event) {
+    event.preventDefault();
+    selectedIds = new Set([job.id]);
+    contextId = job.id;
+    error = "";
+    if (!contextDialog.open) contextDialog.showModal();
+  }
+
+  async function contextAction(value: string) {
+    if (contextJob && (await action(contextJob, value))) contextDialog.close();
+  }
+
+  async function contextClosed() {
+    await tick();
+    if (
+      document.activeElement === document.body ||
+      document.activeElement?.closest("dialog:not([open])")
+    )
+      document.querySelector<HTMLElement>(".table-scroll")?.focus();
+  }
+
+  function shortcuts(event: KeyboardEvent) {
+    if (
+      document.querySelector("dialog[open]") ||
+      (event.target instanceof Element &&
+        event.target.closest("input, textarea, select, [contenteditable=true]"))
+    )
+      return;
+    const control = event.ctrlKey || event.metaKey;
+    if (control && event.key.toLowerCase() === "n") {
+      event.preventDefault();
+      void newDownload();
+    }
+    if (control && event.key.toLowerCase() === "f") {
+      event.preventDefault();
+      searchInput.focus();
+    }
+    if (control && event.key.toLowerCase() === "a" && !bulkBusy) {
+      event.preventDefault();
+      selectedIds = new Set(filtered.map((job) => job.id));
+    }
+    if (
+      event.key === "Delete" &&
+      !bulkBusy &&
+      !pausingAll &&
+      !busyIds.size &&
+      selectedJobs.some((job) => eligible(job, "remove"))
+    ) {
+      event.preventDefault();
+      selectedAction("remove");
+    }
+  }
 
   async function newDownload() {
     formError = "";
@@ -639,6 +734,10 @@
     try {
       await invoke("download_action", { id: job.id, action: value });
       await refresh();
+      if (value === "remove") {
+        await tick();
+        document.querySelector<HTMLElement>(".table-scroll")?.focus();
+      }
       return true;
     } catch (e) {
       error = errorMessage(e);
@@ -740,6 +839,8 @@
     }
   }
 </script>
+
+<svelte:window onkeydown={shortcuts} />
 
 <a class="skip-link" href="#downloads">{text.downloads}</a>
 
@@ -922,6 +1023,7 @@
             ><Icon name="search" /><input
               aria-label={text.search}
               type="search"
+              bind:this={searchInput}
               placeholder={text.searchHint}
               bind:value={search}
             /></label
@@ -956,6 +1058,7 @@
           {/if}
         </div>
         <p class="selection-help helper">{text.selectionHelp}</p>
+        <p class="selection-help helper">{text.shortcutHint}</p>
         {#if bulkResults.length}<ul class="bulk-results" aria-live="polite">
             {#each bulkResults as result (result.id)}<li>
                 <bdi>{result.name}</bdi>: {result.result}
@@ -964,28 +1067,31 @@
 
         <!-- svelte-ignore a11y_no_noninteractive_tabindex (Keyboard users need to scroll the table horizontally.) -->
         <div class="table-scroll" tabindex="0" role="region" aria-label={text.downloadTable}>
-          <table>
+          <table style:width={`${tableWidth}px`} style:min-width={`${tableWidth}px`}>
             <caption class="sr-only">{text.tableHelp}</caption>
             <thead
               ><tr>
-                {#each [{ key: "filename", label: text.filename }, { key: "total", label: text.total }, { key: "status", label: text.status }] as column}
+                {#each visibleColumns as column (column.id)}
                   <th
                     scope="col"
-                    aria-sort={sortKey === column.key
-                      ? descending
-                        ? "descending"
-                        : "ascending"
-                      : "none"}
-                    ><button onclick={() => sortBy(column.key as "filename" | "total" | "status")}
-                      >{column.label}<span aria-hidden="true"
-                        >{sortKey === column.key ? (descending ? "▾" : "▴") : "↕"}</span
-                      ></button
-                    ></th
+                    style:width={`${column.width}px`}
+                    aria-sort={!["filename", "total", "status"].includes(column.id)
+                      ? undefined
+                      : sortKey === column.id
+                        ? descending
+                          ? "descending"
+                          : "ascending"
+                        : "none"}
+                    >{#if ["filename", "total", "status"].includes(column.id)}<button
+                        disabled={viewBusy}
+                        onclick={() => sortBy(column.id as "filename" | "total" | "status")}
+                        >{text[column.id as "filename" | "total" | "status"]}<span
+                          aria-hidden="true"
+                          >{sortKey === column.id ? (descending ? "▾" : "▴") : "↕"}</span
+                        ></button
+                      >{:else}{text[column.id as "timeLeft" | "transferRate" | "website"]}{/if}</th
                   >
                 {/each}
-                <th scope="col">{text.timeLeft}</th><th scope="col">{text.transferRate}</th><th
-                  scope="col">{text.website}</th
-                >
               </tr></thead
             >
             <tbody>
@@ -1005,6 +1111,14 @@
                         aria-pressed={selectedIds.has(job.id)}
                         disabled={bulkBusy}
                         onclick={(event) => selectJob(job, event)}
+                        oncontextmenu={(event) => showContext(job, event)}
+                        onkeydown={(event) => {
+                          if (
+                            event.key === "ContextMenu" ||
+                            (event.key === "F10" && event.shiftKey)
+                          )
+                            showContext(job, event);
+                        }}
                         title={basename(job.destination)}
                         ><Icon name={categoryIcon(fileCategory(job.destination))} /><bdi
                           >{basename(job.destination)}</bdi
@@ -1015,32 +1129,37 @@
                         {failureMessages[job.failure_reason || ""] || errorMessage(job.error)}
                       </p>{/if}</td
                   >
-                  <td
-                    ><bdi dir="ltr">{job.total !== null ? bytes(job.total) : text.unknown}</bdi></td
-                  >
-                  <td class="status-cell"
-                    ><span
-                      class="job-status"
-                      class:running={job.status === "downloading"}
-                      class:finished={job.status === "completed"}
-                      >{text[job.status]}{job.total && job.status === "downloading"
-                        ? ` (${Math.floor(percent(job))}%)`
-                        : ""}</span
-                    ><progress
-                      max="100"
-                      value={job.total || job.status === "completed" ? percent(job) : undefined}
-                      aria-label={`${basename(job.destination)} ${text[job.status]}`}
-                    ></progress></td
-                  >
-                  <td>{remaining(job) || "—"}</td>
-                  <td
-                    ><bdi dir="ltr"
-                      >{job.status === "downloading" ? `${bytes(job.speed)}/s` : "—"}</bdi
-                    ></td
-                  >
-                  <td class="origin-cell"
-                    ><bdi dir="ltr" title={hostname(job.url)}>{hostname(job.url)}</bdi></td
-                  >
+                  {#if visibleColumns.some((column) => column.id === "total")}<td
+                      ><bdi dir="ltr">{job.total !== null ? bytes(job.total) : text.unknown}</bdi
+                      ></td
+                    >{/if}
+                  {#if visibleColumns.some((column) => column.id === "status")}<td
+                      class="status-cell"
+                      ><span
+                        class="job-status"
+                        class:running={job.status === "downloading"}
+                        class:finished={job.status === "completed"}
+                        >{text[job.status]}{job.total && job.status === "downloading"
+                          ? ` (${Math.floor(percent(job))}%)`
+                          : ""}</span
+                      ><progress
+                        max="100"
+                        value={job.total || job.status === "completed" ? percent(job) : undefined}
+                        aria-label={`${basename(job.destination)} ${text[job.status]}`}
+                      ></progress></td
+                    >{/if}
+                  {#if visibleColumns.some((column) => column.id === "timeLeft")}<td
+                      >{remaining(job) || "—"}</td
+                    >{/if}
+                  {#if visibleColumns.some((column) => column.id === "transferRate")}<td
+                      ><bdi dir="ltr"
+                        >{job.status === "downloading" ? `${bytes(job.speed)}/s` : "—"}</bdi
+                      ></td
+                    >{/if}
+                  {#if visibleColumns.some((column) => column.id === "website")}<td
+                      class="origin-cell"
+                      ><bdi dir="ltr" title={hostname(job.url)}>{hostname(job.url)}</bdi></td
+                    >{/if}
                 </tr>
               {/each}
             </tbody>
@@ -1155,6 +1274,52 @@
         >{text.close}</button
       >
       <button type="submit" class="primary">{text.confirmAction}</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog bind:this={contextDialog} aria-labelledby="context-title" onclose={contextClosed}>
+  <form onsubmit={(event) => event.preventDefault()}>
+    <h2 id="context-title">{text.contextActions}</h2>
+    {#if contextJob}<p><bdi>{basename(contextJob.destination)}</bdi></p>
+      <div class="context-actions">
+        {#each [{ value: "resume", label: contextJob.status === "failed" ? text.retry : text.resume }, { value: "pause", label: text.pause }, { value: "cancel", label: text.cancel }, { value: "remove", label: text.remove }] as item}
+          <button
+            type="button"
+            class="secondary"
+            disabled={!eligible(contextJob, item.value) || busyIds.has(contextJob.id)}
+            onclick={() => contextAction(item.value)}>{item.label}</button
+          >
+        {/each}
+        <button
+          type="button"
+          class="secondary"
+          disabled={contextJob.status !== "completed"}
+          onclick={() => contextJob && openFile(contextJob)}>{text.open}</button
+        >
+        <button
+          type="button"
+          class="secondary"
+          disabled={contextJob.status !== "completed"}
+          onclick={() => contextJob && openFile(contextJob, true)}>{text.reveal}</button
+        >
+        <button
+          type="button"
+          class="secondary"
+          disabled={!eligible(contextJob, "resume") || busyIds.has(contextJob.id)}
+          onclick={() => {
+            contextDialog.close();
+            void showLinkReplacement();
+          }}>{text.replaceLink}</button
+        >
+      </div>
+    {:else}<p>{text.actionUnavailable}</p>{/if}
+    <p class="helper">{text.removeHint}</p>
+    {#if error}<p role="alert" class="form-error">{error}</p>{/if}
+    <div class="dialog-actions">
+      <button type="button" class="secondary" onclick={() => contextDialog.close()}
+        >{text.close}</button
+      >
     </div>
   </form>
 </dialog>
@@ -1353,6 +1518,56 @@
       required
     />
     <p class="helper">{text.unlimited}</p>
+    <label for="appearance">{text.appearance}</label>
+    <select id="appearance" bind:value={draft.view.appearance}
+      ><option value="dark">{text.dark}</option><option value="light">{text.light}</option><option
+        value="system">{text.system}</option
+      ></select
+    >
+    <fieldset class="column-preferences">
+      <legend>{text.columns}</legend>
+      <p class="helper">{text.columnHint}</p>
+      {#each draft.view.columns as column (column.id)}
+        <label
+          ><input
+            type="checkbox"
+            bind:checked={column.visible}
+            disabled={column.id === "filename"}
+          />{text.showColumn}
+          {text[
+            column.id as "filename" | "total" | "status" | "timeLeft" | "transferRate" | "website"
+          ]}</label
+        >
+        <label for={`width-${column.id}`}
+          >{text.columnWidth}
+          {text[
+            column.id as "filename" | "total" | "status" | "timeLeft" | "transferRate" | "website"
+          ]}: {column.width}px</label
+        >
+        <input
+          id={`width-${column.id}`}
+          type="range"
+          min={column.id === "filename" ? 180 : 80}
+          max="800"
+          step="10"
+          bind:value={column.width}
+        />
+      {/each}
+      <button
+        type="button"
+        class="secondary"
+        onclick={() =>
+          (draft = {
+            ...draft,
+            view: {
+              ...draft.view,
+              columns: structuredClone(defaultView.columns),
+              sort: "recent",
+              descending: false,
+            },
+          })}>{text.resetColumns}</button
+      >
+    </fieldset>
     <label for="language">{text.language}</label><select id="language" bind:value={draft.language}
       ><option value="en">English</option><option value="ar">العربية</option></select
     ><label for="default-folder">{text.defaultFolder}</label>

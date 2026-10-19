@@ -13,4 +13,42 @@
   --error: #ffb9b0;
   --selection: #344d5e;
   --selection-border: #86b4d4;
+  --primary-ink: #142622;
+  --orange: #e9bd7a;
+  --red: #f5a8ac;
+  --blue: #97c8f0;
+  --violet: #c5b0f1;
+  --folder: #ddc381;
+  --file: #a4c6df;
+  --finished: #a8d5f3;
+  --error-background: #482d2b;
+  --notice: #b6e5ca;
+  --notice-background: #253d31;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --background: #f5f7f6;
+  --surface: #ffffff;
+  --text: #1f2c26;
+  --muted: #4c5c54;
+  --border: #a5b2ab;
+  --input-border: #718279;
+  --muted-surface: #e7eeea;
+  --primary: #14664d;
+  --primary-hover: #0d4d39;
+  --primary-ink: #ffffff;
+  --focus: #805200;
+  --error: #922828;
+  --selection: #d9e9f2;
+  --selection-border: #396d8b;
+  --orange: #89540c;
+  --red: #96333b;
+  --blue: #245e8e;
+  --violet: #63428f;
+  --folder: #795900;
+  --file: #23648c;
+  --finished: #23648c;
+  --error-background: #fdebe8;
+  --notice: #175536;
+  --notice-background: #e2f4e8;
 }

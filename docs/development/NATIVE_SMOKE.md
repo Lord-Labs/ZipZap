@@ -88,3 +88,20 @@ were checked visually. This baseline is not a full screen-reader certification.
 External editor rendering, actual browser handoff, installer lifecycle and other
 Windows versions were not tested here. No blocking product defect was observed
 in this bounded baseline. Hosted checks were skipped by [policy](WORKFLOW.md).
+
+## Pending workspace qualification: issue #40
+
+Appearance/column/context changes have automated browser and Rust coverage only.
+On 2026-10-19 the maintainer requested continued work without controlling the
+device, so actual WebView2 keyboard/accessibility inspection is **unexercised**.
+Keep the implementation PR draft and #40 open pending that required evidence;
+the historical #29 baseline above is not evidence for the new changes.
+
+In a suitable isolated smoke session, verify light/dark/system contrast and
+system changes, saved sorting and columns across reopen, slider keyboard resize,
+filename availability and horizontal scrolling. Exercise right-click/Shift+F10
+actions, errors/retry, context dismissal and focus after removal/filter changes.
+Repeat in Arabic at 780×560, with long names and actual Windows/browser 200%
+text scaling. Automated CSS zoom is separate evidence, not that native check.
+Record the exact build and accessibility observations; do not change a personal
+Windows session's scaling or drive device UI without authorization.
