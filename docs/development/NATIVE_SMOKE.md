@@ -109,6 +109,24 @@ fixture hash. Result files must contain only the version/UUID/state/safe code;
 no private URL query, name or path. Close the popup during receipt and confirm
 the app still consumes the request. Restore all isolated registrations afterward.
 
+## Workspace qualification: issue #40
+
+Appearance/column/context changes have automated browser and Rust coverage.
+On 2026-10-19 the maintainer reported personally testing the Windows interface
+and confirmed all requested manual scenarios, including English/Arabic,
+keyboard operation and scaling. This is maintainer-reported acceptance,
+not agent-observed Computer Use evidence. Further Computer Use was prohibited.
+The historical #29 baseline is separate; repeat against release #47's candidate.
+
+In a suitable isolated smoke session, verify light/dark/system contrast and
+system changes, saved sorting and columns across reopen, slider keyboard resize,
+filename availability and horizontal scrolling. Exercise right-click/Shift+F10
+actions, errors/retry, context dismissal and focus after removal/filter changes.
+Repeat in Arabic at 780×560, with long names and actual Windows/browser 200%
+text scaling. Automated CSS zoom is separate evidence, not that native check.
+Record the exact build and accessibility observations; do not change a personal
+Windows session's scaling or drive device UI without authorization.
+
 ## Lifecycle qualification: issue #41
 
 The lifecycle implementation has automated Rust and mocked IPC UI coverage.

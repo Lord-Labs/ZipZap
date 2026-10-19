@@ -1,0 +1,13 @@
+{
+  "appearance": "dark",
+  "columns": [
+    { "id": "filename", "width": 260, "visible": true },
+    { "id": "total", "width": 120, "visible": true },
+    { "id": "status", "width": 180, "visible": true },
+    { "id": "timeLeft", "width": 120, "visible": true },
+    { "id": "transferRate", "width": 120, "visible": true },
+    { "id": "website", "width": 140, "visible": true }
+  ],
+  "sort": "recent",
+  "descending": false
+}

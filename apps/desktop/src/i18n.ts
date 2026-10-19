@@ -95,6 +95,19 @@ const en = {
   cancelled: "Cancelled",
   downloading: "Downloading",
   settings: "Settings",
+  appearance: "Appearance",
+  dark: "Dark",
+  light: "Light",
+  system: "Follow system",
+  columns: "Columns and sorting",
+  columnWidth: "Column width",
+  showColumn: "Show column",
+  resetColumns: "Reset columns and sorting",
+  columnHint:
+    "Resize with the sliders or arrow keys. Filename remains visible. Wide tables scroll horizontally.",
+  contextActions: "File actions",
+  shortcutHint:
+    "Filename: right-click or Shift+F10 for actions. Ctrl+N: new download; Ctrl+F: search; Ctrl+A: select visible; Delete: confirm history removal. Text fields and dialogs keep their own keys.",
   closeToTray: "Keep downloads running in the system tray when closing the window",
   trayHint: "Off by default. Use the tray menu to show ZipZap or quit and pause active downloads.",
   trayUnavailable:
@@ -315,6 +328,19 @@ const ar: Record<keyof typeof en, string> = {
   cancelled: "ملغاة",
   downloading: "جارٍ التنزيل",
   settings: "الإعدادات",
+  appearance: "المظهر",
+  dark: "داكن",
+  light: "فاتح",
+  system: "اتباع النظام",
+  columns: "الأعمدة والترتيب",
+  columnWidth: "عرض العمود",
+  showColumn: "إظهار العمود",
+  resetColumns: "إعادة الأعمدة والترتيب الافتراضي",
+  columnHint:
+    "غيّر العرض بالمؤشرات أو مفاتيح الأسهم. يبقى اسم الملف ظاهرًا. الجداول الواسعة تتمرر أفقيًا.",
+  contextActions: "إجراءات الملف",
+  shortcutHint:
+    "اضغط اسم الملف بالزر الأيمن أو Shift+F10 للإجراءات. Ctrl+N: تنزيل جديد؛ Ctrl+F: بحث؛ Ctrl+A: تحديد الظاهر؛ Delete: تأكيد حذف السجلات. تحتفظ حقول النص والنوافذ بمفاتيحها.",
   closeToTray: "إبقاء التنزيلات تعمل في شريط النظام عند إغلاق النافذة",
   trayHint:
     "معطّل افتراضيًا. استخدم قائمة شريط النظام لإظهار ZipZap أو الخروج وإيقاف التنزيلات النشطة مؤقتًا.",
