@@ -18,7 +18,13 @@ test.beforeEach(async ({ page }) => {
       notice: null,
     };
     const calls: { command: string; args: any }[] = [];
-    (window as any).zipzapTest = { state, calls, failAction: "" };
+    (window as any).zipzapTest = {
+      state,
+      calls,
+      failAction: "",
+      suggestion: null,
+      holdProbe: false,
+    };
     (window as any).__TAURI_INTERNALS__ = {
       invoke: async (command: string, args: any) => {
         if (command === "snapshot") return structuredClone(state);
@@ -40,6 +46,17 @@ test.beforeEach(async ({ page }) => {
           });
           return "test";
         }
+        if (command === "suggest_download") {
+          if ((window as any).zipzapTest.holdProbe) await new Promise(() => {});
+          return (
+            (window as any).zipzapTest.suggestion || {
+              filename: args.filename || "sample.zip",
+              total: 1048576,
+              alternative: null,
+            }
+          );
+        }
+        if (command === "cancel_probe") return;
         if (command === "download_action") {
           if ((window as any).zipzapTest.failAction === args.action)
             throw new Error("Storage unavailable");
@@ -77,10 +94,66 @@ test("empty screen, keyboard form validation, and completed row", async ({ page 
   await expect(page.getByRole("alert")).toContainText("HTTP");
   await page.getByLabel("Download link", { exact: true }).fill("https://example.com/sample.zip");
   await page.getByRole("button", { name: "Start download" }).click();
+  await expect(page.getByLabel("Filename", { exact: true })).toHaveValue("sample.zip");
+  expect((await calls(page)).filter((call) => call.command === "add_download")).toHaveLength(0);
+  await page.getByRole("button", { name: "Start download" }).click();
   await expect(page.getByText("sample.zip", { exact: true })).toBeVisible();
   await expect(page.getByRole("progressbar")).toHaveAttribute("value", "100");
   await page.getByRole("searchbox").fill("does-not-exist");
   await expect(page.getByRole("heading", { name: "No matching downloads" })).toBeVisible();
+});
+
+test("filename conflicts require review and cancellation stops the probe", async ({ page }) => {
+  await page.evaluate(() => {
+    (window as any).zipzapTest.suggestion = {
+      filename: "ملف.zip",
+      total: 100,
+      alternative: "ملف (1).zip",
+    };
+  });
+  await page.getByRole("button", { name: "العربية", exact: true }).click();
+  await page.getByRole("button", { name: "تنزيل جديد", exact: true }).click();
+  await page.locator("#url").fill("https://example.com/file");
+  await page.getByRole("button", { name: "فحص اسم الملف", exact: true }).click();
+  await expect(page.locator("#filename")).toHaveValue("ملف.zip");
+  await expect(page.getByRole("status").filter({ hasText: "الاسم مستخدم" })).toContainText(
+    "ملف (1).zip",
+  );
+  await page.getByRole("button", { name: "استخدام الاسم البديل", exact: true }).click();
+  await expect(page.locator("#filename")).toHaveValue("ملف (1).zip");
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await page.screenshot({ path: ".research-local/ui/filename-review-ar.png", fullPage: true });
+  await page.evaluate(() => {
+    (window as any).zipzapTest.holdProbe = true;
+  });
+  await page.getByRole("button", { name: "فحص اسم الملف", exact: true }).click();
+  await expect(page.getByRole("button", { name: "جارٍ فحص الاسم…" })).toBeDisabled();
+  await page.keyboard.press("Escape");
+  await expect
+    .poll(async () => (await calls(page)).some((call) => call.command === "cancel_probe"))
+    .toBeTruthy();
+  await expect(page.locator("dialog[open]")).toHaveCount(0);
+});
+
+test("browser collision offers an editable fresh download without overwriting the open form", async ({
+  page,
+}) => {
+  await page.getByRole("button", { name: "New download", exact: true }).click();
+  await page.locator("#url").fill("https://example.com/my-link");
+  await page.evaluate(() => {
+    (window as any).zipzapTest.state.browser_review = {
+      url: "https://example.com/browser-link",
+      destination: "C:\\Downloads",
+      suggestion: { filename: "report.zip", total: 100, alternative: "report (1).zip" },
+    };
+  });
+  await expect(page.getByRole("button", { name: "Review filename", exact: true })).toBeVisible();
+  await expect(page.locator("#url")).toHaveValue("https://example.com/my-link");
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: "Review filename", exact: true }).click();
+  await expect(page.locator("#filename")).toHaveValue("report (1).zip");
+  await expect(page.locator("#url")).toHaveValue("https://example.com/browser-link");
+  await page.locator("#filename").fill("my-report.zip");
 });
 
 test("Arabic switches direction and settings persist", async ({ page }) => {

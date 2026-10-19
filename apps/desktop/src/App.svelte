@@ -38,7 +38,9 @@
     version: string;
     native_error: string | null;
     notice: string | null;
+    browser_review?: { url: string; destination: string; suggestion: Suggestion } | null;
   };
+  type Suggestion = { filename: string; total: number | null; alternative: string | null };
 
   let jobs: Job[] = [];
 
@@ -126,6 +128,9 @@
   let destination = "";
 
   let formError = "";
+  let suggestion: Suggestion | null = null;
+  let probeId = "";
+  let browserReview: Snapshot["browser_review"] = null;
 
   let draft: Settings = { ...settings };
 
@@ -147,6 +152,7 @@
 
   const errorMessage = (value: unknown) => {
     const raw = value instanceof Error ? value.message : String(value);
+    if (raw.startsWith("Browser destination is occupied;")) return text.browserReviewHint;
     const reason = /^Storage error: (full|access|missing|other)\./.exec(raw)?.[1];
     const messages: Record<string, string> = {
       full: text.storageFull,
@@ -259,6 +265,7 @@
       ready = true;
 
       if (value.notice) error = errorMessage(value.notice);
+      if (value.browser_review) browserReview = value.browser_review;
     } catch {
       error = text.missing;
     } finally {
@@ -280,9 +287,60 @@
     url = "";
     filename = "";
     destination = folder;
+    suggestion = null;
     addDialog.showModal();
     await tick();
     urlInput.focus();
+  }
+
+  function cancelProbe() {
+    if (probeId && isDesktop()) void invoke("cancel_probe", { id: probeId }).catch(() => {});
+    probeId = "";
+    busy = false;
+  }
+
+  async function checkName() {
+    formError = "";
+    suggestion = null;
+    if (!isDesktop()) {
+      formError = text.preview;
+      return null;
+    }
+    const id = crypto.randomUUID();
+    probeId = id;
+    busy = true;
+    try {
+      const result = await invoke<Suggestion>("suggest_download", {
+        id,
+        url,
+        destination,
+        filename: filename.trim() || null,
+      });
+      if (probeId !== id) return null;
+      suggestion = result;
+      if (!filename.trim()) filename = result.filename;
+      return result;
+    } catch (e) {
+      if (probeId === id) formError = `${text.probeFailed} ${errorMessage(e)}`;
+      return null;
+    } finally {
+      if (probeId === id) {
+        probeId = "";
+        busy = false;
+      }
+    }
+  }
+
+  async function reviewBrowser() {
+    const review = browserReview;
+    if (!review) return;
+    await newDownload();
+    url = review.url;
+    destination = review.destination;
+    filename = review.suggestion.alternative || review.suggestion.filename;
+    suggestion = { ...review.suggestion, filename, alternative: null };
+    browserReview = null;
+    error = "";
   }
 
   async function addDownload(event: SubmitEvent) {
@@ -303,6 +361,9 @@
       return;
     }
 
+    const hadName = !!filename.trim();
+    const checked = await checkName();
+    if (!checked || !hadName || checked.alternative) return;
     busy = true;
 
     try {
@@ -569,6 +630,14 @@
             aria-label={text.clearError}><Icon name="close" /></button
           >
         </div>{/if}
+      {#if browserReview}<div class="message notice" role="status">
+          <span>{text.browserReviewHint}</span><button class="secondary" onclick={reviewBrowser}
+            >{text.reviewName}</button
+          >
+          <button class="icon-button" onclick={() => (browserReview = null)} aria-label={text.close}
+            ><Icon name="close" /></button
+          >
+        </div>{/if}
 
       <section class="download-panel" aria-label={text.downloads}>
         <div class="panel-toolbar">
@@ -729,7 +798,7 @@
   </footer>
 </div>
 
-<dialog bind:this={addDialog} aria-labelledby="add-title">
+<dialog bind:this={addDialog} aria-labelledby="add-title" onclose={cancelProbe}>
   <form onsubmit={addDownload}>
     <div class="dialog-title">
       <div>
@@ -752,6 +821,7 @@
       dir="ltr"
       placeholder={text.urlHint}
       required
+      disabled={busy}
       maxlength="16384"
       aria-describedby="download-help"
     />
@@ -761,6 +831,8 @@
       bind:value={filename}
       placeholder={text.optional}
       maxlength="180"
+      disabled={busy}
+      oninput={() => (suggestion = null)}
     /><label for="destination">{text.destination}</label>
     <div class="folder-picker">
       <input
@@ -772,11 +844,32 @@
       /><button
         type="button"
         class="secondary"
+        disabled={busy}
         onclick={() => chooseFolder()}
         aria-label={text.browse}><Icon name="folder" /></button
       >
     </div>
     <p id="storage-help" class="helper">{text.storageUnknown} {text.storage}</p>
+    <div class="name-preview">
+      <button type="button" class="secondary" disabled={busy || !url} onclick={() => checkName()}
+        >{busy ? text.checkingName : text.checkName}</button
+      >
+      {#if suggestion}<p class="helper" role="status">
+          {text.reviewNameHint}
+          {#if suggestion.total !== null}<bdi dir="ltr">{bytes(suggestion.total)}</bdi>{/if}
+        </p>{/if}
+      {#if suggestion?.alternative}<p class="helper" role="status">
+          {text.duplicateName} <bdi>{suggestion.alternative}</bdi>
+        </p>
+        <button
+          type="button"
+          class="secondary"
+          onclick={() => {
+            filename = suggestion!.alternative!;
+            suggestion = null;
+          }}>{text.useAlternative}</button
+        >{/if}
+    </div>
     {#if formError}<p class="form-error" role="alert">{formError}</p>{/if}
     <div class="dialog-actions">
       <button type="button" class="secondary" onclick={() => addDialog.close()}>{text.close}</button

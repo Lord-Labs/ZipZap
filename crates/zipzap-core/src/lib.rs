@@ -1,4 +1,6 @@
 //! Download state, integrity, durable checkpoints, and one bounded queue.
+mod metadata;
+pub use metadata::Suggestion;
 #[cfg(test)]
 mod persistence_tests;
 mod publication;
@@ -19,7 +21,7 @@ use std::{
     sync::{Arc, Mutex},
     time::{Duration, Instant},
 };
-use tokio_util::sync::CancellationToken;
+pub use tokio_util::sync::CancellationToken;
 use uuid::Uuid;
 
 pub type Result<T> = std::result::Result<T, String>;
@@ -124,6 +126,12 @@ struct State {
     settings: Settings,
     samples: HashMap<String, (Instant, u64)>,
 }
+fn destination_queued(state: &State, path: &Path) -> bool {
+    state.jobs.iter().any(|job| {
+        job.destination.to_string_lossy().to_lowercase() == path.to_string_lossy().to_lowercase()
+            && ![Status::Cancelled, Status::Failed].contains(&job.status)
+    })
+}
 pub struct Manager {
     state: Mutex<State>,
     client: Client,
@@ -162,9 +170,11 @@ pub fn validate_filename(value: &str) -> Result<()> {
         || value.len() > 180
         || value.trim() != value
         || value.ends_with('.')
-        || value
-            .chars()
-            .any(|c| c.is_control() || "<>:\"/\\|?*".contains(c))
+        || value.chars().any(|c| {
+            c.is_control()
+                || matches!(c, '\u{202a}'..='\u{202e}' | '\u{2066}'..='\u{2069}')
+                || "<>:\"/\\|?*".contains(c)
+        })
         || ["CON", "PRN", "AUX", "NUL", "CLOCK$", "CONIN$", "CONOUT$"].contains(&stem.as_str())
         || (["COM", "LPT"].iter().any(|prefix| {
             stem.strip_prefix(prefix).is_some_and(|suffix| {
@@ -397,12 +407,8 @@ impl Manager {
             return Ok(job);
         }
         let url = validate_url(value)?;
-        let suggested = url
-            .path_segments()
-            .and_then(|mut p| p.next_back())
-            .filter(|s| validate_filename(s).is_ok())
-            .unwrap_or("download.bin");
-        let name = filename.unwrap_or(suggested);
+        let suggested = metadata::url_name(&url);
+        let name = filename.unwrap_or(&suggested);
         validate_filename(name)?;
         let folder = folder.canonicalize().map_err(io_error)?;
         if !folder.is_dir() {
@@ -416,11 +422,7 @@ impl Manager {
         if state.jobs.len() >= 1000 {
             return Err("Queue history limit reached; remove old completed downloads".into());
         }
-        if state.jobs.iter().any(|j| {
-            j.destination.to_string_lossy().to_lowercase()
-                == destination.to_string_lossy().to_lowercase()
-                && ![Status::Cancelled, Status::Failed].contains(&j.status)
-        }) {
+        if destination_queued(&state, &destination) {
             return Err("That destination is already in the queue".into());
         }
         let job = Job {
@@ -672,6 +674,10 @@ impl Manager {
             }
             tokio::time::sleep(Duration::from_millis(50)).await;
         }
+    }
+
+    pub fn is_stopping(&self) -> bool {
+        self.stop.is_cancelled()
     }
 
     fn job(&self, id: &str) -> Result<Job> {

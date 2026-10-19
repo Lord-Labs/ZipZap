@@ -21,6 +21,15 @@ Click Filename, Total size or Status to sort; click again to reverse. Unknown
 sizes stay last. Selecting a status filter clears the file-category filter.
 These workspace changes are not included in the published first beta.
 
+In the development version, **Check filename** previews a safe server suggestion
+without downloading the file. Starting with an empty name also previews first;
+review or edit the name and press Start again. An explicit filename is kept.
+If it is occupied, review and accept the proposed numbered alternative or type
+another name. Suggestions do not reserve names, so a later race may still be
+rejected safely. Closing the dialog cancels an outstanding metadata check; the
+check also stops after ten seconds. If it fails, you can enter a plain filename
+and retry. Unsupported/unsafe server names fall back to the link or download.bin.
+
 The development version also keeps a rejected pause/resume/cancel action from
 changing the download when its database save fails. If a worker cannot save its
 final state, it shows Failed with a **last saved state retained** message. Repair
@@ -91,6 +100,13 @@ host is missing, open ZipZap settings and choose **Connect Chrome / Edge**. A
 red extension badge/error means the request was not accepted by the host. An
 accepted handoff can still fail in the app (for example, duplicate filename or
 unavailable destination); inspect the app's error notice and queue.
+
+The development version checks server filenames with the same rules as the
+manual dialog. A duplicate browser destination is rejected; **Review filename**
+offers the latest rejected link as a new editable download with an available
+alternative. The original request was not queued. Resend the link if this
+temporary review is dismissed or the app restarts. Metadata failures appear in
+the app notice; native receipt still does not confirm enqueue success.
 
 No cookies, browser history or tabs are read. Authenticated sessions, blob/data
 URLs, protected players and HLS/DASH are unsupported. Signed direct links may
