@@ -36,6 +36,19 @@ The review is a source/fixture review, not an independent penetration test.
   The publishing job alone can write releases and uses the protected `beta`
   environment restricted to protected branches. There is no automatic updater.
 
+## Development Windows provenance (#44)
+
+[ADR 0007](../architecture/0007-windows-provenance.md) selects a minimal
+`Zone.Identifier` stream with Internet zone 3 before hard-link publication and
+verified recovery. Existing Internet/Restricted markers are preserved. No
+HostUrl/ReferrerUrl/private query is written, no payload byte changes, no automatic
+open, scanner invocation, warning bypass or Windows security setting change.
+Unsupported/failed metadata is a persisted advisory warning, separate from valid
+completed payload. Explicit Open checks current metadata and asks for native
+confirmation if it cannot verify the marker; reveal does not execute the file.
+Legacy completed files are not silently relabeled. This does not certify malware
+safety or guarantee SmartScreen behavior. The published first beta is unchanged.
+
 ## Dependency checks (2026-10-16)
 
 `npm audit --json`: 0 vulnerabilities. `cargo-audit 0.22.2`: 0 vulnerability

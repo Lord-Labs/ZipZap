@@ -89,6 +89,23 @@ External editor rendering, actual browser handoff, installer lifecycle and other
 Windows versions were not tested here. No blocking product defect was observed
 in this bounded baseline. Hosted checks were skipped by [policy](WORKFLOW.md).
 
+## Windows provenance qualification: issue #44
+
+Local Windows tests exercise actual alternate streams on temporary NTFS files:
+publication with unchanged bytes, preservation of Restricted zone 4, stream-access
+failure with a completed payload/advisory warning, reopen, and crash recovery that
+restores a missing stream on the verified file. The engine fixture also checks
+the exact marker and payload hash on every completed Windows download.
+
+On 2026-10-19 the maintainer reported personally testing the Windows interface
+and confirmed all requested manual scenarios, including the unmarked-file Open
+warning's confirm/cancel and reveal paths. This is maintainer-reported acceptance,
+not agent-observed Computer Use evidence. Further Computer Use was prohibited.
+Automated UI tests independently check completed-byte warnings and explicit
+reveal, with mocked IPC. Neither source of evidence certifies SmartScreen/AV
+safety. Repeat the native paths against release #47's candidate using owned
+harmless fixtures; do not change security settings or relabel personal files.
+
 ## Browser-result qualification: issue #43
 
 Version 2 receipt/queued/rejected feedback has protocol, core/desktop and mocked

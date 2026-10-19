@@ -182,6 +182,22 @@ Close button and Escape remain disabled until enqueue responses finish. These wo
 the published first beta; UI evidence uses mocked IPC, separate from native
 release qualification.
 
+## Windows Internet origin metadata (development)
+
+New Windows downloads receive an Internet zone marker before publication, without
+storing their private source link in the file's metadata or changing payload bytes.
+Interrupted publication applies the same rule during verified recovery. Existing
+completed history is not rewritten. This is provenance, not a safety/antivirus
+certification or a promise that Windows will show a particular security prompt.
+
+If the filesystem or permissions prevent saving the marker, the download can
+still complete with a separate warning. **Open file** checks the current marker
+and asks for native confirmation when it cannot verify Internet/Restricted origin,
+including legacy files; Cancel keeps the file closed. **Show in folder** remains
+an explicit reveal action. Keep Windows security warnings enabled and open only
+files you trust. No downloaded file is opened automatically. This behavior is
+development work, separate from the published first beta.
+
 ## Chrome and Edge
 
 The installer registers a native messaging host for the current Windows user.

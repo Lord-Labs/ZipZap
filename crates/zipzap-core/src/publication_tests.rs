@@ -95,6 +95,96 @@ fn publication_commits_evidence_and_keeps_the_final_file_on_cleanup() {
     assert_eq!(std::fs::read(&job.destination).unwrap(), b"prefix");
     assert!(!transfer::part(&job, 0).exists());
     assert!(!transfer::part(&job, 4).exists());
+    #[cfg(windows)]
+    {
+        assert_eq!(complete.provenance, Some(Provenance::Internet));
+        assert!(has_internet_zone(&job.destination));
+        assert_eq!(
+            std::fs::read(zone(&job.destination)).unwrap(),
+            b"[ZoneTransfer]\r\nZoneId=3\r\n"
+        );
+    }
+}
+
+#[cfg(windows)]
+fn zone(path: &Path) -> PathBuf {
+    let mut value = path.as_os_str().to_os_string();
+    value.push(":Zone.Identifier");
+    PathBuf::from(value)
+}
+
+#[cfg(windows)]
+#[test]
+fn zone_failure_keeps_valid_bytes_and_a_durable_warning_without_lowering_restricted_zones() {
+    use std::os::windows::fs::OpenOptionsExt;
+    for restricted in [false, true] {
+        let (folder, manager, db, job) = fixture();
+        let metadata = zone(&transfer::part(&job, 4));
+        std::fs::write(
+            &metadata,
+            if restricted {
+                b"[ZoneTransfer]\r\nZoneId=4\r\n".as_slice()
+            } else {
+                b"unavailable"
+            },
+        )
+        .unwrap();
+        let guard = if restricted {
+            None
+        } else {
+            Some(
+                std::fs::OpenOptions::new()
+                    .read(true)
+                    .share_mode(0)
+                    .open(&metadata)
+                    .unwrap(),
+            )
+        };
+        publication::publish(&manager, &job.id, &CancellationToken::new()).unwrap();
+        assert_eq!(std::fs::read(&job.destination).unwrap(), b"prefix");
+        let completed = manager.job(&job.id).unwrap();
+        assert_eq!(completed.status, Status::Completed);
+        assert_eq!(
+            completed.provenance,
+            Some(if restricted {
+                Provenance::Internet
+            } else {
+                Provenance::Unavailable
+            })
+        );
+        drop(guard);
+        if restricted {
+            assert!(
+                std::fs::read_to_string(zone(&job.destination))
+                    .unwrap()
+                    .contains("ZoneId=4")
+            );
+        }
+        assert_eq!(has_internet_zone(&job.destination), restricted);
+        drop(db);
+        drop(manager);
+        let reopened = Manager::open(&folder.path().join("state.sqlite")).unwrap();
+        assert_eq!(
+            reopened.job(&job.id).unwrap().provenance,
+            completed.provenance
+        );
+        assert_eq!(std::fs::read(&job.destination).unwrap(), b"prefix");
+    }
+}
+
+#[cfg(windows)]
+#[test]
+fn crash_recovery_restores_missing_zone_metadata_on_the_verified_file() {
+    let (_folder, database, job) = crash("after_link");
+    assert!(has_internet_zone(&job.destination));
+    std::fs::remove_file(zone(&job.destination)).unwrap();
+    assert!(!has_internet_zone(&job.destination));
+    let manager = Manager::open(&database).unwrap();
+    let recovered = manager.job(&job.id).unwrap();
+    assert_eq!(recovered.status, Status::Completed);
+    assert_eq!(recovered.provenance, Some(Provenance::Internet));
+    assert!(has_internet_zone(&job.destination));
+    assert_eq!(std::fs::read(&job.destination).unwrap(), b"prefix");
 }
 
 #[test]

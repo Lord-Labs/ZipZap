@@ -187,11 +187,11 @@ async fn select_folder(app: tauri::AppHandle) -> Result<Option<String>, String> 
 }
 
 #[tauri::command]
-fn open_download(
+async fn open_download(
     id: String,
     reveal: bool,
     app: tauri::AppHandle,
-    state: State<AppState>,
+    state: State<'_, AppState>,
 ) -> Result<(), String> {
     use tauri_plugin_opener::OpenerExt;
     let job = state
@@ -205,6 +205,24 @@ fn open_download(
             .reveal_item_in_dir(job.destination)
             .map_err(|e| e.to_string())
     } else {
+        if !zipzap_core::has_internet_zone(&job.destination) {
+            let arabic = state.manager.settings().language == "ar";
+            let handle = app.clone();
+            let confirmed = tokio::task::spawn_blocking(move || {
+                let (message, open, cancel) = if arabic {
+                    ("تعذّر التحقق من علامة منشأ الإنترنت لهذا الملف. قد لا تتوفر تحذيرات Windows المعتادة. افتحه فقط إذا كنت تثق بالمصدر.", "فتح الملف", "إلغاء")
+                } else {
+                    ("This file's Internet origin marker could not be verified. Usual Windows warnings may be unavailable. Open it only if you trust its source.", "Open file", "Cancel")
+                };
+                handle.dialog().message(message).title("ZipZap")
+                    .kind(tauri_plugin_dialog::MessageDialogKind::Warning)
+                    .buttons(tauri_plugin_dialog::MessageDialogButtons::OkCancelCustom(open.into(), cancel.into()))
+                    .blocking_show()
+            }).await.map_err(|_| "File warning dialog failed")?;
+            if !confirmed {
+                return Ok(());
+            }
+        }
         app.opener()
             .open_path(job.destination.to_string_lossy(), None::<&str>)
             .map_err(|e| e.to_string())

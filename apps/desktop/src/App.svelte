@@ -24,6 +24,7 @@
     attempt?: number;
     next_retry?: number | null;
     failure_reason?: string | null;
+    provenance?: "internet" | "unavailable" | null;
   };
 
   type Category = {
@@ -1139,6 +1140,9 @@
                         ></button
                       >
                     </div>
+                    {#if job.provenance === "unavailable"}<p class="job-error">
+                        {text.provenanceUnavailable}
+                      </p>{/if}
                     {#if job.error}<p class="job-error">
                         {failureMessages[job.failure_reason || ""] || errorMessage(job.error)}
                       </p>{/if}</td
@@ -1244,6 +1248,9 @@
                 >{new Date(selected.next_retry).toLocaleTimeString(language)}</bdi
               >
             </div>{/if}
+          {#if selected.provenance === "unavailable"}<p class="job-error" role="status">
+              {text.provenanceUnavailable}
+            </p>{/if}
           {#if selected.error}<p class="job-error" role="status">
               {failureMessages[selected.failure_reason || ""] || errorMessage(selected.error)}
             </p>{/if}

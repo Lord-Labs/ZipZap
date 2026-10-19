@@ -159,6 +159,49 @@ test.afterEach(async ({ page }) => {
   expect(browserErrors.get(page)).toEqual([]);
 });
 
+test("zone metadata failure stays distinct from successful bytes in English and Arabic", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.evaluate(() => {
+    (window as any).zipzapTest.state.jobs = [
+      {
+        id: "zone-warning",
+        url: "https://example.com/file?token=private",
+        destination: "C:\\Downloads\\safe-fixture.bin",
+        status: "completed",
+        downloaded: 1024,
+        total: 1024,
+        speed: 0,
+        error: null,
+        provenance: "unavailable",
+      },
+    ];
+  });
+  await expect(page.getByText("safe-fixture.bin", { exact: true }).first()).toBeVisible();
+  await page.getByText("safe-fixture.bin", { exact: true }).first().click();
+  await expect(
+    page.getByText(/Windows Internet origin metadata could not be saved/).first(),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Show in folder", exact: true }).click();
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          (window as any).zipzapTest.calls
+            .filter((call: any) => call.command === "open_download")
+            .at(-1)?.args.reveal,
+      ),
+    )
+    .toBe(true);
+  await page.getByRole("button", { name: "العربية", exact: true }).click();
+  await expect(page.getByText(/تعذّر حفظ علامة منشأ الإنترنت/).first()).toBeVisible();
+  await expect(page.locator("body")).not.toContainText("token=private");
+  await page.setViewportSize({ width: 780, height: 560 });
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await page.screenshot({ path: ".research-local/ui/provenance-ar.png", fullPage: true });
+});
+
 test("empty screen, keyboard form validation, and completed row", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Ready when you are." })).toBeVisible();
   await page.getByRole("button", { name: "New download", exact: true }).click();

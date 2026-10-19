@@ -160,6 +160,7 @@ pub(super) fn recover(job: &mut Job) -> Result<Option<(File, File)>> {
         return Ok(None);
     };
     let assembly = marker(job)?;
+    provenance::mark(job);
     completed(job);
     Ok(Some((assembly, destination)))
 }
@@ -201,6 +202,7 @@ pub(super) fn publish(manager: &Manager, id: &str, token: &CancellationToken) ->
     if state.jobs[index].status != Status::Downloading || token.is_cancelled() {
         return Err("Paused".into());
     }
+    provenance::mark(&mut job);
     if state.jobs[index].publication.is_none() {
         save(&state, &job)?;
         state.jobs[index] = job.clone();

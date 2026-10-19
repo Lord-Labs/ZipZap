@@ -1,4 +1,6 @@
 const en = {
+  provenanceUnavailable:
+    "Download bytes are complete, but Windows Internet origin metadata could not be saved. Keep security warnings enabled and open only files you trust.",
   downloads: "Downloads",
   categories: "Categories",
   categoryRules: "Category rules",
@@ -236,6 +238,8 @@ const en = {
     "Check the destination drive and NTFS support, then retry; saved checkpoints are kept.",
 };
 const ar: Record<keyof typeof en, string> = {
+  provenanceUnavailable:
+    "اكتملت بيانات التنزيل، لكن تعذّر حفظ علامة منشأ الإنترنت في Windows. أبقِ تحذيرات الأمان مفعّلة وافتح الملفات الموثوقة فقط.",
   downloads: "التنزيلات",
   categories: "الفئات",
   categoryRules: "قواعد الفئات",
