@@ -44,6 +44,18 @@ const handler = async (request, response) => {
   response.once("close", finish);
   const route = request.url.split("?")[0];
   requests.push({ route, range: request.headers.range, ifRange: request.headers["if-range"] });
+  if (route === "/metadata-redirect") {
+    response.writeHead(302, { Location: "/metadata-star" }).end();
+    return;
+  }
+  const dispositionHeaders = {
+    "/metadata-star": "attachment; filename=old.zip; filename*=UTF-8''%D9%85%D9%84%D9%81.zip",
+    "/metadata-plain": 'attachment; filename="report; Q1.zip"',
+    "/metadata-unsafe": 'attachment; filename="../evil.zip"',
+    "/metadata-malformed": "attachment; filename=a.zip; FILENAME=b.zip",
+  };
+  if (dispositionHeaders[route])
+    response.setHeader("Content-Disposition", dispositionHeaders[route]);
   if (request.headers["if-range"]) {
     if (route === "/segment-auth") {
       response.writeHead(403).end();
@@ -290,6 +302,59 @@ try {
     }),
   );
   passed.push("HTTPS with explicitly trusted fixture CA");
+  const beforeProbe = (await ask({ command: "jobs" })).length;
+  for (const [route, expected] of [
+    ["/metadata-star", "ملف.zip"],
+    ["/metadata-redirect", "ملف.zip"],
+    ["/metadata-plain", "report; Q1.zip"],
+    ["/metadata-unsafe", "metadata-unsafe"],
+    ["/metadata-malformed", "metadata-malformed"],
+    ["/%D9%85%D9%84%D9%81.zip", "ملف.zip"],
+  ]) {
+    const proposal = await ask({
+      command: "suggest",
+      url: `${base}${route}?token=DO_NOT_LEAK`,
+      folder: directory,
+    });
+    assert.equal(proposal.filename, expected);
+    assert.equal(proposal.total, bytes.length);
+    assert.equal(proposal.alternative, null);
+  }
+  assert.equal((await ask({ command: "jobs" })).length, beforeProbe);
+  await assert.rejects(
+    ask({ command: "suggest", url: `${base}/unsafe?token=DO_NOT_LEAK`, folder: directory }),
+    (error) => !error.message.includes("DO_NOT_LEAK"),
+  );
+  const explicit = await ask({
+    command: "suggest",
+    url: `${base}/metadata-star`,
+    folder: directory,
+    filename: "chosen.zip",
+  });
+  assert.equal(explicit.filename, "chosen.zip");
+  const proposal = await ask({
+    command: "suggest",
+    url: `${base}/metadata-star`,
+    folder: directory,
+  });
+  await complete(
+    await ask({
+      command: "add",
+      url: `${base}/metadata-star`,
+      folder: directory,
+      filename: proposal.filename,
+    }),
+  );
+  const collision = await ask({
+    command: "suggest",
+    url: `${base}/metadata-star`,
+    folder: directory,
+  });
+  assert.equal(collision.alternative, "ملف (1).zip");
+  assert.equal(digest(await readFile(path.join(directory, "ملف.zip"))), digest(bytes));
+  passed.push(
+    "metadata headers, Unicode, safe fallbacks, redirects and duplicate alternatives stay advisory",
+  );
   await complete(await add("/range", "range.bin"));
   passed.push("segmented transfer matches full digest");
   assert.ok(requests.some((r) => r.range?.startsWith("bytes=2097152-") && r.ifRange));

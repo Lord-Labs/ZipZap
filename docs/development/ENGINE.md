@@ -91,6 +91,38 @@ live database/WAL pair separately. No additional snapshot is needed for this
 transactional upgrade. Keep databases private and preserve completed files;
 installer upgrade/downgrade qualification remains part of #47.
 
+## Filename metadata (development version)
+
+`Manager::suggest` and the CLI `suggest` command inspect headers through the same
+client, host slots, redirects and TLS policy as downloads. A single GET with
+`Range: bytes=0-0` has a ten-second overall deadline and is cancellable, including
+before headers. The body is dropped even if the server ignores the range. No job,
+partial file or reservation is created, and the probe does not retry. An explicit
+filename skips the network and is never replaced by server metadata.
+
+The fallback order is valid UTF-8 `filename*`, valid quoted/token `filename`
+(legacy bytes are Latin-1), the strictly UTF-8 percent-decoded final response URL
+component, then `download.bin`. Parsing is bounded to 4096 header bytes. Duplicate
+filename parameters/headers, quoted backslash escapes, unsupported encodings and
+malformed values fall back; no path is stripped into an apparently safe name.
+All candidates use shared validation: at most 180 UTF-8 bytes, no traversal/path
+characters, Windows device names, trailing dots/spaces, controls or Unicode bidi
+override/isolate characters. The advisory header rules follow
+[RFC 6266](https://www.rfc-editor.org/rfc/rfc6266.html) and the UTF-8 extended-value
+format in [RFC 8187](https://www.rfc-editor.org/rfc/rfc8187.html); unsupported cases
+are deliberately ignored rather than guessed.
+
+Occupied destinations return a free `name (N).ext` alternative, with at most 1000
+case-insensitive queue/filesystem candidates. Users review/edit it; it is not a
+reservation. Add and no-clobber publication still reject races. Manual desktop
+requests with an empty filename preview before starting. Browser requests use
+the same suggestion path; a collision rejects that original enqueue and offers
+the latest rejected request for a fresh, editable desktop download. Closing or
+restarting can discard this advisory review; resend the browser link if needed.
+Native receipt remains separate from enqueue success until #43. The synchronous
+`add` API retains the safe URL fallback when callers omit a filename; callers
+wanting server metadata use `suggest` before `add`.
+
 ## Retry policy (development version)
 
 The shared worker classifies transient network failures, HTTP 408/500/502/503/504

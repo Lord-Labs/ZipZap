@@ -38,7 +38,7 @@ async fn main() {
             continue;
         }
         let result = match serde_json::from_str::<Value>(&line) {
-            Ok(value) => dispatch(&manager, &value),
+            Ok(value) => dispatch(&manager, &value).await,
             Err(_) => Err("Invalid JSON command".into()),
         };
         println!(
@@ -61,8 +61,19 @@ async fn main() {
     manager.shutdown().await;
 }
 
-fn dispatch(manager: &Manager, value: &Value) -> Result<Value, String> {
+async fn dispatch(manager: &Manager, value: &Value) -> Result<Value, String> {
     match value["command"].as_str().unwrap_or("") {
+        "suggest" => manager
+            .suggest(
+                value["url"].as_str().ok_or("Missing URL")?,
+                Path::new(value["folder"].as_str().ok_or("Missing folder")?),
+                value["filename"].as_str(),
+                &tokio_util::sync::CancellationToken::new(),
+            )
+            .await
+            .and_then(|suggestion| {
+                serde_json::to_value(suggestion).map_err(|_| "Serialization failed".into())
+            }),
         "add" => manager
             .add(
                 value["url"].as_str().ok_or("Missing URL")?,
