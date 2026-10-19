@@ -3,7 +3,7 @@
 Use Git, Node.js 24 (see `.node-version`), npm and Rust 1.99.0
 (`rust-toolchain.toml`). Windows desktop work needs the MSVC C++ Build Tools,
 Windows SDK and Microsoft Edge WebView2 runtime. Use a Windows x64 host to
-package the desktop; Linux CI checks the core and frontend only.
+package the desktop; Linux verification covers the core and frontend only.
 
 ```sh
 git clone https://github.com/Lord-shaban/ZipZap.git
@@ -28,7 +28,7 @@ that step automatically. Do not run build tools as administrator.
 | `npx playwright test`     | UI contract, keyboard, RTL and Axe tests                     |
 
 Install Playwright's test browser with `npx playwright install chromium`.
-Linux UI CI uses `npx playwright install --with-deps chromium`.
+Linux UI checks use `npx playwright install --with-deps chromium`.
 
 ## Required Rust and integrity checks
 
@@ -49,8 +49,10 @@ are committed; keep `--locked` and use `npm ci`.
 
 See [engine behavior](ENGINE.md), [desktop integration](DESKTOP.md),
 [user instructions](../USER_GUIDE.md) and [workflow](WORKFLOW.md).
-Documentation-only contributors can run Node checks; full CI still builds the
-workspace. GitHub CLI is optional for contributors. Ponytail and REA are optional
+Documentation-only contributors can run Node checks. Hosted verification is
+manual-only by [maintainer decision #54](https://github.com/Lord-shaban/ZipZap/issues/54)
+and must not be run without a separate request. Required local checks remain in
+force. GitHub CLI is optional for contributors. Ponytail and REA are optional
 assistant workflows, never paid build requirements.
 
 ## Troubleshooting

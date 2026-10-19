@@ -4,13 +4,21 @@ Use research to answer a specific implementation question, not to imply that the
 whole reference application has been understood. Public IDM feature descriptions
 establish advertised behavior, not internal algorithms or measured performance.
 
-No IDM binary, extension, runtime, or packet capture has been analyzed for this
-repository. The implementation is independently authored from public protocol/framework
-documentation and verified against ZipZap's own fixtures.
+The [IDM desktop reference](idm-desktop.md) records a bounded REA resource
+inventory and separate main-window observations of installed IDM 6.43. No IDM
+download algorithm, extension or packet capture has been analyzed. ZipZap's
+implementation is independently authored and verified against its own fixtures.
 
 The separately recorded [engine strategy comparison](engine-strategy.md) uses a
 local HTTP fixture with reqwest/Tokio and an official aria2 Windows binary. It
 does not analyze IDM or establish production performance.
+
+## Next-phase study
+
+The [next-phase feature study](next-phase-features.md) maps the inspected ZipZap
+baseline and official IDM/platform documentation to the accepted M6 backlog and
+separate M7 decisions. It reuses existing REA evidence and does not claim new
+native analysis, runtime verification or performance results.
 
 ## Tools
 

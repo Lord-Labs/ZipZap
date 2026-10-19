@@ -1,0 +1,46 @@
+[
+  {
+    "id": "compressed",
+    "name": "",
+    "extensions": ["zip", "rar", "7z", "gz", "bz2", "xz", "tar", "tgz", "zst"],
+    "download_folder": null
+  },
+  {
+    "id": "documents",
+    "name": "",
+    "extensions": [
+      "pdf",
+      "doc",
+      "docx",
+      "xls",
+      "xlsx",
+      "ppt",
+      "pptx",
+      "txt",
+      "csv",
+      "epub",
+      "odt",
+      "rtf"
+    ],
+    "download_folder": null
+  },
+  {
+    "id": "music",
+    "name": "",
+    "extensions": ["mp3", "m4a", "wav", "flac", "ogg", "aac", "opus"],
+    "download_folder": null
+  },
+  {
+    "id": "programs",
+    "name": "",
+    "extensions": ["exe", "msi", "msix", "appx", "apk"],
+    "download_folder": null
+  },
+  {
+    "id": "video",
+    "name": "",
+    "extensions": ["mp4", "mkv", "webm", "avi", "mov", "m4v"],
+    "download_folder": null
+  },
+  { "id": "other", "name": "", "extensions": [], "download_folder": null }
+]

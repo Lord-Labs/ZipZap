@@ -1,4 +1,21 @@
 //! Download state, integrity, durable checkpoints, and one bounded queue.
+mod categories;
+mod metadata;
+pub use categories::{Category, default_categories};
+pub use metadata::Suggestion;
+mod link_refresh;
+pub use link_refresh::LinkReplacement;
+mod queue;
+pub use queue::QueueState;
+#[cfg(test)]
+mod persistence_tests;
+mod publication;
+#[cfg(test)]
+mod publication_tests;
+mod retry;
+pub use retry::FailureReason;
+#[cfg(test)]
+mod storage_tests;
 mod transfer;
 
 use reqwest::{Client, Url};
@@ -10,7 +27,7 @@ use std::{
     sync::{Arc, Mutex},
     time::{Duration, Instant},
 };
-use tokio_util::sync::CancellationToken;
+pub use tokio_util::sync::CancellationToken;
 use uuid::Uuid;
 
 pub type Result<T> = std::result::Result<T, String>;
@@ -26,7 +43,7 @@ pub enum Status {
     Failed,
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub struct Segment {
     pub start: u64,
     pub end: Option<u64>,
@@ -34,7 +51,20 @@ pub struct Segment {
     pub hash: String,
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
+pub struct FileIdentity {
+    pub volume: u64,
+    pub index: [u8; 16],
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
+pub struct Publication {
+    pub bytes: u64,
+    pub sha256: String,
+    pub identity: FileIdentity,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub struct Job {
     pub id: String,
     pub url: String,
@@ -48,6 +78,16 @@ pub struct Job {
     pub validator: Option<String>,
     pub effective_url: Option<String>,
     pub created_at: u64,
+    #[serde(default)]
+    pub queue_order: u64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub publication: Option<Publication>,
+    #[serde(default)]
+    pub attempt: u8,
+    #[serde(default)]
+    pub next_retry: Option<u64>,
+    #[serde(default)]
+    pub failure_reason: Option<FailureReason>,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -58,6 +98,8 @@ pub struct Settings {
     pub language: String,
     #[serde(default)]
     pub download_folder: Option<String>,
+    #[serde(default = "default_categories")]
+    pub categories: Vec<Category>,
 }
 impl Default for Settings {
     fn default() -> Self {
@@ -67,7 +109,24 @@ impl Default for Settings {
             speed_limit: 0,
             language: "en".into(),
             download_folder: None,
+            categories: default_categories(),
         }
+    }
+}
+impl Settings {
+    fn validate(&self) -> Result<()> {
+        if !(1..=4).contains(&self.max_concurrent)
+            || !(1..=4).contains(&self.connections)
+            || self.speed_limit > 10_000_000_000
+            || !["en", "ar"].contains(&self.language.as_str())
+            || self
+                .download_folder
+                .as_ref()
+                .is_some_and(|p| p.len() > 32768 || !Path::new(p).is_absolute())
+        {
+            return Err("Invalid queue settings".into());
+        }
+        categories::validate(&self.categories)
     }
 }
 
@@ -77,6 +136,13 @@ struct State {
     running: HashMap<String, CancellationToken>,
     settings: Settings,
     samples: HashMap<String, (Instant, u64)>,
+    queue_running: bool,
+}
+fn destination_queued(state: &State, path: &Path) -> bool {
+    state.jobs.iter().any(|job| {
+        job.destination.to_string_lossy().to_lowercase() == path.to_string_lossy().to_lowercase()
+            && ![Status::Cancelled, Status::Failed].contains(&job.status)
+    })
 }
 pub struct Manager {
     state: Mutex<State>,
@@ -86,6 +152,8 @@ pub struct Manager {
     limit_changed: tokio::sync::Notify,
     _owner: std::fs::File,
     hosts: Mutex<HashMap<String, Arc<tokio::sync::Semaphore>>>,
+    #[cfg(test)]
+    file_fault: Mutex<Option<(&'static str, u64, std::io::ErrorKind)>>,
 }
 
 pub fn validate_url(value: &str) -> Result<Url> {
@@ -114,9 +182,11 @@ pub fn validate_filename(value: &str) -> Result<()> {
         || value.len() > 180
         || value.trim() != value
         || value.ends_with('.')
-        || value
-            .chars()
-            .any(|c| c.is_control() || "<>:\"/\\|?*".contains(c))
+        || value.chars().any(|c| {
+            c.is_control()
+                || matches!(c, '\u{202a}'..='\u{202e}' | '\u{2066}'..='\u{2069}')
+                || "<>:\"/\\|?*".contains(c)
+        })
         || ["CON", "PRN", "AUX", "NUL", "CLOCK$", "CONIN$", "CONOUT$"].contains(&stem.as_str())
         || (["COM", "LPT"].iter().any(|prefix| {
             stem.strip_prefix(prefix).is_some_and(|suffix| {
@@ -155,31 +225,53 @@ impl Manager {
         owner
             .try_lock()
             .map_err(|_| "Another ZipZap process already owns this database")?;
-        let db = Connection::open(database).map_err(db_error)?;
+        let mut db = Connection::open(database).map_err(db_error)?;
+        let schema: i64 = db
+            .pragma_query_value(None, "user_version", |r| r.get(0))
+            .map_err(db_error)?;
+        if schema > 4 {
+            return Err("Database was created by a newer ZipZap version".into());
+        }
         db.pragma_update(None, "journal_mode", "WAL")
             .map_err(db_error)?;
         db.pragma_update(None, "synchronous", "FULL")
             .map_err(db_error)?;
-        let schema: i64 = db
-            .pragma_query_value(None, "user_version", |r| r.get(0))
+        let tx = db
+            .transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)
             .map_err(db_error)?;
-        if schema > 1 {
-            return Err("Database was created by a newer ZipZap version".into());
-        }
-        db.execute_batch("CREATE TABLE IF NOT EXISTS jobs (id TEXT PRIMARY KEY, data TEXT NOT NULL); CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY CHECK(id=1), data TEXT NOT NULL); PRAGMA user_version=1;").map_err(db_error)?;
-        let mut jobs = Vec::new();
-        {
-            let mut statement = db
-                .prepare("SELECT data FROM jobs ORDER BY rowid")
+        tx.execute_batch("CREATE TABLE IF NOT EXISTS jobs (id TEXT PRIMARY KEY, data TEXT NOT NULL); CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY CHECK(id=1), data TEXT NOT NULL);").map_err(db_error)?;
+        tx.execute_batch("CREATE TABLE IF NOT EXISTS queue (id INTEGER PRIMARY KEY CHECK(id=1), running INTEGER NOT NULL CHECK(running IN(0,1)));").map_err(db_error)?;
+        let queue_running = if schema < 3 {
+            tx.execute("INSERT INTO queue VALUES(1,1)", [])
                 .map_err(db_error)?;
-            for row in statement
-                .query_map([], |r| r.get::<_, String>(0))
+            true
+        } else {
+            match tx
+                .query_row("SELECT running FROM queue WHERE id=1", [], |row| {
+                    row.get::<_, i64>(0)
+                })
                 .map_err(db_error)?
             {
-                let mut job: Job = serde_json::from_str(&row.map_err(db_error)?)
+                0 => false,
+                1 => true,
+                _ => return Err("Invalid saved queue; database retained for recovery".into()),
+            }
+        };
+        let mut jobs = Vec::new();
+        {
+            let mut statement = tx
+                .prepare("SELECT id,data FROM jobs ORDER BY rowid")
+                .map_err(db_error)?;
+            for row in statement
+                .query_map([], |r| Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?)))
+                .map_err(db_error)?
+            {
+                let (id, data) = row.map_err(db_error)?;
+                let mut job: Job = serde_json::from_str(&data)
                     .map_err(|_| "Invalid saved job; database retained for recovery")?;
                 let uuid = Uuid::parse_str(&job.id).map_err(|_| "Invalid saved job identity")?;
                 if uuid.to_string() != job.id
+                    || id != job.id
                     || job.segments.len() > 4
                     || job.segments.iter().any(|s| {
                         s.end.is_some_and(|end| {
@@ -196,17 +288,53 @@ impl Manager {
                     job.status = Status::Paused;
                 }
                 job.speed = 0;
-                job.downloaded = job.segments.iter().map(|s| s.done).sum();
+                job.next_retry = None;
+                job.downloaded = job
+                    .segments
+                    .iter()
+                    .try_fold(0u64, |total, segment| total.checked_add(segment.done))
+                    .ok_or("Invalid saved checkpoint; database retained for recovery")?;
+                if job.publication.as_ref().is_some_and(|p| {
+                    !job.destination.is_absolute()
+                        || job.destination.file_name().is_none()
+                        || p.bytes != job.downloaded
+                        || job.total.is_some_and(|t| t != p.bytes)
+                        || job.segments.is_empty()
+                        || p.sha256.len() != 64
+                        || !p
+                            .sha256
+                            .bytes()
+                            .all(|b| b.is_ascii_hexdigit() && !b.is_ascii_uppercase())
+                }) {
+                    return Err(
+                        "Invalid saved publication evidence; database retained for recovery".into(),
+                    );
+                }
+                if schema < 3 {
+                    job.queue_order = jobs.len() as u64;
+                }
                 jobs.push(job);
             }
         }
-        let settings = match db.query_row("SELECT data FROM settings WHERE id=1", [], |r| {
-            r.get::<_, String>(0)
-        }) {
-            Ok(value) => serde_json::from_str(&value).map_err(|_| "Invalid saved settings")?,
-            Err(rusqlite::Error::QueryReturnedNoRows) => Settings::default(),
-            Err(error) => return Err(db_error(error)),
-        };
+        jobs.sort_by_key(|job| job.queue_order);
+        if jobs
+            .windows(2)
+            .any(|pair| pair[0].queue_order == pair[1].queue_order)
+            || jobs.last().is_some_and(|job| job.queue_order == u64::MAX)
+        {
+            return Err("Invalid saved queue order; database retained for recovery".into());
+        }
+        let settings: Settings =
+            match tx.query_row("SELECT data FROM settings WHERE id=1", [], |r| {
+                r.get::<_, String>(0)
+            }) {
+                Ok(value) => serde_json::from_str(&value).map_err(|_| "Invalid saved settings")?,
+                Err(rusqlite::Error::QueryReturnedNoRows) => Settings::default(),
+                Err(error) => return Err(db_error(error)),
+            };
+        settings
+            .validate()
+            .map_err(|_| "Invalid saved settings; database retained for recovery")?;
         let client = Client::builder()
             .user_agent("ZipZap/0.1.0-beta.1")
             .connect_timeout(Duration::from_secs(10))
@@ -218,14 +346,44 @@ impl Manager {
         } else {
             client
         };
-        let client = client.build().map_err(network_error)?;
-        let manager = Arc::new(Self {
+        let client = client
+            .build()
+            .map_err(|error| network_error(error).message)?;
+        let mut publication_guards = Vec::new();
+        for job in &mut jobs {
+            match publication::recover(job) {
+                Ok(Some(guards)) => publication_guards.push(guards),
+                Ok(None) => {}
+                Err(error) => {
+                    job.status = Status::Failed;
+                    job.failure_reason = Some(retry::Failure::from(error.clone()).reason);
+                    job.error = Some(error);
+                }
+            }
+        }
+        // Recovery and the schema marker become durable together before workers can start.
+        for job in &jobs {
+            tx.execute(
+                "UPDATE jobs SET data=?1 WHERE id=?2",
+                params![serde_json::to_string(job).map_err(json_error)?, job.id],
+            )
+            .map_err(db_error)?;
+        }
+        tx.pragma_update(None, "user_version", 4)
+            .map_err(db_error)?;
+        tx.commit().map_err(db_error)?;
+        drop(publication_guards);
+        for job in &jobs {
+            publication::cleanup(job);
+        }
+        Ok(Arc::new(Self {
             state: Mutex::new(State {
                 db,
                 jobs,
                 running: HashMap::new(),
                 settings,
                 samples: HashMap::new(),
+                queue_running,
             }),
             client,
             stop: CancellationToken::new(),
@@ -233,12 +391,9 @@ impl Manager {
             limit_changed: tokio::sync::Notify::new(),
             _owner: owner,
             hosts: Mutex::new(HashMap::new()),
-        });
-        // Persist recovered states before any new work starts.
-        for job in manager.jobs() {
-            manager.update(&job.id, |_| {})?;
-        }
-        Ok(manager)
+            #[cfg(test)]
+            file_fault: Mutex::new(None),
+        }))
     }
 
     pub fn jobs(&self) -> Vec<Job> {
@@ -248,17 +403,25 @@ impl Manager {
         self.state.lock().expect("state lock").settings.clone()
     }
     pub fn set_settings(&self, settings: Settings) -> Result<()> {
-        if !(1..=4).contains(&settings.max_concurrent)
-            || !(1..=4).contains(&settings.connections)
-            || settings.speed_limit > 10_000_000_000
-            || !["en", "ar"].contains(&settings.language.as_str())
-            || settings.download_folder.as_ref().is_some_and(|p| {
-                p.len() > 32768 || !Path::new(p).is_absolute() || !Path::new(p).is_dir()
-            })
+        settings.validate()?;
+        if settings
+            .download_folder
+            .as_ref()
+            .is_some_and(|p| !Path::new(p).is_dir())
         {
             return Err("Invalid queue settings".into());
         }
         let mut state = self.state.lock().expect("state lock");
+        for category in &settings.categories {
+            if let Some(folder) = &category.download_folder
+                && !state.settings.categories.iter().any(|old| {
+                    old.id == category.id && old.download_folder.as_ref() == Some(folder)
+                })
+                && !Path::new(folder).is_dir()
+            {
+                return Err("Category folder is unavailable; choose an existing folder".into());
+            }
+        }
         state
             .db
             .execute(
@@ -276,6 +439,20 @@ impl Manager {
         self.add_with_id(value, folder, filename, &Uuid::new_v4().to_string())
     }
 
+    pub fn add_for_later(&self, value: &str, folder: &Path, filename: Option<&str>) -> Result<Job> {
+        self.add_for_later_with_id(value, folder, filename, &Uuid::new_v4().to_string())
+    }
+
+    pub fn add_for_later_with_id(
+        &self,
+        value: &str,
+        folder: &Path,
+        filename: Option<&str>,
+        id: &str,
+    ) -> Result<Job> {
+        self.add_with_mode(value, folder, filename, id, true)
+    }
+
     /// A stable request ID makes native inbox replay idempotent across crashes.
     pub fn add_with_id(
         &self,
@@ -283,6 +460,17 @@ impl Manager {
         folder: &Path,
         filename: Option<&str>,
         id: &str,
+    ) -> Result<Job> {
+        self.add_with_mode(value, folder, filename, id, false)
+    }
+
+    fn add_with_mode(
+        &self,
+        value: &str,
+        folder: &Path,
+        filename: Option<&str>,
+        id: &str,
+        later: bool,
     ) -> Result<Job> {
         if Uuid::parse_str(id)
             .map_err(|_| "Invalid request ID")?
@@ -295,12 +483,8 @@ impl Manager {
             return Ok(job);
         }
         let url = validate_url(value)?;
-        let suggested = url
-            .path_segments()
-            .and_then(|mut p| p.next_back())
-            .filter(|s| validate_filename(s).is_ok())
-            .unwrap_or("download.bin");
-        let name = filename.unwrap_or(suggested);
+        let suggested = metadata::url_name(&url);
+        let name = filename.unwrap_or(&suggested);
         validate_filename(name)?;
         let folder = folder.canonicalize().map_err(io_error)?;
         if !folder.is_dir() {
@@ -314,18 +498,18 @@ impl Manager {
         if state.jobs.len() >= 1000 {
             return Err("Queue history limit reached; remove old completed downloads".into());
         }
-        if state.jobs.iter().any(|j| {
-            j.destination.to_string_lossy().to_lowercase()
-                == destination.to_string_lossy().to_lowercase()
-                && ![Status::Cancelled, Status::Failed].contains(&j.status)
-        }) {
+        if destination_queued(&state, &destination) {
             return Err("That destination is already in the queue".into());
         }
         let job = Job {
             id: id.to_owned(),
             url: url.to_string(),
             destination,
-            status: Status::Queued,
+            status: if later {
+                Status::Paused
+            } else {
+                Status::Queued
+            },
             downloaded: 0,
             total: None,
             speed: 0,
@@ -337,6 +521,18 @@ impl Manager {
                 .duration_since(std::time::UNIX_EPOCH)
                 .unwrap_or_default()
                 .as_secs(),
+            publication: None,
+            queue_order: match state.jobs.last() {
+                Some(job) => job
+                    .queue_order
+                    .checked_add(1)
+                    .filter(|order| *order < u64::MAX)
+                    .ok_or("Queue order limit reached")?,
+                None => 0,
+            },
+            attempt: 0,
+            next_retry: None,
+            failure_reason: None,
         };
         state
             .db
@@ -357,44 +553,48 @@ impl Manager {
             .position(|j| j.id == id)
             .ok_or("Download not found")?;
         let status = state.jobs[index].status.clone();
+        let mut job = state.jobs[index].clone();
         match action {
             "pause" if [Status::Queued, Status::Downloading].contains(&status) => {
-                state.jobs[index].status = Status::Paused;
-                if let Some(token) = state.running.get(id) {
-                    token.cancel();
-                }
+                job.status = Status::Paused;
             }
-            "resume"
-                if [Status::Paused, Status::Failed].contains(&status)
-                    && !state.running.contains_key(id) =>
-            {
-                state.jobs[index].status = Status::Queued;
-                state.jobs[index].error = None;
+            "resume" if [Status::Paused, Status::Failed].contains(&status) => {
+                // The scheduler waits for the previous worker to exit before restarting.
+                job.status = Status::Queued;
+                job.error = None;
             }
             "cancel" if status != Status::Completed => {
-                state.jobs[index].status = Status::Cancelled;
-                if let Some(token) = state.running.get(id) {
-                    token.cancel();
-                }
+                job.status = Status::Cancelled;
             }
             "remove"
                 if !state.running.contains_key(id)
                     && [Status::Completed, Status::Cancelled, Status::Failed].contains(&status) =>
             {
-                let job = state.jobs.remove(index);
                 state
                     .db
                     .execute("DELETE FROM jobs WHERE id=?1", [id])
                     .map_err(db_error)?;
+                let job = state.jobs.remove(index);
                 drop(state);
                 transfer::cleanup(&job);
                 return Ok(());
             }
             _ => return Err("Action is not available for this download state".into()),
         }
-        state.jobs[index].speed = 0;
-        let job = state.jobs[index].clone();
+        job.speed = 0;
+        job.next_retry = None;
+        job.error = None;
+        job.failure_reason = None;
+        if action == "resume" {
+            job.attempt = 0;
+        }
         save(&state, &job)?;
+        state.jobs[index] = job.clone();
+        if [Status::Paused, Status::Cancelled].contains(&job.status)
+            && let Some(token) = state.running.get(id)
+        {
+            token.cancel();
+        }
         let clean = job.status == Status::Cancelled && !state.running.contains_key(id);
         drop(state);
         if clean {
@@ -419,10 +619,14 @@ impl Manager {
                             *hosts.entry(host(&job.url)).or_default() += 1;
                         }
                     }
-                    let capacity = state
-                        .settings
-                        .max_concurrent
-                        .saturating_sub(state.running.len());
+                    let capacity = if state.queue_running {
+                        state
+                            .settings
+                            .max_concurrent
+                            .saturating_sub(state.running.len())
+                    } else {
+                        0
+                    };
                     for index in 0..state.jobs.len() {
                         if pending.len() >= capacity {
                             break;
@@ -435,12 +639,16 @@ impl Manager {
                         {
                             continue;
                         }
-                        state.jobs[index].status = Status::Downloading;
-                        if let Err(error) = save(&state, &state.jobs[index]) {
+                        let mut job = job.clone();
+                        job.status = Status::Downloading;
+                        if let Err(error) = save(&state, &job) {
                             state.jobs[index].status = Status::Failed;
-                            state.jobs[index].error = Some(error);
+                            state.jobs[index].speed = 0;
+                            state.jobs[index].error = Some(unsaved_error(error));
+                            state.jobs[index].failure_reason = Some(FailureReason::Storage);
                             continue;
                         }
+                        state.jobs[index] = job;
                         let token = manager.stop.child_token();
                         let id = state.jobs[index].id.clone();
                         state.running.insert(id.clone(), token.clone());
@@ -467,26 +675,57 @@ impl Manager {
             if token.is_cancelled() {
                 break;
             }
+            if let Err(error) = self.update(id, |job| {
+                if job.status == Status::Downloading && !token.is_cancelled() {
+                    job.attempt = attempt as u8 + 1;
+                    job.next_retry = None;
+                }
+            }) {
+                failure = Some(retry::Failure::from(error));
+                break;
+            }
             match transfer::download(Arc::clone(self), id, &token, single).await {
                 Ok(()) => {
                     failure = None;
                     break;
                 }
                 Err(error) => {
-                    if error.starts_with("Range rejected") {
+                    let fallback = !single && error.message.starts_with("Range rejected");
+                    if fallback {
                         single = true;
                     }
-                    failure = Some(error);
-                    if token.is_cancelled() {
+                    let delay = if fallback {
+                        Some(Duration::ZERO)
+                    } else {
+                        error.delay(attempt)
+                    };
+                    if let Err(save_error) = self.update(id, |job| {
+                        if job.status == Status::Downloading && !token.is_cancelled() {
+                            job.error = Some(error.message.clone());
+                            job.failure_reason = Some(error.reason.clone());
+                            job.speed = 0;
+                            job.next_retry = delay.filter(|_| attempt < 2).map(|delay| {
+                                retry::now_ms().saturating_add(delay.as_millis() as u64)
+                            });
+                        }
+                    }) {
+                        failure = Some(retry::Failure::from(save_error));
                         break;
                     }
-                    tokio::select! { _ = token.cancelled() => break, _ = tokio::time::sleep(Duration::from_millis(500 * (1 << attempt))) => {} }
+                    failure = Some(error);
+                    if token.is_cancelled() || attempt == 2 || delay.is_none() {
+                        break;
+                    }
+                    tokio::select! { _ = token.cancelled() => break, _ = tokio::time::sleep(delay.expect("retry delay")) => {} }
                 }
             }
         }
-        let _ = self.update(id, |job| {
-            job.speed = 0;
+        let mut state = self.state.lock().expect("state lock");
+        if let Some(index) = state.jobs.iter().position(|j| j.id == id) {
+            let mut job = state.jobs[index].clone();
             if job.status == Status::Downloading {
+                job.speed = 0;
+                job.next_retry = None;
                 job.status = if token.is_cancelled() {
                     Status::Paused
                 } else if failure.is_some() {
@@ -494,14 +733,29 @@ impl Manager {
                 } else {
                     Status::Completed
                 };
-                job.error = if token.is_cancelled() { None } else { failure };
+                job.failure_reason = if token.is_cancelled() {
+                    None
+                } else {
+                    failure.as_ref().map(|error| error.reason.clone())
+                };
+                job.error = if token.is_cancelled() {
+                    None
+                } else {
+                    failure.map(|error| error.message)
+                };
+                if let Err(error) = save(&state, &job) {
+                    // This live failure is not durable; retain the last saved checkpoint.
+                    job.status = Status::Failed;
+                    job.error = Some(unsaved_error(error));
+                    job.failure_reason = Some(FailureReason::Storage);
+                }
+                state.jobs[index] = job.clone();
             }
-        });
-        let cancelled = self.job(id).is_ok_and(|j| j.status == Status::Cancelled);
-        if cancelled && let Ok(job) = self.job(id) {
-            transfer::cleanup(&job);
+            if job.status == Status::Cancelled {
+                transfer::cleanup(&job);
+            }
         }
-        self.state.lock().expect("state lock").running.remove(id);
+        state.running.remove(id);
     }
 
     pub async fn shutdown(&self) {
@@ -514,6 +768,10 @@ impl Manager {
         }
     }
 
+    pub fn is_stopping(&self) -> bool {
+        self.stop.is_cancelled()
+    }
+
     fn job(&self, id: &str) -> Result<Job> {
         self.jobs()
             .into_iter()
@@ -522,14 +780,16 @@ impl Manager {
     }
     fn update(&self, id: &str, action: impl FnOnce(&mut Job)) -> Result<()> {
         let mut state = self.state.lock().expect("state lock");
-        let job = state
+        let index = state
             .jobs
-            .iter_mut()
-            .find(|j| j.id == id)
+            .iter()
+            .position(|j| j.id == id)
             .ok_or("Download not found")?;
-        action(job);
-        let copy = job.clone();
-        save(&state, &copy)
+        let mut job = state.jobs[index].clone();
+        action(&mut job);
+        save(&state, &job)?;
+        state.jobs[index] = job;
+        Ok(())
     }
     fn progress(&self, id: &str, count: u64) {
         let mut state = self.state.lock().expect("state lock");
@@ -569,7 +829,7 @@ impl Manager {
         &self,
         builder: reqwest::RequestBuilder,
         token: &CancellationToken,
-    ) -> Result<(reqwest::Response, tokio::sync::OwnedSemaphorePermit)> {
+    ) -> retry::TransferResult<(reqwest::Response, tokio::sync::OwnedSemaphorePermit)> {
         let mut request = builder.build().map_err(network_error)?;
         for _ in 0..=10 {
             let slots = self.host_slots(request.url().as_str());
@@ -627,14 +887,36 @@ fn save(state: &State, job: &Job) -> Result<()> {
     Ok(())
 }
 fn io_error(error: std::io::Error) -> String {
-    format!("File operation failed: {error}")
+    use std::io::ErrorKind;
+    let (reason, recovery) = match error.kind() {
+        ErrorKind::StorageFull | ErrorKind::QuotaExceeded => {
+            ("full", "Free space on the destination drive, then retry")
+        }
+        ErrorKind::PermissionDenied | ErrorKind::ReadOnlyFilesystem => {
+            ("access", "Allow writes to the destination, then retry")
+        }
+        ErrorKind::NotFound | ErrorKind::NotADirectory => (
+            "missing",
+            "Reconnect or restore the destination folder, then retry",
+        ),
+        _ => (
+            "other",
+            "Check the destination drive and NTFS support, then retry",
+        ),
+    };
+    format!("Storage error: {reason}. {recovery}. Saved checkpoints are retained. ({error})")
 }
 fn db_error(error: rusqlite::Error) -> String {
     format!("State database error: {error}")
 }
+fn unsaved_error(error: String) -> String {
+    format!(
+        "Could not save download state; last saved state retained. Repair storage and retry: {error}"
+    )
+}
 fn json_error(_: serde_json::Error) -> String {
     "Invalid state document".into()
 }
-fn network_error(error: reqwest::Error) -> String {
-    format!("Network request failed: {}", error.without_url())
+fn network_error(error: reqwest::Error) -> retry::Failure {
+    retry::Failure::network(error)
 }
