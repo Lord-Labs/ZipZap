@@ -1,3 +1,4 @@
+use crate::lifecycle;
 use std::{
     path::{Path, PathBuf},
     sync::{Arc, Mutex},
@@ -7,22 +8,29 @@ use tauri::{Manager as _, State};
 use tauri_plugin_dialog::DialogExt;
 use zipzap_core::{CancellationToken, LinkReplacement, Manager, Settings, Status, Suggestion};
 
-struct AppState {
-    manager: Arc<Manager>,
+pub(crate) struct AppState {
+    pub(crate) manager: Arc<Manager>,
     folder: PathBuf,
     native: Mutex<Option<String>>,
-    notice: Mutex<Option<String>>,
+    pub(crate) notice: Mutex<Option<String>>,
+    pub(crate) lifecycle: lifecycle::Lifecycle,
     probe: Mutex<Option<(String, CancellationToken)>>,
     browser_review: Mutex<Option<serde_json::Value>>,
 }
 
 #[tauri::command]
 fn snapshot(state: State<AppState>) -> serde_json::Value {
-    serde_json::json!({"jobs":state.manager.jobs(),"queue":state.manager.queue(),"settings":state.manager.settings(),"folder":folder(&state),"version":env!("CARGO_PKG_VERSION"),"native_error":*state.native.lock().expect("native lock"),"notice":state.notice.lock().expect("notice lock").take(),"browser_review":state.browser_review.lock().expect("review lock").take()})
+    serde_json::json!({"jobs":state.manager.jobs(),"queue":state.manager.queue(),"settings":state.manager.settings(),"tray_available":state.lifecycle.available(),"folder":folder(&state),"version":env!("CARGO_PKG_VERSION"),"native_error":*state.native.lock().expect("native lock"),"notice":state.notice.lock().expect("notice lock").take(),"browser_review":state.browser_review.lock().expect("review lock").take()})
 }
 #[tauri::command]
-fn set_queue_running(running: bool, state: State<AppState>) -> Result<(), String> {
-    state.manager.set_queue_running(running)
+fn set_queue_running(
+    running: bool,
+    app: tauri::AppHandle,
+    state: State<AppState>,
+) -> Result<(), String> {
+    state.manager.set_queue_running(running)?;
+    lifecycle::update_menu(&app);
+    Ok(())
 }
 #[tauri::command]
 fn move_waiting(id: String, direction: String, state: State<AppState>) -> Result<(), String> {
@@ -146,8 +154,24 @@ fn download_action(id: String, action: String, state: State<AppState>) -> Result
     state.manager.action(&id, &action)
 }
 #[tauri::command]
-fn save_settings(settings: Settings, state: State<AppState>) -> Result<(), String> {
-    state.manager.set_settings(settings)
+fn save_settings(
+    settings: Settings,
+    app: tauri::AppHandle,
+    state: State<AppState>,
+) -> Result<(), String> {
+    if settings.close_to_tray
+        && !state.manager.settings().close_to_tray
+        && !state.lifecycle.available()
+    {
+        return Err("System tray is unavailable; keep closing behavior set to Quit".into());
+    }
+    state.manager.set_settings(settings)?;
+    lifecycle::update_menu(&app);
+    Ok(())
+}
+#[tauri::command]
+fn quit_app(app: tauri::AppHandle) {
+    lifecycle::quit(app);
 }
 #[tauri::command]
 async fn select_folder(app: tauri::AppHandle) -> Result<Option<String>, String> {
@@ -243,15 +267,10 @@ async fn enqueue_browser(
 
 pub fn run() {
     tauri::Builder::default()
-        .plugin(tauri_plugin_single_instance::init(|app, _, _| {
-            if let Some(window) = app.get_webview_window("main") {
-                let _ = window.show();
-                let _ = window.unminimize();
-                let _ = window.set_focus();
-            }
-        }))
+        .plugin(tauri_plugin_single_instance::init(|app, _, _| lifecycle::show(app)))
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_notification::init())
         .setup(|app| {
             let root = app.path().app_local_data_dir()?;
             std::fs::create_dir_all(&root)?;
@@ -267,7 +286,12 @@ pub fn run() {
                 notice: Mutex::new(None),
                 probe: Mutex::new(None),
                 browser_review: Mutex::new(None),
+                lifecycle: lifecycle::Lifecycle::default(),
             });
+            if lifecycle::init(app.handle()).is_err() {
+                *app.state::<AppState>().notice.lock().expect("notice lock") = Some("System tray unavailable; closing the window will quit ZipZap".into());
+            }
+            lifecycle::watch(app.handle().clone());
             let handle = app.handle().clone();
             tauri::async_runtime::spawn(async move {
                 manager.start();
@@ -350,10 +374,9 @@ pub fn run() {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
                 api.prevent_close();
                 let app = window.app_handle().clone();
-                tauri::async_runtime::spawn(async move {
-                    app.state::<AppState>().manager.shutdown().await;
-                    app.exit(0);
-                });
+                if app.state::<AppState>().manager.settings().close_to_tray
+                    && app.state::<AppState>().lifecycle.available() && window.hide().is_ok() { return; }
+                lifecycle::quit(app);
             }
         })
         .invoke_handler(tauri::generate_handler![
@@ -366,12 +389,20 @@ pub fn run() {
             cancel_probe,
             download_action,
             save_settings,
+            quit_app,
             select_folder,
             open_download,
             connect_browser
         ])
-        .run(tauri::generate_context!())
-        .expect("ZipZap could not start");
+        .build(tauri::generate_context!())
+        .expect("ZipZap could not start")
+        .run(|app, event| {
+            if let tauri::RunEvent::ExitRequested { api, .. } = event
+                && !app.state::<AppState>().lifecycle.ready_to_exit() {
+                api.prevent_exit();
+                lifecycle::quit(app.clone());
+            }
+        });
 }
 
 #[cfg(test)]
