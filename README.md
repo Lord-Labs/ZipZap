@@ -1,18 +1,23 @@
 # ZipZap
 
-[![Repository checks](https://github.com/Lord-shaban/ZipZap/actions/workflows/repository.yml/badge.svg)](https://github.com/Lord-shaban/ZipZap/actions/workflows/repository.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 A free, open-source download manager focused on reliable downloads, safe resume,
 and a straightforward desktop experience. Windows first, with a Rust engine and
 a Tauri interface.
 
-**Status: Windows desktop and browser handoff implemented; first-beta release
-verification is in progress. No public release yet or performance superiority claim.**
+**Status: [0.1.0-beta.1](https://github.com/Lord-shaban/ZipZap/releases/tag/v0.1.0-beta.1)
+is available for Windows 11 x64. This beta is unsigned; verify the published
+SHA-256 checksums before installing.**
 
 [العربية](docs/README.ar.md) · [Roadmap](docs/ROADMAP.md) ·
 [Project tracker](https://github.com/users/Lord-shaban/projects/12) ·
 [Contributing](CONTRIBUTING.md)
+
+The [next development phase](docs/planning/NEXT_PHASE.md) is prepared for a
+daily-use beta: recovery, durable queue/scheduling, desktop completion and
+release qualification. [الخطة بالعربية](docs/planning/NEXT_PHASE.ar.md).
+These are planned tasks, separate from the published first beta.
 
 ## First-beta capabilities
 
@@ -51,6 +56,9 @@ npm ci
 npm run check
 ```
 
+Verification runs locally. Hosted GitHub checks are manual-only by
+[maintainer decision](https://github.com/Lord-shaban/ZipZap/issues/54).
+
 Run `node scripts/build-native.mjs` then `npm run desktop:dev` on Windows.
 See [development setup](docs/development/SETUP.md) for native prerequisites,
 [the user guide](docs/USER_GUIDE.md) for app/browser usage, and
@@ -60,15 +68,16 @@ from the production application.
 
 ## Find your way
 
-| Document                                                    | Purpose                                                 |
-| ----------------------------------------------------------- | ------------------------------------------------------- |
-| [Product scope](docs/PRODUCT.md)                            | Users, first-beta requirements, and explicit exclusions |
-| [Roadmap](docs/ROADMAP.md)                                  | Ordered milestones, issues, and completion gates        |
-| [Architecture](docs/architecture/0001-project-direction.md) | Stack, component ownership, and data flow               |
-| [Development workflow](docs/development/WORKFLOW.md)        | Issue → branch → PR → checks → merge                    |
-| [Verification](docs/development/VERIFICATION.md)            | Current checks and future application test requirements |
-| [Release process](docs/development/RELEASING.md)            | Evidence required before a public release               |
-| [Research protocol](docs/research/README.md)                | Evidence-based investigation with REA                   |
+| Document                                                    | Purpose                                                        |
+| ----------------------------------------------------------- | -------------------------------------------------------------- |
+| [Product scope](docs/PRODUCT.md)                            | Users, first-beta requirements, and explicit exclusions        |
+| [Roadmap](docs/ROADMAP.md)                                  | Ordered milestones, issues, and completion gates               |
+| [Next phase](docs/planning/NEXT_PHASE.md)                   | Daily-use beta scope, dependencies, research and release gates |
+| [Architecture](docs/architecture/0001-project-direction.md) | Stack, component ownership, and data flow                      |
+| [Development workflow](docs/development/WORKFLOW.md)        | Issue → branch → PR → checks → merge                           |
+| [Verification](docs/development/VERIFICATION.md)            | Current checks and future application test requirements        |
+| [Release process](docs/development/RELEASING.md)            | Evidence required before a public release                      |
+| [Research protocol](docs/research/README.md)                | Evidence-based investigation with REA                          |
 
 Report reproducible bugs through [Issues](https://github.com/Lord-shaban/ZipZap/issues).
 Use [Discussions](https://github.com/Lord-shaban/ZipZap/discussions) for questions

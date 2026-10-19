@@ -1,13 +1,45 @@
 # Verification
 
+## Native current-source baseline (2026-10-18)
+
+[Issue #29 evidence and repeatable procedure](NATIVE_SMOKE.md) cover actual
+WebView2/Tauri downloads from source `6568cc9`, with isolated identity/state,
+real pause/resume/reopen/cancel, exact output hashes, safe history removal,
+native folder selection, OS open/reveal handoff, and English/Arabic keyboard
+and accessibility-tree checks at 780×560. Browser/installer evidence remains
+separate. Hosted tests were skipped by the current maintainer policy.
+
+## Desktop workspace follow-up (2026-10-17)
+
+[Issue #25](https://github.com/Lord-shaban/ZipZap/issues/25) replaces the desktop
+dashboard with a compact toolbar, filename categories and sortable table. Local
+`npm run check` passed with zero Svelte errors/warnings; `npm run build:web`
+passed. All nine Playwright UI tests passed, including command/error handling,
+selection, categories, sorting and English/Arabic layouts. Axe found zero
+violations in the tested empty/modal/populated states at 375/780/1200 pixels.
+The final Arabic screenshot was visually inspected using synthetic fixture jobs.
+
+These tests mock the Tauri IPC boundary. Native Windows download, browser,
+installer and Rust checks were not repeated for this frontend/configuration
+change. The existing beta evidence below remains evidence for its original
+commit. GitHub Actions is skipped for this change at the maintainer's explicit
+request; no hosted-check result is claimed. The
+[IDM study](../research/idm-desktop.md) records the reference evidence and limits.
+
 ## What runs today
 
 `npm run check` runs Prettier, checks local Markdown file targets, and exercises
-the link checker's behavior, and Svelte/TypeScript diagnostics. GitHub Actions runs the same command on Ubuntu and
+the link checker's behavior, and Svelte/TypeScript diagnostics. Required checks
+run locally. As of 2026-10-18, [maintainer decision #54](https://github.com/Lord-shaban/ZipZap/issues/54)
+disables automatic hosted checks and removes their required merge status, while
+preserving PR, conversation-resolution and linear-history protections. Hosted
+checks are skipped unless separately requested; this is not a passing result.
+
+The retained manual Repository workflow runs the same command on Ubuntu and
 Windows with Node 24. The same platform jobs now install pinned Rust 1.99.0,
 check Rust formatting/clippy, run the unit tests, build the feasibility probe,
 and run its six local HTTP scenarios. The final `Repository checks` job aggregates
-both results and is the status required for merging. The production core also
+both results; it is no longer required for merging. The production core also
 has unit validation tests and `scripts/test-engine.mjs`: trusted/untrusted TLS,
 byte integrity, safe fallback, durable recovery, cancellation, and queue limits.
 
@@ -16,10 +48,29 @@ Markdown heading anchors, external HTTP availability, or content correctness. It
 ignores fenced code examples and external URLs. Those limits are intentional;
 reviewers must assess the meaning and accuracy of documentation.
 
-The workspace includes the core, native bridge and Windows desktop shell. CI
+The workspace includes the core, native bridge and Windows desktop shell. Manual CI
 builds the frontend and extension, and runs Playwright/Axe on Ubuntu. Windows
 prepares the native sidecar before compiling the desktop. aria2 is historical
 evidence, not a CI dependency. The core fixture never changes OS trust.
+
+## Windows retry-clock fixture precision (#70)
+
+On 2026-10-19 one capped-retry fixture assertion failed before its cancellation
+checks; surrounding full runs passed. A separate local stdin/stdout probe compared
+Rust 1.99.0 `SystemTime::now` with a later Node 24.19.0 `Date.now` reading 5,000
+times. Rust's timestamp was 1–3 ms ahead in all samples. No clock setting was
+changed. This reproduces a cross-runtime observation mismatch, not excess retry
+sleep; the original failed sample did not capture its exact difference.
+
+The pinned [Node/V8 Windows clock](https://github.com/nodejs/node/blob/v24.19.0/deps/v8/src/base/platform/time.cc)
+resynchronizes a tick-based clock to `GetSystemTimeAsFileTime`; its source records
+approximately 1–15.6 ms system-clock resolution. The pinned
+[Rust Windows clock](https://github.com/rust-lang/rust/blob/1.99.0/library/std/src/sys/time/windows.rs)
+uses the precise system API. The fixture therefore allows 20 ms of Windows-only
+timestamp observation margin and reports deadline/current/remaining values on
+failure. Other platforms retain the strict bound. The application's 30-second
+retry cap and exact Rust duration test are unchanged; cancellation/shutdown and
+payload-integrity checks remain required. This is not a scheduler-clock policy.
 
 ## Engine gates (M1–M2)
 
@@ -90,7 +141,8 @@ Sources: [Playwright extension testing](https://playwright.dev/docs/chrome-exten
 The installed app also paused `manual-restart.bin` at 13.6 MiB, closed, reopened
 with the same paused state and Arabic/default-folder settings, then resumed to
 the exact original 16 MiB SHA-256 above. The deterministic core suite now also
-tests an unavailable destination followed by repair/retry (22 scenarios total).
+tests an unavailable destination followed by repair/retry and immediate resume
+while the paused worker exits (23 scenarios total).
 See [benchmark evidence](../research/benchmark.md) and
 [security review](SECURITY_REVIEW.md) for M5 details and untested physical faults.
 
@@ -102,3 +154,38 @@ License text and MPL source resources were included in the installed files.
 There is no older public ZipZap version to exercise a cross-version upgrade yet;
 reinstall tests the installer replacement path, not a future schema migration.
 The same `scripts/test-installer.ps1` runs on clean Windows CI runners.
+
+## First-beta acceptance checklist
+
+- [x] HTTP/HTTPS, validated ranges, fallback, redirects and errors produce verified bytes or safe failures.
+- [x] Pause/restart/resume, immediate resume, changed resources and damaged partials preserve file integrity.
+- [x] Queue order, concurrency and shared bandwidth limits pass deterministic fixtures.
+- [x] English/Arabic desktop downloads, persisted settings, keyboard interaction and automated accessibility checks pass.
+- [x] Chrome for Testing and Edge handoff reach complete files through the installed host and shared engine.
+- [x] Source security review, dependency notices, MPL sources and known limitations are recorded.
+- [x] Windows clean install, same-version reinstall and uninstall preserve state/downloads and clean up host registration.
+- [x] Protected CI publishes the reviewed commit as a prerelease, and downloaded assets match its checksum manifest.
+
+## Published beta (2026-10-17)
+
+[0.1.0-beta.1](https://github.com/Lord-shaban/ZipZap/releases/tag/v0.1.0-beta.1)
+was published from reviewed commit `c9caec970ec244c17319f01afdd1a510716b6b51`.
+[PR #18](https://github.com/Lord-shaban/ZipZap/pull/18) records distribution/security
+verification; [PR #21](https://github.com/Lord-shaban/ZipZap/pull/21) fixes immediate
+resume while a paused worker finishes its checkpoint. The
+[protected-main checks](https://github.com/Lord-shaban/ZipZap/actions/runs/38987645035)
+passed on Windows and Ubuntu. The
+[Windows beta workflow](https://github.com/Lord-shaban/ZipZap/actions/runs/38988700324)
+rebuilt that commit, passed the installer lifecycle and published through `beta`.
+
+All seven release assets were downloaded after publication. The six payloads
+(installer, browser ZIP, third-party sources ZIP, notices, dependency metadata and
+MIT license) matched every entry in `SHA256SUMS.txt`, with no missing or extra
+payloads. The published tag was independently checked against the commit above.
+
+- Installer SHA-256: `954ed29c5d9379799725954c2abfd8a80de92c9652d7cb72b3ecf3c7aa582969`.
+- Manifest SHA-256: `a84fd729a36330751383b3177e25ce2f87252ebfb4f8ff43a65eb8f9f498e68c`.
+
+The unsigned Windows 11 x64 support scope and all
+[release limitations](../releases/0.1.0-beta.1.md) still apply. `npm audit --json`
+was repeated on 2026-10-17 and reported zero vulnerabilities.

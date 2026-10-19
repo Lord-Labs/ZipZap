@@ -1,4 +1,4 @@
-use zipzap_core::{Manager, validate_filename, validate_url};
+use zipzap_core::{Manager, Status, validate_filename, validate_url};
 
 #[test]
 fn rejects_unsafe_names_and_urls() {
@@ -61,4 +61,134 @@ fn persistent_queue_and_no_clobber_validation() {
         std::fs::read(folder.path().join("occupied.bin")).unwrap(),
         b"keep"
     );
+}
+
+#[test]
+fn batch_replay_reuses_accepted_ids_and_retries_only_rejected_insertions() {
+    let folder = tempfile::tempdir().unwrap();
+    let database = folder.path().join("state.sqlite");
+    let manager = Manager::open(&database).unwrap();
+    let id = "00000000-0000-4000-8000-000000000038";
+    let failed_id = "00000000-0000-4000-8000-000000000039";
+    let job = manager
+        .add_for_later_with_id("https://example.com/a", folder.path(), Some("a.bin"), id)
+        .unwrap();
+    let replay = manager
+        .add_for_later_with_id("https://example.com/a", folder.path(), Some("a.bin"), id)
+        .unwrap();
+    assert_eq!(job.id, replay.id);
+    assert_eq!(replay.status, Status::Paused);
+    assert_eq!(manager.jobs().len(), 1);
+    let db = rusqlite::Connection::open(&database).unwrap();
+    db.execute_batch("CREATE TRIGGER reject_insert BEFORE INSERT ON jobs BEGIN SELECT RAISE(ABORT, 'batch save failed'); END;").unwrap();
+    assert!(
+        manager
+            .add_with_id(
+                "https://example.com/b",
+                folder.path(),
+                Some("b.bin"),
+                failed_id
+            )
+            .is_err()
+    );
+    assert_eq!(manager.jobs().len(), 1);
+    db.execute_batch("DROP TRIGGER reject_insert;").unwrap();
+    manager
+        .add_with_id(
+            "https://example.com/b",
+            folder.path(),
+            Some("b.bin"),
+            failed_id,
+        )
+        .unwrap();
+    assert!(
+        manager
+            .add_with_id(
+                "file:///private",
+                folder.path(),
+                Some("bad.bin"),
+                "00000000-0000-4000-8000-000000000040"
+            )
+            .is_err()
+    );
+    assert!(
+        manager
+            .add_with_id(
+                "https://example.com/c",
+                folder.path(),
+                Some("a.bin"),
+                "00000000-0000-4000-8000-000000000041"
+            )
+            .is_err()
+    );
+    drop(manager);
+    let reopened = Manager::open(&database).unwrap();
+    assert_eq!(reopened.jobs().len(), 2);
+    assert_eq!(
+        reopened
+            .add_for_later_with_id("https://example.com/a", folder.path(), Some("a.bin"), id)
+            .unwrap()
+            .status,
+        Status::Paused
+    );
+    assert_eq!(reopened.jobs().len(), 2);
+    assert!(std::fs::read_dir(folder.path()).unwrap().all(|entry| {
+        !entry
+            .unwrap()
+            .file_name()
+            .to_string_lossy()
+            .starts_with(".zipzap-")
+    }));
+}
+
+#[test]
+fn failed_history_deletion_keeps_job_and_files_for_retry() {
+    for status in [Status::Completed, Status::Cancelled, Status::Failed] {
+        let folder = tempfile::tempdir().unwrap();
+        let database = folder.path().join("state.sqlite");
+        let manager = Manager::open(&database).unwrap();
+        let mut job = manager
+            .add("https://example.com/file.bin", folder.path(), None)
+            .unwrap();
+        drop(manager);
+        job.status = status;
+        let saved = serde_json::to_string(&job).unwrap();
+        let db = rusqlite::Connection::open(&database).unwrap();
+        db.execute("UPDATE jobs SET data=?1 WHERE id=?2", (&saved, &job.id))
+            .unwrap();
+        db.execute_batch(
+            "CREATE TRIGGER reject_delete BEFORE DELETE ON jobs
+             BEGIN SELECT RAISE(ABORT, 'injected deletion failure'); END;",
+        )
+        .unwrap();
+        std::fs::write(&job.destination, b"keep final file").unwrap();
+        let partial = folder.path().join(format!(".zipzap-{}.part0", job.id));
+        std::fs::write(&partial, b"keep recoverable data").unwrap();
+
+        let manager = Manager::open(&database).unwrap();
+        let error = manager.action(&job.id, "remove").unwrap_err();
+        assert!(error.contains("injected deletion failure"), "{error}");
+        assert_eq!(
+            serde_json::to_value(manager.jobs()).unwrap(),
+            serde_json::to_value([&job]).unwrap()
+        );
+        assert_eq!(
+            db.query_row("SELECT data FROM jobs WHERE id=?1", [&job.id], |row| {
+                row.get::<_, String>(0)
+            })
+            .unwrap(),
+            saved
+        );
+        assert_eq!(std::fs::read(&partial).unwrap(), b"keep recoverable data");
+        assert_eq!(std::fs::read(&job.destination).unwrap(), b"keep final file");
+
+        db.execute_batch("DROP TRIGGER reject_delete;").unwrap();
+        manager.action(&job.id, "remove").unwrap();
+        assert!(manager.jobs().is_empty());
+        assert!(!partial.exists());
+        assert_eq!(std::fs::read(&job.destination).unwrap(), b"keep final file");
+        drop(manager);
+        let reopened = Manager::open(&database).unwrap();
+        assert!(reopened.jobs().is_empty());
+    }
 }

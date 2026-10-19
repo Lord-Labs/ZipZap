@@ -1,3 +1,4 @@
+use super::retry::{Failure, TransferResult as Result};
 use super::*;
 use reqwest::{Response, StatusCode, header};
 use sha2::{Digest, Sha256};
@@ -7,7 +8,7 @@ use tokio::{
     task::JoinSet,
 };
 
-fn part(job: &Job, index: usize) -> PathBuf {
+pub(super) fn part(job: &Job, index: usize) -> PathBuf {
     job.destination
         .parent()
         .expect("validated parent")
@@ -15,6 +16,9 @@ fn part(job: &Job, index: usize) -> PathBuf {
 }
 pub(super) fn cleanup(job: &Job) {
     for index in 0..=4 {
+        if index == 4 && job.publication.is_some() && !publication::owns_assembly(job) {
+            continue;
+        }
         let _ = std::fs::remove_file(part(job, index));
     }
 }
@@ -50,60 +54,32 @@ pub(super) async fn download(
     single: bool,
 ) -> Result<()> {
     let mut job = manager.job(id)?;
+    let parent = job
+        .destination
+        .parent()
+        .ok_or("Missing destination folder")?;
+    if !fs::metadata(parent).await.map_err(io_error)?.is_dir() {
+        return Err(io_error(std::io::Error::from(std::io::ErrorKind::NotADirectory)).into());
+    }
+    if job.publication.is_some() {
+        let m = Arc::clone(&manager);
+        let id = id.to_owned();
+        let token = token.clone();
+        return tokio::task::spawn_blocking(move || publication::publish(&m, &id, &token))
+            .await
+            .map_err(|_| "Publication worker stopped unexpectedly".to_owned())?
+            .map_err(Failure::from);
+    }
     if job.destination.symlink_metadata().is_ok() {
         return Err("Destination already exists; no file was replaced".into());
     }
-    let request = manager
-        .client
-        .get(&job.url)
-        .header(header::ACCEPT_ENCODING, "identity")
-        .header(header::RANGE, "bytes=0-0");
-    let (mut probe, probe_permit) = manager.send(request, token).await?;
-    let empty = probe.status() == StatusCode::RANGE_NOT_SATISFIABLE
-        && probe
-            .headers()
-            .get(header::CONTENT_RANGE)
-            .is_some_and(|v| v == "bytes */0");
-    if (!probe.status().is_success() && !empty) || !encoding_ok(&probe) {
-        return Err(format!(
-            "Server returned HTTP {} or unsupported encoding",
-            probe.status().as_u16()
-        ));
-    }
-    let validator = identity(&probe);
-    let total = if empty {
-        Some(0)
-    } else if probe.status() == StatusCode::PARTIAL_CONTENT {
-        probe
-            .headers()
-            .get(header::CONTENT_RANGE)
-            .and_then(|v| v.to_str().ok())
-            .and_then(|v| v.strip_prefix("bytes 0-0/"))
-            .and_then(|v| v.parse::<u64>().ok())
-            .filter(|v| *v > 0)
-    } else {
-        probe.content_length()
-    };
-    let ranged =
-        !single && total.is_some_and(|t| t > 0 && bounds(&probe, 0, 0, t)) && validator.is_some();
-    let effective = probe.url().to_string();
-    if probe.status() == StatusCode::PARTIAL_CONTENT
-        && total.is_some_and(|t| bounds(&probe, 0, 0, t))
-    {
-        let mut received = 0;
-        while let Some(bytes) = tokio::select! { _ = token.cancelled() => return Err("Paused".into()), r = probe.chunk() => r.map_err(network_error)? }
-        {
-            received += bytes.len();
-            if received > 1 {
-                return Err("Range rejected: probe body exceeds one byte".into());
-            }
-        }
-        if received != 1 {
-            return Err("Range rejected: truncated probe body".into());
-        }
-    }
-    drop(probe);
-    drop(probe_permit);
+    let Probe {
+        total,
+        validator,
+        ranged,
+        effective,
+    } = probe(&manager, &job.url, token).await?;
+    let ranged = ranged && !single;
     let mut reusable = ranged
         && job.validator == validator
         && job.effective_url.as_ref() == Some(&effective)
@@ -111,14 +87,26 @@ pub(super) async fn download(
         && !job.segments.is_empty();
     if reusable {
         for (index, segment) in job.segments.iter().enumerate() {
-            if checked_prefix(&part(&job, index), segment).await.is_err() {
-                reusable = false;
-                break;
+            match checked_prefix(&part(&job, index), segment).await {
+                Ok(_) => {}
+                Err(error)
+                    if matches!(
+                        error.reason,
+                        FailureReason::StorageAccess
+                            | FailureReason::StorageFull
+                            | FailureReason::Storage
+                    ) =>
+                {
+                    return Err(error);
+                }
+                Err(_) => {
+                    reusable = false;
+                    break;
+                }
             }
         }
     }
     if !reusable {
-        cleanup(&job);
         let count = if ranged && total.unwrap_or(0) >= 2 * 1024 * 1024 {
             manager.settings().connections as u64
         } else {
@@ -150,6 +138,9 @@ pub(super) async fn download(
         current.validator = job.validator.clone();
         current.effective_url = job.effective_url.clone();
     })?;
+    if !reusable {
+        cleanup(&job);
+    }
     let mut tasks = JoinSet::new();
     for index in 0..job.segments.len() {
         let m = Arc::clone(&manager);
@@ -159,7 +150,7 @@ pub(super) async fn download(
     }
     while let Some(result) = tasks.join_next().await {
         let outcome = result
-            .map_err(|_| "Transfer worker stopped unexpectedly".to_owned())
+            .map_err(|_| Failure::from("Transfer worker stopped unexpectedly"))
             .and_then(|r| r);
         if let Err(error) = outcome {
             tasks.abort_all();
@@ -181,6 +172,8 @@ pub(super) async fn download(
         .map_err(io_error)?;
     for index in 0..job.segments.len() {
         let mut source = File::open(part(&job, index)).await.map_err(io_error)?;
+        #[cfg(test)]
+        manager.file_failure("assembly", 0)?;
         tokio::io::copy(&mut source, &mut assembled)
             .await
             .map_err(io_error)?;
@@ -193,27 +186,82 @@ pub(super) async fn download(
         return Err("Final byte count does not match the resource".into());
     }
     drop(assembled);
-    // shortcut: atomic no-clobber publication requires hard-link-capable storage (NTFS on Windows).
-    {
-        let mut state = manager.state.lock().expect("state lock");
-        let current = state
-            .jobs
-            .iter_mut()
-            .find(|j| j.id == id)
-            .ok_or("Download not found")?;
-        if current.status != Status::Downloading || token.is_cancelled() {
-            return Err("Paused".into());
-        }
-        std::fs::hard_link(&assembled_path, &job.destination).map_err(io_error)?;
-        current.status = Status::Completed;
-        current.speed = 0;
-        current.downloaded = complete.segments.iter().map(|s| s.done).sum();
-        current.error = None;
-        let copy = current.clone();
-        save(&state, &copy)?;
+    let id = id.to_owned();
+    let token = token.clone();
+    tokio::task::spawn_blocking(move || publication::publish(&manager, &id, &token))
+        .await
+        .map_err(|_| "Publication worker stopped unexpectedly".to_owned())?
+        .map_err(Failure::from)
+}
+
+pub(super) struct Probe {
+    pub total: Option<u64>,
+    pub validator: Option<String>,
+    pub ranged: bool,
+    pub effective: String,
+}
+
+pub(super) async fn probe(
+    manager: &Manager,
+    url: &str,
+    token: &CancellationToken,
+) -> Result<Probe> {
+    let request = manager
+        .client
+        .get(url)
+        .header(header::ACCEPT_ENCODING, "identity")
+        .header(header::RANGE, "bytes=0-0");
+    let (mut probe, probe_permit) = manager.send(request, token).await?;
+    let empty = probe.status() == StatusCode::RANGE_NOT_SATISFIABLE
+        && probe
+            .headers()
+            .get(header::CONTENT_RANGE)
+            .is_some_and(|v| v == "bytes */0");
+    if !probe.status().is_success() && !empty {
+        return Err(Failure::response(&probe));
     }
-    cleanup(&job);
-    Ok(())
+    if !encoding_ok(&probe) {
+        return Err("Unsupported content encoding".into());
+    }
+    let validator = identity(&probe);
+    let total = if empty {
+        Some(0)
+    } else if probe.status() == StatusCode::PARTIAL_CONTENT {
+        probe
+            .headers()
+            .get(header::CONTENT_RANGE)
+            .and_then(|v| v.to_str().ok())
+            .and_then(|v| v.strip_prefix("bytes 0-0/"))
+            .and_then(|v| v.parse::<u64>().ok())
+            .filter(|v| *v > 0)
+    } else {
+        probe.content_length()
+    };
+    let ranged = total.is_some_and(|t| t > 0 && bounds(&probe, 0, 0, t)) && validator.is_some();
+    let effective = probe.url().to_string();
+    if probe.status() == StatusCode::PARTIAL_CONTENT
+        && total.is_some_and(|t| bounds(&probe, 0, 0, t))
+    {
+        let mut received = 0;
+        while let Some(bytes) = tokio::select! { _ = token.cancelled() => return Err("Paused".into()), r = probe.chunk() => r.map_err(network_error)? }
+        {
+            received += bytes.len();
+            if received > 1 {
+                return Err("Range rejected: probe body exceeds one byte".into());
+            }
+        }
+        if received != 1 {
+            return Err("Range rejected: truncated probe body".into());
+        }
+    }
+    drop(probe);
+    drop(probe_permit);
+    Ok(Probe {
+        total,
+        validator,
+        ranged,
+        effective,
+    })
 }
 
 async fn checked_prefix(path: &Path, segment: &Segment) -> Result<Sha256> {
@@ -281,6 +329,11 @@ async fn receive(
             );
     }
     let (mut response, _permit) = manager.send(request, token).await?;
+    if !response.status().is_success()
+        && !(ranged && response.status() == StatusCode::RANGE_NOT_SATISFIABLE)
+    {
+        return Err(Failure::response(&response));
+    }
     if ranged {
         if !bounds(
             &response,
@@ -292,11 +345,10 @@ async fn receive(
         {
             return Err("Range rejected: response bounds or resource identity changed".into());
         }
-    } else if response.status() != StatusCode::OK || !encoding_ok(&response) {
-        return Err(format!(
-            "Server returned HTTP {} or unsupported encoding",
-            response.status().as_u16()
-        ));
+    } else if response.status() != StatusCode::OK {
+        return Err(Failure::response(&response));
+    } else if !encoding_ok(&response) {
+        return Err("Unsupported content encoding".into());
     }
     let expected = if ranged {
         segment.end.map(|e| e - segment.start + 1)
@@ -347,6 +399,8 @@ async fn receive(
             if expected.is_some_and(|length| done + bytes.len() as u64 > length) {
                 return Err("Response exceeds the expected byte count".into());
             }
+            #[cfg(test)]
+            manager.file_failure("write", done)?;
             file.write_all(bytes).await.map_err(io_error)?;
             hash.update(bytes);
             done += bytes.len() as u64;
@@ -372,13 +426,17 @@ async fn checkpoint_file(
     done: u64,
     hash: &Sha256,
 ) -> Result<()> {
+    #[cfg(test)]
+    manager.file_failure("flush", done)?;
     file.flush().await.map_err(io_error)?;
     file.sync_data().await.map_err(io_error)?;
     let digest = digest(hash);
-    manager.update(&job.id, |j| {
-        j.segments[index].done = done;
-        j.segments[index].hash = digest;
-    })
+    manager
+        .update(&job.id, |j| {
+            j.segments[index].done = done;
+            j.segments[index].hash = digest;
+        })
+        .map_err(Failure::from)
 }
 
 fn digest(hash: &Sha256) -> String {

@@ -2,8 +2,11 @@
 
 This is the implementation order for the first Windows beta. The foundation,
 strategy, production HTTP/HTTPS core, durable resume, and bounded queue are
-implemented, including verified Windows desktop and browser integration. Final
-release CI and publication follow. GitHub issues own live acceptance criteria;
+implemented, including verified Windows desktop and browser integration.
+[0.1.0-beta.1](https://github.com/Lord-shaban/ZipZap/releases/tag/v0.1.0-beta.1)
+was published on 2026-10-17 with the M0–M5 gates verified; see the
+[acceptance checklist and publication evidence](development/VERIFICATION.md).
+GitHub issues own live acceptance criteria;
 this document owns scope and sequencing.
 
 [Project tracker](https://github.com/users/Lord-shaban/projects/12) ·
@@ -66,6 +69,54 @@ hard or security-sensitive work as `good first issue` merely to attract contribu
 
 ## After the beta
 
-Reassess automatic browser interception, Firefox, scheduled queues, media support,
-and other operating systems using user feedback and compatibility evidence. Add
-scoped issues when accepted; these ideas are not commitments for the first beta.
+Post-beta reliability work starts with [#23](https://github.com/Lord-shaban/ZipZap/issues/23):
+preserve live history and recoverable files when database deletion fails, and
+verify a successful retry after repair. That fix was merged in
+[#24](https://github.com/Lord-shaban/ZipZap/pull/24). This does not change the published beta.
+
+The [#25 desktop workspace](https://github.com/Lord-shaban/ZipZap/issues/25), based
+on the [bounded IDM study](research/idm-desktop.md), was merged in
+[#26](https://github.com/Lord-shaban/ZipZap/pull/26). It adds a compact toolbar,
+file categories and sortable table with existing engine commands. The logo/name,
+Arabic support and safe removal contract remain. It is not in the published beta.
+
+## Next accepted development phase
+
+The [M6 daily-use beta plan](planning/NEXT_PHASE.md) and its
+[Arabic execution guide](planning/NEXT_PHASE.ar.md) define the comprehensive next
+phase, prepared in [#27](https://github.com/Lord-shaban/ZipZap/issues/27).
+[Epic #28](https://github.com/Lord-shaban/ZipZap/issues/28) owns the 19 required
+children; [M6](https://github.com/Lord-shaban/ZipZap/milestone/7) groups the work.
+The proposed candidate is `0.2.0-beta.1`, not a published version or a deadline.
+
+| Order | Scope                                                                                | Issues           | Exit gate                                                                                                       |
+| ----- | ------------------------------------------------------------------------------------ | ---------------- | --------------------------------------------------------------------------------------------------------------- |
+| G0    | Native baseline, durable status, migration, publication and storage recovery         | #29–#33          | Real Windows baseline and deterministic failure/retry/reopen evidence preserve output and recoverable state.    |
+| G1    | Retry reasons, safe names/link refresh, queue control and explicit tray lifecycle    | #34–#37, #41     | The shared core owns durable controls; private links, no-clobber output and bounded workers remain protected.   |
+| G2    | Batch/categories/workspace, scheduling, browser feedback, provenance and diagnostics | #38–#40, #42–#45 | Complete English/Arabic daily workflows work through the same engine, with real platform checks where required. |
+| G3    | Full-app measurements and candidate qualification                                    | #46–#47          | One reviewed candidate has upgrade, installer, native/browser integrity, security and release evidence.         |
+
+Dependencies are explicit in each issue and recorded as native GitHub blocked-by
+relationships. Start with [#29](https://github.com/Lord-shaban/ZipZap/issues/29)
+and [#30](https://github.com/Lord-shaban/ZipZap/issues/30), then follow those
+dependencies rather than issue number alone. All implementation tasks start Todo.
+
+The failed-save consistency fix #30 was merged in
+[#53](https://github.com/Lord-shaban/ZipZap/pull/53). The
+[#29 native baseline](development/NATIVE_SMOKE.md) now records actual isolated
+Windows/WebView2 evidence for the classic workspace. These development changes
+are separate from the published first beta; remaining M6 dependencies stay open.
+
+[M7](https://github.com/Lord-shaban/ZipZap/milestone/8) contains four separate
+go/no-go studies: [browser capture/page links #48](https://github.com/Lord-shaban/ZipZap/issues/48),
+[auth/proxies #49](https://github.com/Lord-shaban/ZipZap/issues/49),
+[Firefox/store requirements #50](https://github.com/Lord-shaban/ZipZap/issues/50),
+and [media formats #51](https://github.com/Lord-shaban/ZipZap/issues/51).
+These are decisions, not accepted feature implementations or M6 release blockers.
+The [feature study](research/next-phase-features.md) separates source observations,
+official vendor claims, existing REA evidence and remaining unknowns.
+
+One in-process queue is accepted for M6, including scheduling while the app runs.
+Named/synchronization queues, FTP/torrents, cloud sync, website crawling, other
+operating systems, OS wake/shutdown and an automatic updater remain deferred.
+Scope changes need an explicit issue/plan update; planned checks are not results.

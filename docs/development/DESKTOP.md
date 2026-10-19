@@ -27,6 +27,8 @@ requires an explicit reviewed origin/identity change, not a wildcard.
   mocked Tauri contract; this does not prove native downloads.
 - `cargo test -p zipzap-native --locked`: real framing/origin/schema validation.
 - `node scripts/e2e-fixture.mjs`: bounded local HTTP source for manual app tests.
+- [Native smoke procedure and evidence](NATIVE_SMOKE.md): isolated current-source
+  WebView2 downloads, recovery, file actions and English/Arabic keyboard checks.
 - `node scripts/test-browser.mjs <fixture-url> <app-default-folder>`: real
   unpacked extension/native host/desktop/digest checks on a Windows test install.
   Use a fresh destination with no conflicting output filenames.

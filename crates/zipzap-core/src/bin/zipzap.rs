@@ -38,7 +38,7 @@ async fn main() {
             continue;
         }
         let result = match serde_json::from_str::<Value>(&line) {
-            Ok(value) => dispatch(&manager, &value),
+            Ok(value) => dispatch(&manager, &value).await,
             Err(_) => Err("Invalid JSON command".into()),
         };
         println!(
@@ -61,15 +61,68 @@ async fn main() {
     manager.shutdown().await;
 }
 
-fn dispatch(manager: &Manager, value: &Value) -> Result<Value, String> {
+async fn dispatch(manager: &Manager, value: &Value) -> Result<Value, String> {
     match value["command"].as_str().unwrap_or("") {
-        "add" => manager
-            .add(
+        "queue" => {
+            if let Some(running) = value.get("running") {
+                manager.set_queue_running(running.as_bool().ok_or("Invalid queue state")?)?;
+            }
+            Ok(json!(manager.queue()))
+        }
+        "move_waiting" => {
+            manager.move_waiting(
+                value["id"].as_str().ok_or("Missing ID")?,
+                value["direction"].as_str().ok_or("Missing direction")?,
+            )?;
+            Ok(json!(true))
+        }
+        "replace_link" => manager
+            .replace_link(
+                value["id"].as_str().ok_or("Missing ID")?,
+                value["url"].as_str().ok_or("Missing URL")?,
+                value["restart"].as_bool().unwrap_or(false),
+                &zipzap_core::CancellationToken::new(),
+            )
+            .await
+            .and_then(|result| {
+                serde_json::to_value(result).map_err(|_| "Serialization failed".into())
+            }),
+        "suggest" | "suggest_auto" => {
+            let url = value["url"].as_str().ok_or("Missing URL")?;
+            let folder = Path::new(value["folder"].as_str().ok_or("Missing folder")?);
+            let token = zipzap_core::CancellationToken::new();
+            let result = if value["command"] == "suggest_auto" {
+                manager
+                    .suggest_auto(url, folder, value["filename"].as_str(), &token)
+                    .await
+            } else {
+                manager
+                    .suggest(url, folder, value["filename"].as_str(), &token)
+                    .await
+            };
+            result.and_then(|suggestion| {
+                serde_json::to_value(suggestion).map_err(|_| "Serialization failed".into())
+            })
+        }
+        "add" => {
+            let later = value
+                .get("later")
+                .map(|value| value.as_bool().ok_or("Invalid add-for-later choice"))
+                .transpose()?
+                .unwrap_or(false);
+            let add = if later {
+                Manager::add_for_later
+            } else {
+                Manager::add
+            };
+            add(
+                manager,
                 value["url"].as_str().ok_or("Missing URL")?,
                 Path::new(value["folder"].as_str().ok_or("Missing folder")?),
                 value["filename"].as_str(),
             )
-            .and_then(|j| serde_json::to_value(j).map_err(|_| "Serialization failed".into())),
+            .and_then(|j| serde_json::to_value(j).map_err(|_| "Serialization failed".into()))
+        }
         "jobs" => Ok(json!(manager.jobs())),
         "settings" => {
             if let Some(settings) = value.get("value") {
