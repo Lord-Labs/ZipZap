@@ -97,10 +97,11 @@ failure with a completed payload/advisory warning, reopen, and crash recovery th
 restores a missing stream on the verified file. The engine fixture also checks
 the exact marker and payload hash on every completed Windows download.
 
-The native unmarked-file Open warning (confirm/cancel, English/Arabic) still needs
-an isolated WebView2/platform session. Automated UI tests check the completed-byte
-warning independently of transfer failure and preserve the explicit reveal path;
-they mock IPC and do not certify native dialog behavior or SmartScreen/AV safety.
-Keep the PR draft until that native open/cancel/reveal path is exercised. Do not
-change Windows security settings, remove markers from personal files, or execute
-downloaded programs merely to obtain evidence. Use owned harmless text fixtures.
+On 2026-10-19 the maintainer reported personally testing the Windows interface
+and confirmed all requested manual scenarios, including the unmarked-file Open
+warning's confirm/cancel and reveal paths. This is maintainer-reported acceptance,
+not agent-observed Computer Use evidence. Further Computer Use was prohibited.
+Automated UI tests independently check completed-byte warnings and explicit
+reveal, with mocked IPC. Neither source of evidence certifies SmartScreen/AV
+safety. Repeat the native paths against release #47's candidate using owned
+harmless fixtures; do not change security settings or relabel personal files.
