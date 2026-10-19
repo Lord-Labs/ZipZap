@@ -63,6 +63,19 @@ async fn main() {
 
 async fn dispatch(manager: &Manager, value: &Value) -> Result<Value, String> {
     match value["command"].as_str().unwrap_or("") {
+        "queue" => {
+            if let Some(running) = value.get("running") {
+                manager.set_queue_running(running.as_bool().ok_or("Invalid queue state")?)?;
+            }
+            Ok(json!(manager.queue()))
+        }
+        "move_waiting" => {
+            manager.move_waiting(
+                value["id"].as_str().ok_or("Missing ID")?,
+                value["direction"].as_str().ok_or("Missing direction")?,
+            )?;
+            Ok(json!(true))
+        }
         "replace_link" => manager
             .replace_link(
                 value["id"].as_str().ok_or("Missing ID")?,
@@ -85,13 +98,25 @@ async fn dispatch(manager: &Manager, value: &Value) -> Result<Value, String> {
             .and_then(|suggestion| {
                 serde_json::to_value(suggestion).map_err(|_| "Serialization failed".into())
             }),
-        "add" => manager
-            .add(
+        "add" => {
+            let later = value
+                .get("later")
+                .map(|value| value.as_bool().ok_or("Invalid add-for-later choice"))
+                .transpose()?
+                .unwrap_or(false);
+            let add = if later {
+                Manager::add_for_later
+            } else {
+                Manager::add
+            };
+            add(
+                manager,
                 value["url"].as_str().ok_or("Missing URL")?,
                 Path::new(value["folder"].as_str().ok_or("Missing folder")?),
                 value["filename"].as_str(),
             )
-            .and_then(|j| serde_json::to_value(j).map_err(|_| "Serialization failed".into())),
+            .and_then(|j| serde_json::to_value(j).map_err(|_| "Serialization failed".into()))
+        }
         "jobs" => Ok(json!(manager.jobs())),
         "settings" => {
             if let Some(settings) = value.get("value") {

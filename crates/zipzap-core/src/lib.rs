@@ -3,6 +3,8 @@ mod metadata;
 pub use metadata::Suggestion;
 mod link_refresh;
 pub use link_refresh::LinkReplacement;
+mod queue;
+pub use queue::QueueState;
 #[cfg(test)]
 mod persistence_tests;
 mod publication;
@@ -74,6 +76,8 @@ pub struct Job {
     pub validator: Option<String>,
     pub effective_url: Option<String>,
     pub created_at: u64,
+    #[serde(default)]
+    pub queue_order: u64,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub publication: Option<Publication>,
     #[serde(default)]
@@ -127,6 +131,7 @@ struct State {
     running: HashMap<String, CancellationToken>,
     settings: Settings,
     samples: HashMap<String, (Instant, u64)>,
+    queue_running: bool,
 }
 fn destination_queued(state: &State, path: &Path) -> bool {
     state.jobs.iter().any(|job| {
@@ -219,7 +224,7 @@ impl Manager {
         let schema: i64 = db
             .pragma_query_value(None, "user_version", |r| r.get(0))
             .map_err(db_error)?;
-        if schema > 2 {
+        if schema > 3 {
             return Err("Database was created by a newer ZipZap version".into());
         }
         db.pragma_update(None, "journal_mode", "WAL")
@@ -230,6 +235,23 @@ impl Manager {
             .transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)
             .map_err(db_error)?;
         tx.execute_batch("CREATE TABLE IF NOT EXISTS jobs (id TEXT PRIMARY KEY, data TEXT NOT NULL); CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY CHECK(id=1), data TEXT NOT NULL);").map_err(db_error)?;
+        tx.execute_batch("CREATE TABLE IF NOT EXISTS queue (id INTEGER PRIMARY KEY CHECK(id=1), running INTEGER NOT NULL CHECK(running IN(0,1)));").map_err(db_error)?;
+        let queue_running = if schema < 3 {
+            tx.execute("INSERT INTO queue VALUES(1,1)", [])
+                .map_err(db_error)?;
+            true
+        } else {
+            match tx
+                .query_row("SELECT running FROM queue WHERE id=1", [], |row| {
+                    row.get::<_, i64>(0)
+                })
+                .map_err(db_error)?
+            {
+                0 => false,
+                1 => true,
+                _ => return Err("Invalid saved queue; database retained for recovery".into()),
+            }
+        };
         let mut jobs = Vec::new();
         {
             let mut statement = tx
@@ -283,8 +305,19 @@ impl Manager {
                         "Invalid saved publication evidence; database retained for recovery".into(),
                     );
                 }
+                if schema < 3 {
+                    job.queue_order = jobs.len() as u64;
+                }
                 jobs.push(job);
             }
+        }
+        jobs.sort_by_key(|job| job.queue_order);
+        if jobs
+            .windows(2)
+            .any(|pair| pair[0].queue_order == pair[1].queue_order)
+            || jobs.last().is_some_and(|job| job.queue_order == u64::MAX)
+        {
+            return Err("Invalid saved queue order; database retained for recovery".into());
         }
         let settings: Settings =
             match tx.query_row("SELECT data FROM settings WHERE id=1", [], |r| {
@@ -331,7 +364,7 @@ impl Manager {
             )
             .map_err(db_error)?;
         }
-        tx.pragma_update(None, "user_version", 2)
+        tx.pragma_update(None, "user_version", 3)
             .map_err(db_error)?;
         tx.commit().map_err(db_error)?;
         drop(publication_guards);
@@ -345,6 +378,7 @@ impl Manager {
                 running: HashMap::new(),
                 settings,
                 samples: HashMap::new(),
+                queue_running,
             }),
             client,
             stop: CancellationToken::new(),
@@ -390,6 +424,10 @@ impl Manager {
         self.add_with_id(value, folder, filename, &Uuid::new_v4().to_string())
     }
 
+    pub fn add_for_later(&self, value: &str, folder: &Path, filename: Option<&str>) -> Result<Job> {
+        self.add_with_mode(value, folder, filename, &Uuid::new_v4().to_string(), true)
+    }
+
     /// A stable request ID makes native inbox replay idempotent across crashes.
     pub fn add_with_id(
         &self,
@@ -397,6 +435,17 @@ impl Manager {
         folder: &Path,
         filename: Option<&str>,
         id: &str,
+    ) -> Result<Job> {
+        self.add_with_mode(value, folder, filename, id, false)
+    }
+
+    fn add_with_mode(
+        &self,
+        value: &str,
+        folder: &Path,
+        filename: Option<&str>,
+        id: &str,
+        later: bool,
     ) -> Result<Job> {
         if Uuid::parse_str(id)
             .map_err(|_| "Invalid request ID")?
@@ -431,7 +480,11 @@ impl Manager {
             id: id.to_owned(),
             url: url.to_string(),
             destination,
-            status: Status::Queued,
+            status: if later {
+                Status::Paused
+            } else {
+                Status::Queued
+            },
             downloaded: 0,
             total: None,
             speed: 0,
@@ -444,6 +497,14 @@ impl Manager {
                 .unwrap_or_default()
                 .as_secs(),
             publication: None,
+            queue_order: match state.jobs.last() {
+                Some(job) => job
+                    .queue_order
+                    .checked_add(1)
+                    .filter(|order| *order < u64::MAX)
+                    .ok_or("Queue order limit reached")?,
+                None => 0,
+            },
             attempt: 0,
             next_retry: None,
             failure_reason: None,
@@ -533,10 +594,14 @@ impl Manager {
                             *hosts.entry(host(&job.url)).or_default() += 1;
                         }
                     }
-                    let capacity = state
-                        .settings
-                        .max_concurrent
-                        .saturating_sub(state.running.len());
+                    let capacity = if state.queue_running {
+                        state
+                            .settings
+                            .max_concurrent
+                            .saturating_sub(state.running.len())
+                    } else {
+                        0
+                    };
                     for index in 0..state.jobs.len() {
                         if pending.len() >= capacity {
                             break;

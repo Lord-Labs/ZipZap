@@ -686,6 +686,48 @@ try {
   await complete(first);
   passed.push("bounded queue order survives restart");
 
+  await ask({ command: "queue", running: false });
+  const heldA = await add("/slow", "held-a.bin");
+  const heldB = await add("/slow", "held-b.bin");
+  const later = await ask({
+    command: "add",
+    url: `${base}/slow`,
+    folder: directory,
+    filename: "later.bin",
+    later: true,
+  });
+  const beforeHold = requests.length;
+  await delay(200);
+  assert.equal(requests.length, beforeHold);
+  assert.equal((await get(later.id)).status, "paused");
+  assert.deepEqual((await ask({ command: "queue" })).waiting, [heldA.id, heldB.id]);
+  await ask({ command: "move_waiting", id: heldB.id, direction: "up" });
+  await stop();
+  start();
+  const heldQueue = await ask({ command: "queue" });
+  assert.equal(heldQueue.running, false);
+  assert.deepEqual(heldQueue.waiting, [heldB.id, heldA.id]);
+  await ask({ command: "queue", running: true });
+  await until(heldB.id, (job) => job.downloaded > 256 * 1024);
+  assert.equal((await get(heldA.id)).status, "queued");
+  await ask({ command: "queue", running: false });
+  await complete(heldB);
+  assert.equal((await get(heldA.id)).status, "queued");
+  assert.equal((await get(later.id)).status, "paused");
+  passed.push("durable hold/order and add-for-later survive restart without unpausing jobs");
+  const heldAddition = await add("/slow", "held-addition.bin");
+  await ask({ command: "move_waiting", id: heldAddition.id, direction: "up" });
+  await delay(150);
+  assert.equal((await get(heldAddition.id)).status, "queued");
+  await ask({ command: "queue", running: true });
+  await until(heldAddition.id, (job) => job.downloaded > 256 * 1024);
+  assert.equal((await get(heldA.id)).status, "queued");
+  await complete(heldAddition);
+  await complete(heldA);
+  assert.equal((await get(later.id)).status, "paused");
+  await action(later, "cancel");
+  passed.push("holding lets active work finish while new additions wait in the shared queue");
+
   await ask({
     command: "settings",
     value: { max_concurrent: 2, connections: 4, speed_limit: 0, language: "en" },

@@ -33,6 +33,7 @@
 
   type Snapshot = {
     jobs: Job[];
+    queue: { running: boolean; waiting: string[] };
     settings: Settings;
     folder: string;
     version: string;
@@ -43,6 +44,9 @@
   type Suggestion = { filename: string; total: number | null; alternative: string | null };
 
   let jobs: Job[] = [];
+  let queue = { running: true, waiting: [] as string[] };
+  let queueBusy = false;
+  let addLater = false;
 
   let settings: Settings = {
     max_concurrent: 2,
@@ -239,6 +243,7 @@
   $: canResume = selected && ["paused", "failed"].includes(selected.status);
   $: canCancel = selected && ["queued", "downloading", "paused"].includes(selected.status);
   $: canRemove = selected && ["completed", "failed", "cancelled"].includes(selected.status);
+  $: queueIndex = selected ? queue.waiting.indexOf(selected.id) : -1;
 
   function sortBy(key: "filename" | "total" | "status") {
     descending = sortKey === key ? !descending : false;
@@ -267,6 +272,7 @@
       }
 
       jobs = value.jobs;
+      queue = value.queue;
       settings = value.settings;
       language = value.settings.language;
       folder = value.folder;
@@ -298,6 +304,7 @@
     filename = "";
     destination = folder;
     suggestion = null;
+    addLater = false;
     addDialog.showModal();
     await tick();
     urlInput.focus();
@@ -386,7 +393,12 @@
     busy = true;
 
     try {
-      await invoke("add_download", { url, filename: filename.trim() || null, destination });
+      await invoke("add_download", {
+        url,
+        filename: filename.trim() || null,
+        destination,
+        later: addLater,
+      });
       addDialog.close();
       filter = "all";
       category = "all";
@@ -409,6 +421,33 @@
     linkDialog.showModal();
     await tick();
     linkInput.focus();
+  }
+
+  async function queueControl(running: boolean) {
+    queueBusy = true;
+    error = "";
+    try {
+      await invoke("set_queue_running", { running });
+      await refresh();
+    } catch (e) {
+      error = `${text.queueFailed} ${errorMessage(e)}`;
+    } finally {
+      queueBusy = false;
+    }
+  }
+
+  async function moveWaiting(direction: "up" | "down") {
+    if (!selected) return;
+    queueBusy = true;
+    error = "";
+    try {
+      await invoke("move_waiting", { id: selected.id, direction });
+      await refresh();
+    } catch (e) {
+      error = `${text.queueFailed} ${errorMessage(e)}`;
+    } finally {
+      queueBusy = false;
+    }
   }
 
   async function replaceLink(event: SubmitEvent) {
@@ -690,6 +729,16 @@
     </aside>
 
     <main id="downloads" tabindex="-1">
+      <section class="queue-controls" aria-label={text.queueTitle}>
+        <span role="status">{queue.running ? text.queueRunning : text.queueHeld}</span>
+        <button
+          class="secondary"
+          disabled={queueBusy || !isDesktop()}
+          onclick={() => queueControl(!queue.running)}
+          >{queue.running ? text.holdQueue : text.startQueue}</button
+        >
+        <span class="helper">{text.queueHoldHint}</span>
+      </section>
       {#if error}<div class="message error" role="alert">
           <Icon name="alert" /><span>{error}</span><button
             class="icon-button"
@@ -826,6 +875,23 @@
       <!-- svelte-ignore a11y_no_noninteractive_tabindex (Keyboard users need to scroll the download details.) -->
       <section class="selection-details" aria-label={text.details} tabindex="0">
         {#if selected}
+          {#if queueIndex >= 0}<div class="queue-position">
+              <strong>{text.queuePosition}</strong><span
+                >{new Intl.NumberFormat(language).format(queueIndex + 1)} / {new Intl.NumberFormat(
+                  language,
+                ).format(queue.waiting.length)}</span
+              >
+              <button
+                class="secondary"
+                disabled={queueBusy || selectedBusy || queueIndex === 0}
+                onclick={() => moveWaiting("up")}>{text.moveUp}</button
+              >
+              <button
+                class="secondary"
+                disabled={queueBusy || selectedBusy || queueIndex === queue.waiting.length - 1}
+                onclick={() => moveWaiting("down")}>{text.moveDown}</button
+              >
+            </div>{/if}
           <div>
             <strong>{text.destination}</strong><bdi dir="ltr">{pathLabel(selected.destination)}</bdi
             >
@@ -924,6 +990,9 @@
       >
     </div>
     <p id="storage-help" class="helper">{text.storageUnknown} {text.storage}</p>
+    <label class="helper"
+      ><input type="checkbox" bind:checked={addLater} disabled={busy} />{text.addLater}</label
+    >
     <div class="name-preview">
       <button type="button" class="secondary" disabled={busy || !url} onclick={() => checkName()}
         >{busy ? text.checkingName : text.checkName}</button
@@ -948,7 +1017,9 @@
     <div class="dialog-actions">
       <button type="button" class="secondary" onclick={() => addDialog.close()}>{text.close}</button
       ><button type="submit" class="primary" disabled={busy}
-        ><Icon name="download" />{text.start}</button
+        ><Icon name={addLater ? "clock" : "download"} />{addLater
+          ? text.addLaterButton
+          : text.start}</button
       >
     </div>
   </form>
