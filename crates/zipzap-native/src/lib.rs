@@ -20,7 +20,9 @@ pub fn extension_id() -> String {
 #[serde(deny_unknown_fields)]
 pub struct Request {
     pub version: u32,
-    pub url: String,
+    pub url: Option<String>,
+    pub id: Option<String>,
+    pub action: Option<String>,
 }
 #[derive(Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -30,26 +32,152 @@ pub struct Inbox {
     pub url: String,
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[serde(tag = "state", rename_all = "snake_case", deny_unknown_fields)]
+pub enum Outcome {
+    Received,
+    Queued,
+    Rejected { code: Rejection },
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "snake_case")]
+pub enum Rejection {
+    InboxFull,
+    HostRejected,
+    Destination,
+    AppRejected,
+    AppStartFailed,
+    Expired,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct Receipt {
+    pub version: u32,
+    pub id: String,
+    #[serde(flatten)]
+    pub outcome: Outcome,
+}
+
+pub fn valid_id(id: &str) -> bool {
+    uuid::Uuid::parse_str(id).is_ok_and(|value| value.to_string() == id)
+}
+
+fn receipt(id: &str, outcome: Outcome) -> serde_json::Value {
+    serde_json::to_value(Receipt {
+        version: 2,
+        id: id.to_owned(),
+        outcome,
+    })
+    .expect("serializable receipt")
+}
+
+fn read_local(path: &Path) -> Result<Vec<u8>, String> {
+    let metadata = std::fs::symlink_metadata(path).map_err(|_| "Local message unavailable")?;
+    if !metadata.file_type().is_file() || metadata.len() > 32768 {
+        return Err("Invalid local message".into());
+    }
+    std::fs::read(path).map_err(|_| "Local message unavailable".into())
+}
+
+// Results are private local acknowledgments, never a log of links or raw errors.
+pub fn result(state: &Path, id: &str) -> Result<Option<Receipt>, String> {
+    if !valid_id(id) {
+        return Err("Invalid request ID".into());
+    }
+    let path = state.join("results").join(format!("{id}.json"));
+    if !path
+        .try_exists()
+        .map_err(|_| "Cannot inspect local result")?
+    {
+        return Ok(None);
+    }
+    let age = std::fs::symlink_metadata(&path)
+        .and_then(|m| m.modified())
+        .ok()
+        .and_then(|time| time.elapsed().ok())
+        .unwrap_or_default();
+    if age.as_secs() >= 86400 {
+        return Ok(None);
+    }
+    let saved: Receipt =
+        serde_json::from_slice(&read_local(&path)?).map_err(|_| "Invalid local result")?;
+    if saved.id != id || saved.version != 2 || saved.outcome == Outcome::Received {
+        return Err("Invalid local result".into());
+    }
+    Ok(Some(saved))
+}
+
+pub fn save_result(state: &Path, id: &str, outcome: Outcome) -> Result<(), String> {
+    if !valid_id(id) || outcome == Outcome::Received {
+        return Err("Invalid local result".into());
+    }
+    let folder = state.join("results");
+    std::fs::create_dir_all(&folder).map_err(|_| "Cannot create local results")?;
+    let mut entries: Vec<_> = std::fs::read_dir(&folder)
+        .map_err(|_| "Cannot inspect local results")?
+        .take(201)
+        .flatten()
+        .filter_map(|entry| {
+            let meta = std::fs::symlink_metadata(entry.path()).ok()?;
+            (meta.file_type().is_file()).then_some((meta.modified().ok()?, entry.path()))
+        })
+        .collect();
+    entries.sort_by_key(|(time, _)| *time);
+    let excess = entries.len().saturating_sub(99);
+    for (index, (time, path)) in entries.into_iter().enumerate() {
+        if index < excess || time.elapsed().is_ok_and(|age| age.as_secs() >= 86400) {
+            std::fs::remove_file(path).map_err(|_| "Cannot clean local results")?;
+        }
+    }
+    let temporary = folder.join(format!("{id}-{}.tmp", uuid::Uuid::new_v4()));
+    let bytes =
+        serde_json::to_vec(&receipt(id, outcome)).map_err(|_| "Cannot encode local result")?;
+    let mut file = std::fs::OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(&temporary)
+        .map_err(|_| "Cannot create local result")?;
+    let written = file.write_all(&bytes).and_then(|_| file.sync_all());
+    drop(file);
+    if written.is_err() {
+        let _ = std::fs::remove_file(&temporary);
+        return Err("Cannot save local result".into());
+    }
+    let published = folder.join(format!("{id}.json"));
+    let renamed = std::fs::rename(&temporary, published)
+        .map_err(|_| "Cannot publish local result".to_owned());
+    if renamed.is_err() {
+        let _ = std::fs::remove_file(temporary);
+    }
+    renamed
+}
+
 pub fn receive(
     reader: &mut impl Read,
     writer: &mut impl Write,
     origin: &str,
     state: &Path,
-) -> Result<(), String> {
+) -> Result<bool, String> {
     let response = process(reader, origin, state);
-    let value = match response {
-        Ok(id) => serde_json::json!({"ok":true,"id":id}),
-        Err(error) => serde_json::json!({"ok":false,"error":error}),
+    let (value, launch) = match response {
+        Ok(value) => value,
+        Err(error) => (serde_json::json!({"ok":false,"error":error}), false),
     };
     let bytes = serde_json::to_vec(&value).map_err(|_| "Cannot encode response")?;
     writer
         .write_all(&(bytes.len() as u32).to_ne_bytes())
         .and_then(|_| writer.write_all(&bytes))
         .and_then(|_| writer.flush())
-        .map_err(|_| "Cannot write native response".to_owned())
+        .map_err(|_| "Cannot write native response".to_owned())?;
+    Ok(launch)
 }
 
-fn process(reader: &mut impl Read, origin: &str, state: &Path) -> Result<String, String> {
+fn process(
+    reader: &mut impl Read,
+    origin: &str,
+    state: &Path,
+) -> Result<(serde_json::Value, bool), String> {
     if origin != format!("chrome-extension://{}/", extension_id()) {
         return Err("Unexpected extension identity".into());
     }
@@ -66,40 +194,120 @@ fn process(reader: &mut impl Read, origin: &str, state: &Path) -> Result<String,
         .read_exact(&mut data)
         .map_err(|_| "Truncated native message")?;
     let request: Request = serde_json::from_slice(&data).map_err(|_| "Invalid native message")?;
-    if request.version != 1 {
+    if ![1, 2].contains(&request.version) {
         return Err("Unsupported message version".into());
     }
-    zipzap_core::validate_url(&request.url)?;
-    let folder = state.join("inbox");
-    std::fs::create_dir_all(&folder).map_err(|_| "Cannot create local inbox")?;
-    if std::fs::read_dir(&folder)
-        .map_err(|_| "Cannot inspect local inbox")?
-        .take(101)
-        .count()
-        >= 100
-    {
-        return Err("ZipZap inbox is full; open the application".into());
-    }
-    let id = uuid::Uuid::new_v4().to_string();
-    let path = folder.join(format!("{id}.tmp"));
-    let pending = Inbox {
-        version: 1,
-        id: id.clone(),
-        url: request.url,
+    let legacy = request.version == 1;
+    let id = if legacy {
+        if request.id.is_some() || request.action.is_some() {
+            return Err("Invalid native message".into());
+        }
+        uuid::Uuid::new_v4().to_string()
+    } else {
+        let id = request.id.ok_or("Missing request ID")?;
+        if !valid_id(&id) {
+            return Err("Invalid request ID".into());
+        }
+        if request.action.as_deref() == Some("status") && request.url.is_none() {
+            if let Some(saved) = result(state, &id)? {
+                return Ok((receipt(&id, saved.outcome), false));
+            }
+            let pending = state.join("inbox").join(format!("{id}.json"));
+            return Ok((
+                receipt(
+                    &id,
+                    if pending
+                        .try_exists()
+                        .map_err(|_| "Cannot inspect local inbox")?
+                    {
+                        Outcome::Received
+                    } else {
+                        Outcome::Rejected {
+                            code: Rejection::Expired,
+                        }
+                    },
+                ),
+                false,
+            ));
+        }
+        if request.action.as_deref() != Some("enqueue") {
+            return Err("Invalid native message".into());
+        }
+        id
     };
-    let bytes = serde_json::to_vec(&pending).map_err(|_| "Cannot encode local request")?;
-    let mut file = std::fs::OpenOptions::new()
-        .write(true)
-        .create_new(true)
-        .open(&path)
-        .map_err(|_| "Cannot create local request")?;
-    file.write_all(&bytes)
-        .and_then(|_| file.sync_all())
-        .map_err(|_| "Cannot save local request")?;
-    drop(file);
-    std::fs::rename(&path, folder.join(format!("{id}.json")))
-        .map_err(|_| "Cannot publish local request")?;
-    Ok(id)
+    let url = request.url.ok_or("Missing download link")?;
+    zipzap_core::validate_url(&url).map_err(|_| "Invalid download link")?;
+    let enqueue = (|| {
+        if !legacy {
+            if let Some(saved) = result(state, &id)? {
+                return Ok((receipt(&id, saved.outcome), false));
+            }
+            let pending = state.join("inbox").join(format!("{id}.json"));
+            if pending
+                .try_exists()
+                .map_err(|_| "Cannot inspect local inbox")?
+            {
+                let previous: Inbox = serde_json::from_slice(&read_local(&pending)?)
+                    .map_err(|_| "Invalid local request")?;
+                if previous.id != id || previous.url != url || previous.version != 2 {
+                    return Err("Request ID is already in use".into());
+                }
+                return Ok((receipt(&id, Outcome::Received), true));
+            }
+        }
+        let folder = state.join("inbox");
+        std::fs::create_dir_all(&folder).map_err(|_| "Cannot create local inbox")?;
+        if std::fs::read_dir(&folder)
+            .map_err(|_| "Cannot inspect local inbox")?
+            .take(101)
+            .count()
+            >= 100
+        {
+            return Err("ZipZap inbox is full; open the application".into());
+        }
+        let path = folder.join(format!("{id}.tmp"));
+        let pending = Inbox {
+            version: request.version,
+            id: id.clone(),
+            url,
+        };
+        let bytes = serde_json::to_vec(&pending).map_err(|_| "Cannot encode local request")?;
+        let mut file = std::fs::OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&path)
+            .map_err(|_| "Cannot create local request")?;
+        file.write_all(&bytes)
+            .and_then(|_| file.sync_all())
+            .map_err(|_| "Cannot save local request")?;
+        drop(file);
+        std::fs::rename(&path, folder.join(format!("{id}.json")))
+            .map_err(|_| "Cannot publish local request")?;
+        Ok((
+            if legacy {
+                serde_json::json!({"ok":true,"id":id})
+            } else {
+                receipt(&id, Outcome::Received)
+            },
+            true,
+        ))
+    })();
+    match enqueue {
+        Err(error) if !legacy => Ok((
+            receipt(
+                &id,
+                Outcome::Rejected {
+                    code: if error == "ZipZap inbox is full; open the application" {
+                        Rejection::InboxFull
+                    } else {
+                        Rejection::HostRejected
+                    },
+                },
+            ),
+            false,
+        )),
+        outcome => outcome,
+    }
 }
 
 #[cfg(windows)]
@@ -199,5 +407,138 @@ mod tests {
             serde_json::from_slice::<serde_json::Value>(&out[4..]).unwrap()["ok"],
             false
         );
+    }
+
+    #[test]
+    fn version_two_receipt_replay_and_final_results_are_distinct() {
+        let temp = tempfile::tempdir().unwrap();
+        let origin = format!("chrome-extension://{}/", extension_id());
+        let id = uuid::Uuid::new_v4().to_string();
+        let enqueue = serde_json::to_vec(&serde_json::json!({"version":2,"action":"enqueue","id":id,"url":"https://example.com/file?secret=private"})).unwrap();
+        let status =
+            serde_json::to_vec(&serde_json::json!({"version":2,"action":"status","id":id}))
+                .unwrap();
+        assert_eq!(send(&status, &origin, temp.path())["code"], "expired");
+        assert!(!temp.path().join("inbox").exists());
+        assert_eq!(send(&enqueue, &origin, temp.path())["state"], "received");
+        assert_eq!(send(&enqueue, &origin, temp.path())["id"], id);
+        assert_eq!(
+            std::fs::read_dir(temp.path().join("inbox"))
+                .unwrap()
+                .count(),
+            1
+        );
+        assert_eq!(send(&status, &origin, temp.path())["state"], "received");
+        save_result(temp.path(), &id, Outcome::Queued).unwrap();
+        assert_eq!(send(&status, &origin, temp.path())["state"], "queued");
+        assert_eq!(send(&enqueue, &origin, temp.path())["state"], "queued");
+        save_result(
+            temp.path(),
+            &id,
+            Outcome::Rejected {
+                code: Rejection::Destination,
+            },
+        )
+        .unwrap();
+        let rejected = send(&status, &origin, temp.path());
+        assert_eq!(rejected["code"], "destination");
+        assert!(!rejected.to_string().contains("secret"));
+        assert!(!rejected.to_string().contains("example.com"));
+    }
+
+    #[test]
+    fn rejects_invalid_ids_actions_and_result_payloads() {
+        let temp = tempfile::tempdir().unwrap();
+        let origin = format!("chrome-extension://{}/", extension_id());
+        let id = uuid::Uuid::new_v4().to_string();
+        for value in [
+            serde_json::json!({"version":2,"action":"status","id":"../escape"}),
+            serde_json::json!({"version":2,"action":"status","id":id,"url":"https://example.com"}),
+            serde_json::json!({"version":2,"action":"execute","id":id}),
+            serde_json::json!({"version":1,"id":id,"url":"https://example.com"}),
+        ] {
+            assert_eq!(
+                send(&serde_json::to_vec(&value).unwrap(), &origin, temp.path())["ok"],
+                false
+            );
+        }
+        assert!(!temp.path().join("inbox").exists());
+        save_result(temp.path(), &id, Outcome::Queued).unwrap();
+        let path = temp.path().join("results").join(format!("{id}.json"));
+        for payload in [
+            serde_json::json!({"version":2,"id":id,"state":"rejected","code":"https://private/token"}),
+            serde_json::json!({"version":2,"id":id,"state":"received"}),
+            serde_json::json!({"version":2,"id":"another","state":"queued"}),
+        ] {
+            std::fs::write(&path, serde_json::to_vec(&payload).unwrap()).unwrap();
+            assert!(result(temp.path(), &id).is_err());
+        }
+    }
+
+    #[test]
+    fn only_enqueue_can_request_app_launch_and_inbox_quota_is_preserved() {
+        let temp = tempfile::tempdir().unwrap();
+        let origin = format!("chrome-extension://{}/", extension_id());
+        let id = uuid::Uuid::new_v4().to_string();
+        for (action, launch) in [("enqueue", true), ("status", false)] {
+            let mut value = serde_json::json!({"version":2,"action":action,"id":id});
+            if launch {
+                value["url"] = "https://example.com/file".into();
+            }
+            let bytes = serde_json::to_vec(&value).unwrap();
+            let mut input = (bytes.len() as u32).to_ne_bytes().to_vec();
+            input.extend(bytes);
+            assert_eq!(
+                receive(&mut &input[..], &mut Vec::new(), &origin, temp.path()).unwrap(),
+                launch
+            );
+        }
+        for index in 1..100 {
+            std::fs::write(
+                temp.path().join("inbox").join(format!("{index}.tmp")),
+                b"pending",
+            )
+            .unwrap();
+        }
+        let payload = serde_json::to_vec(&serde_json::json!({"version":2,"action":"enqueue","id":uuid::Uuid::new_v4().to_string(),"url":"https://example.com/other"})).unwrap();
+        assert_eq!(send(&payload, &origin, temp.path())["code"], "inbox_full");
+        assert_eq!(
+            std::fs::read_dir(temp.path().join("inbox"))
+                .unwrap()
+                .count(),
+            100
+        );
+    }
+
+    #[test]
+    fn result_retention_is_bounded_and_expires_without_replaying_work() {
+        let temp = tempfile::tempdir().unwrap();
+        let mut first = String::new();
+        for index in 0..105 {
+            let id = uuid::Uuid::new_v4().to_string();
+            if index == 0 {
+                first = id.clone();
+            }
+            save_result(temp.path(), &id, Outcome::Queued).unwrap();
+            if index == 0 {
+                std::fs::OpenOptions::new()
+                    .write(true)
+                    .open(temp.path().join("results").join(format!("{id}.json")))
+                    .unwrap()
+                    .set_times(std::fs::FileTimes::new().set_modified(
+                        std::time::SystemTime::now() - std::time::Duration::from_secs(86401),
+                    ))
+                    .unwrap();
+                assert!(result(temp.path(), &id).unwrap().is_none());
+            }
+        }
+        assert!(result(temp.path(), &first).unwrap().is_none());
+        assert_eq!(
+            std::fs::read_dir(temp.path().join("results"))
+                .unwrap()
+                .count(),
+            100
+        );
+        assert!(!temp.path().join("inbox").exists());
     }
 }

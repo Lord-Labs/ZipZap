@@ -26,6 +26,12 @@ The review is a source/fixture review, not an independent penetration test.
 - The extension asks only for contextMenus/nativeMessaging. It reads no cookies,
   tabs/history or page scripts. Host errors stay visible; acceptance is not a
   successful-download guarantee.
+- Development protocol v2 separates receipt from app enqueue/rejection with
+  stable UUIDs and allowlisted error codes. Status polling cannot enqueue work or
+  launch the app. Results contain no links, filenames or raw errors; retention is
+  capped at 100/24 hours. Pending inbox requests survive result-write failure and
+  shutdown; saved job UUIDs prevent duplicate enqueue on replay. Compatibility
+  with v1 is receipt-only. Real Chrome/Edge qualification remains pending (#43).
 - CI tests run with read-only repository permissions and no release secrets.
   The publishing job alone can write releases and uses the protected `beta`
   environment restricted to protected branches. There is no automatic updater.

@@ -12,13 +12,16 @@ form.addEventListener("submit", async (event) => {
   button.disabled = true;
   status.textContent = "";
   try {
-    await sendLink(input.value);
+    await sendLink(input.value, () => {
+      status.textContent = chrome.i18n.getMessage("received");
+      status.className = "pending";
+    });
     status.textContent = chrome.i18n.getMessage("sent");
     status.className = "success";
     input.value = "";
     await chrome.action.setBadgeText({ text: "" });
   } catch (error) {
-    status.textContent = `${chrome.i18n.getMessage("missing")} ${error instanceof Error ? error.message : ""}`;
+    status.textContent = error instanceof Error ? error.message : chrome.i18n.getMessage("missing");
     status.className = "error";
   } finally {
     button.disabled = false;
