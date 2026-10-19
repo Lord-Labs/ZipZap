@@ -117,8 +117,9 @@ links. Old history is not replayed when enabling notifications or reopening.
 Windows settings can suppress delivery; inspect the app for authoritative
 results. Downloads require the app to remain running. Tray mode does not keep
 Windows awake, start at login, wake the machine or run after sign-out. Native
-tray/notification and OS sleep/sign-out/restart qualification is still pending;
-these development changes are not in the published beta.
+acceptance is [reported by the maintainer](development/NATIVE_SMOKE.md);
+release-candidate qualification remains with #47. These development changes
+are not in the published beta.
 
 The app never opens completed files automatically. Use **Open file** only when
 you trust the file; **Show in folder** reveals it without executing it.

@@ -89,16 +89,18 @@ External editor rendering, actual browser handoff, installer lifecycle and other
 Windows versions were not tested here. No blocking product defect was observed
 in this bounded baseline. Hosted checks were skipped by [policy](WORKFLOW.md).
 
-## Pending lifecycle qualification: issue #41
+## Lifecycle qualification: issue #41
 
 The lifecycle implementation has automated Rust and mocked IPC UI coverage.
-No native tray/notification scenario below has been completed. A local smoke
-build was prepared and launched, but native inspection was interrupted before
-verification. On 2026-10-19 the maintainer requested continued implementation
-without controlling the device. Native UI and OS session/power checks are
-therefore **unexercised**, not passing. The #29 results above predate this code.
+Before review, native inspection was interrupted and these scenarios were
+recorded as unexercised. On 2026-10-19 the maintainer reported testing the
+Windows interface personally and confirmed all requested manual scenarios,
+including tray close/show/quit, notifications and sleep/resume. This is
+maintainer-reported acceptance, not agent-observed Computer Use evidence.
+The maintainer prohibited further Computer Use. The #29 results above predate
+this code; release #47 must qualify its own candidate, including OS sessions.
 
-When a suitable isolated Windows test environment is available:
+Repeat against the release candidate in an isolated Windows environment:
 
 1. Start with fresh smoke state. Verify both preferences default off; closing
    checkpoints and exits. Reopen and verify saved bytes and output hashes.
@@ -119,6 +121,6 @@ When a suitable isolated Windows test environment is available:
    Record actual OS behavior and any defects. Never suspend, restart or sign out
    the maintainer's active host just to obtain evidence.
 
-Keep #41 open and its PR in draft until the required native evidence is supplied
-or a maintainer records an explicit scope/verification change. Release #47 must
-carry these gaps; do not substitute headless, process-kill or mocked tests.
+The maintainer's manual acceptance permits implementation review to finish.
+Release #47 must retain this evidence distinction and repeat its candidate's
+checks; headless, process-kill and mocked tests are not native observations.

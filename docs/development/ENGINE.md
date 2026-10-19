@@ -131,12 +131,13 @@ status changes while disabled, prunes removed jobs and batches terminal results
 at most once per five seconds. Payloads contain only localized counts; no job
 URLs, filenames or paths. Preparing a notification does not prove Windows
 displayed it. Debug builds may use PowerShell notification branding; installed
-application identity and suppression behavior need native qualification.
+application identity and suppression behavior need native release qualification.
 
 Automated tests cover notification deduplication/batching and saved opt-in UI
 behavior, including unavailable-tray fallback. They do not establish actual
 Windows tray, second-instance, notifications or OS session/power behavior. See
-the pending [native scenarios](NATIVE_SMOKE.md). Forced OS termination may still
+the [maintainer-reported native acceptance and repeat procedure](NATIVE_SMOKE.md).
+Forced OS termination may still
 require ordinary checkpoint recovery; there is no service, autostart or wake
 mechanism, and tray mode does not prevent sleep.
 
