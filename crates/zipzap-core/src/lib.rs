@@ -19,6 +19,8 @@ pub use retry::FailureReason;
 #[cfg(test)]
 mod storage_tests;
 mod transfer;
+mod view;
+pub use view::ViewPreferences;
 
 use reqwest::{Client, Url};
 use rusqlite::{Connection, params};
@@ -102,8 +104,14 @@ pub struct Settings {
     pub language: String,
     #[serde(default)]
     pub download_folder: Option<String>,
+    #[serde(default)]
+    pub close_to_tray: bool,
+    #[serde(default)]
+    pub notifications: bool,
     #[serde(default = "default_categories")]
     pub categories: Vec<Category>,
+    #[serde(default)]
+    pub view: ViewPreferences,
 }
 impl Default for Settings {
     fn default() -> Self {
@@ -113,7 +121,10 @@ impl Default for Settings {
             speed_limit: 0,
             language: "en".into(),
             download_folder: None,
+            close_to_tray: false,
+            notifications: false,
             categories: default_categories(),
+            view: ViewPreferences::default(),
         }
     }
 }
@@ -130,7 +141,8 @@ impl Settings {
         {
             return Err("Invalid queue settings".into());
         }
-        categories::validate(&self.categories)
+        categories::validate(&self.categories)?;
+        self.view.validate()
     }
 }
 

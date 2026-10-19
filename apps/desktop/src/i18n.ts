@@ -97,6 +97,30 @@ const en = {
   cancelled: "Cancelled",
   downloading: "Downloading",
   settings: "Settings",
+  appearance: "Appearance",
+  dark: "Dark",
+  light: "Light",
+  system: "Follow system",
+  columns: "Columns and sorting",
+  columnWidth: "Column width",
+  showColumn: "Show column",
+  resetColumns: "Reset columns and sorting",
+  columnHint:
+    "Resize with the sliders or arrow keys. Filename remains visible. Wide tables scroll horizontally.",
+  contextActions: "File actions",
+  shortcutHint:
+    "Filename: right-click or Shift+F10 for actions. Ctrl+N: new download; Ctrl+F: search; Ctrl+A: select visible; Delete: confirm history removal. Text fields and dialogs keep their own keys.",
+  closeToTray: "Keep downloads running in the system tray when closing the window",
+  trayHint: "Off by default. Use the tray menu to show ZipZap or quit and pause active downloads.",
+  trayUnavailable:
+    "The system tray is unavailable. Closing the window will quit ZipZap and pause active work.",
+  notifications: "Notify me about completed or failed downloads",
+  notificationHint:
+    "Off by default. Notifications contain counts only, with no filenames or links. Windows may suppress them.",
+  notificationFailed:
+    "Windows could not prepare a notification. Open download details to check the result.",
+  footerTray: "Closing this window keeps ZipZap running in the system tray.",
+  quitApp: "Quit ZipZap",
   add: "New download",
   title: "Make room for what’s next.",
   subtitle: "Your files, on your terms. Fast, free, and local.",
@@ -308,6 +332,30 @@ const ar: Record<keyof typeof en, string> = {
   cancelled: "ملغاة",
   downloading: "جارٍ التنزيل",
   settings: "الإعدادات",
+  appearance: "المظهر",
+  dark: "داكن",
+  light: "فاتح",
+  system: "اتباع النظام",
+  columns: "الأعمدة والترتيب",
+  columnWidth: "عرض العمود",
+  showColumn: "إظهار العمود",
+  resetColumns: "إعادة الأعمدة والترتيب الافتراضي",
+  columnHint:
+    "غيّر العرض بالمؤشرات أو مفاتيح الأسهم. يبقى اسم الملف ظاهرًا. الجداول الواسعة تتمرر أفقيًا.",
+  contextActions: "إجراءات الملف",
+  shortcutHint:
+    "اضغط اسم الملف بالزر الأيمن أو Shift+F10 للإجراءات. Ctrl+N: تنزيل جديد؛ Ctrl+F: بحث؛ Ctrl+A: تحديد الظاهر؛ Delete: تأكيد حذف السجلات. تحتفظ حقول النص والنوافذ بمفاتيحها.",
+  closeToTray: "إبقاء التنزيلات تعمل في شريط النظام عند إغلاق النافذة",
+  trayHint:
+    "معطّل افتراضيًا. استخدم قائمة شريط النظام لإظهار ZipZap أو الخروج وإيقاف التنزيلات النشطة مؤقتًا.",
+  trayUnavailable:
+    "شريط النظام غير متاح. سيغلق التطبيق وتتوقف التنزيلات النشطة مؤقتًا عند إغلاق النافذة.",
+  notifications: "إشعاري عند اكتمال التنزيلات أو فشلها",
+  notificationHint:
+    "معطّل افتراضيًا. تعرض الإشعارات أعدادًا فقط دون أسماء أو روابط. قد يمنع Windows عرضها.",
+  notificationFailed: "تعذر تجهيز إشعار Windows. افتح تفاصيل التنزيل للتحقق من النتيجة.",
+  footerTray: "إغلاق هذه النافذة يبقي ZipZap يعمل في شريط النظام.",
+  quitApp: "خروج من ZipZap",
   add: "تنزيل جديد",
   title: "جاهز لكل اللي جاي.",
   subtitle: "ملفاتك على راحتك. تنزيل سريع، مجاني، ومحلي.",

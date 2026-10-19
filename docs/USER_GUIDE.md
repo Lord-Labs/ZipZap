@@ -96,10 +96,30 @@ private links out of public screenshots and reports.
 
 Settings control one to four simultaneous downloads, one to four connections per
 download, a shared speed limit (0 means unlimited), the default folder and
-language. The language button switches English/LTR and Arabic/RTL. Closing the
-window pauses running work; queued work starts when the app next opens. Resume
+language. The language button switches English/LTR and Arabic/RTL. By default,
+closing the window pauses running work; queued work starts when the app next opens. Resume
 paused work explicitly. Resume can safely restart when the server cannot prove
 the resource has not changed. See [recovery limits](development/ENGINE.md).
+
+In the development version, Settings offers **Keep downloads running in the
+system tray when closing the window**, off by default. When enabled, closing
+hides the window and keeps the same queue running. Click the ZipZap tray icon to
+show it; right-click for **Show ZipZap**, **Hold queue**, **Start queue** or
+**Quit ZipZap**. Windows may place the icon in its hidden-icons area. Quit is
+also available in Settings and checkpoints active work before exiting. If the
+tray cannot be created or the window cannot be hidden, closing quits instead.
+A second launch focuses the existing instance.
+
+**Notify me about completed or failed downloads** is a separate, optional
+setting, also off by default. Notifications batch new results into localized
+counts at most once every five seconds; they contain no filenames, paths or
+links. Old history is not replayed when enabling notifications or reopening.
+Windows settings can suppress delivery; inspect the app for authoritative
+results. Downloads require the app to remain running. Tray mode does not keep
+Windows awake, start at login, wake the machine or run after sign-out. Native
+acceptance is [reported by the maintainer](development/NATIVE_SMOKE.md);
+release-candidate qualification remains with #47. These development changes
+are not in the published beta.
 
 The app never opens completed files automatically. Use **Open file** only when
 you trust the file; **Show in folder** reveals it without executing it.
@@ -213,6 +233,29 @@ retains download files and the local database/settings so a later reinstall can
 recover them. Remove the unpacked extension separately through your browser.
 
 ## Keyboard and accessibility
+
+The development version offers **Appearance** in Settings: Dark (the default),
+Light or Follow system. System mode follows color-scheme changes while running.
+**Columns and sorting** saves each existing column's width/visibility; resize
+with the sliders or their arrow keys. Filename stays visible. Wide tables retain
+horizontal scrolling. **Reset columns and sorting** edits the draft; Save
+commits it. Clicking a sortable header saves its choice only after a successful
+settings write. These visual preferences do not change download destinations.
+
+Right-click a filename, press Shift+F10 or the context-menu key for **File
+actions**. The dialog exposes the same available pause/resume/retry/cancel,
+history removal, link replacement, Open file and Show in folder commands as the
+workspace. Cancel and history removal use the same affected-file confirmation
+as the toolbar. Errors remain visible for retry; Escape returns to the file, or the
+table when its opener was removed. Removing history returns focus to the table.
+Ctrl+N opens New download, Ctrl+F focuses search, Ctrl+A selects visible files
+and Delete opens the affected-set history-removal confirmation. Text fields and
+open dialogs keep their normal keys. Hidden/filtered rows are deselected.
+
+Automated browser tests cover both themes, saved choices, focus, RTL and doubled
+CSS render scale. Native acceptance is [reported by the maintainer](development/NATIVE_SMOKE.md);
+release-candidate qualification remains with #47. These changes are not in the
+published beta.
 
 Tab/Shift+Tab move focus; Enter/Space activate buttons; Escape closes a dialog.
 Select a filename with Enter/Space to use the toolbar. Tab to the table region
