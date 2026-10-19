@@ -147,6 +147,16 @@ Native receipt remains separate from enqueue success until #43. The synchronous
 `add` API retains the safe URL fallback when callers omit a filename; callers
 wanting server metadata use `suggest` before `add`.
 
+## Batch enqueue (development version)
+
+Desktop batch previews reuse `suggest` sequentially and have no durable state.
+The desktop add command accepts an optional request ID; `add_with_id` and
+`add_for_later_with_id` return an existing job for a replay before destination or
+capacity checks. New IDs still use the same validation, no-clobber and save-before-
+live insertion path. Accepted IDs do not change start mode on replay. The client
+keeps attempted payloads fixed and reports each result separately. A fresh batch
+after closing creates fresh IDs and must pass ordinary destination checks.
+
 ## Replacing an expired link (development version)
 
 `Manager::replace_link`, CLI `replace_link`, and the desktop **Replace link**

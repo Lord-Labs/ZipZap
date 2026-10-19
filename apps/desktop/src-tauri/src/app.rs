@@ -102,8 +102,24 @@ fn add_download(
     filename: Option<String>,
     destination: String,
     later: bool,
+    request_id: Option<String>,
     state: State<AppState>,
 ) -> Result<String, String> {
+    if let Some(id) = request_id {
+        let add = if later {
+            Manager::add_for_later_with_id
+        } else {
+            Manager::add_with_id
+        };
+        return add(
+            &state.manager,
+            &url,
+            Path::new(&destination),
+            filename.as_deref(),
+            &id,
+        )
+        .map(|job| job.id);
+    }
     let add = if later {
         Manager::add_for_later
     } else {
