@@ -34,13 +34,21 @@ async fn suggest_download(
     url: String,
     destination: String,
     filename: Option<String>,
+    automatic_folder: Option<bool>,
     state: State<'_, AppState>,
 ) -> Result<Suggestion, String> {
     let token = begin_probe(&state, &id)?;
-    let result = state
-        .manager
-        .suggest(&url, Path::new(&destination), filename.as_deref(), &token)
-        .await;
+    let result = if automatic_folder.unwrap_or(false) {
+        state
+            .manager
+            .suggest_auto(&url, Path::new(&destination), filename.as_deref(), &token)
+            .await
+    } else {
+        state
+            .manager
+            .suggest(&url, Path::new(&destination), filename.as_deref(), &token)
+            .await
+    };
     finish_probe(&state, &id);
     result
 }
@@ -248,8 +256,9 @@ pub fn run() {
                                 if manager.jobs().iter().any(|job| job.id == request.id) {
                                     return Ok(());
                                 }
-                                let destination = folder(&handle.state::<AppState>());
-                                let suggestion = manager.suggest(&request.url, &destination, None, &CancellationToken::new()).await?;
+                                let fallback = folder(&handle.state::<AppState>());
+                                let suggestion = manager.suggest_auto(&request.url, &fallback, None, &CancellationToken::new()).await?;
+                                let destination = suggestion.destination.clone();
                                 if suggestion.alternative.is_some() {
                                     *handle.state::<AppState>().browser_review.lock().expect("review lock") = Some(serde_json::json!({"url":request.url,"destination":destination,"suggestion":suggestion}));
                                     return Err("Browser destination is occupied; review a new filename".to_owned());

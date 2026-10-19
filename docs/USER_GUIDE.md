@@ -62,8 +62,9 @@ is rejected without resetting it. Do not lower its schema number or delete it
 to make an older app start; use the compatible app or restore a coherent backup
 with all instances closed. A saved folder on an offline drive does not prevent
 opening history. These changes are not in the published first beta; installer
-upgrade qualification remains pending. The development database uses schema 3
-for durable queue control (schema 2 introduced publication evidence). Older
+upgrade qualification remains pending. The development database uses schema 4
+for saved category folders (schema 3 added durable queue control; schema 2
+introduced publication evidence). Older
 ZipZap versions cannot open it; use a compatible app or a
 coherent pre-upgrade backup, never edit the schema number to force a downgrade.
 
@@ -102,6 +103,32 @@ the resource has not changed. See [recovery limits](development/ENGINE.md).
 
 The app never opens completed files automatically. Use **Open file** only when
 you trust the file; **Show in folder** reveals it without executing it.
+
+### Categories and suggested folders (development version)
+
+In Settings, edit **Category rules** to rename a group, change its comma-separated
+extensions or choose its save-folder suggestion. Add/remove groups up to 16;
+keep Other for unknown/no-extension names. Matching ignores case and uses the
+longest literal suffix, so tar.gz can override gz. An extension may belong to
+only one category; resolve a reported duplicate before saving. Unicode letters
+and numbers are supported; paths, wildcards and empty dot parts are rejected.
+
+Built-in names follow the selected language until renamed. Custom names remain
+as typed. **Restore default categories** resets the draft to the original six
+groups and clears folder rules; Save commits it, and Close discards edits.
+Rules and filters use saved settings across restart. Editing a category never
+moves a completed file or a partial download.
+
+New manual downloads use category folder suggestions after **Check filename**;
+review a changed folder before starting. Choosing a folder explicitly turns off
+automatic suggestions for that download; the checkbox can re-enable them.
+Browser requests use the same category rules after checking the server filename.
+Batch links keep their displayed common folder explicit. Existing/duplicate
+destinations still require a free name. An offline category folder is retained
+in Settings but new requests fail until it is restored or another folder is
+chosen. These changes require schema 4; older builds reject that state rather
+than ignore the saved folder choice. Native/browser/installer qualification for
+the next release remains pending.
 
 ### Multiple files and links (development version)
 

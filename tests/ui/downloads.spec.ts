@@ -1,7 +1,11 @@
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+const browserErrors = new WeakMap<Page, string[]>();
 
 test.beforeEach(async ({ page }) => {
+  const errors: string[] = [];
+  browserErrors.set(page, errors);
+  page.on("pageerror", (error) => errors.push(error.message));
   await page.addInitScript(() => {
     const state = {
       jobs: [] as any[],
@@ -31,6 +35,9 @@ test.beforeEach(async ({ page }) => {
       suggestion: null,
       holdProbe: false,
       restartRequired: false,
+      failSettings: "",
+      autoFolder: "",
+      selectedFolder: "C:\\Downloads",
     };
     (window as any).__TAURI_INTERNALS__ = {
       invoke: async (command: string, args: any) => {
@@ -44,6 +51,8 @@ test.beforeEach(async ({ page }) => {
           });
         calls.push({ command, args: structuredClone(args) });
         if (command === "save_settings") {
+          if ((window as any).zipzapTest.failSettings)
+            throw new Error((window as any).zipzapTest.failSettings);
           state.settings = args.settings;
           return;
         }
@@ -52,10 +61,11 @@ test.beforeEach(async ({ page }) => {
             return args.requestId;
           if ((window as any).zipzapTest.failAddUrls.includes(args.url))
             throw new Error((window as any).zipzapTest.failAddMessage);
+          const id = args.requestId || crypto.randomUUID();
           state.jobs.push({
-            id: args.requestId || "test",
+            id,
             url: args.url,
-            destination: `C:\\Downloads\\${args.filename || "sample.zip"}`,
+            destination: `${args.destination}\\${args.filename || "sample.zip"}`,
             status: args.later ? "paused" : "completed",
             downloaded: args.later ? 0 : 1048576,
             total: 1048576,
@@ -66,7 +76,7 @@ test.beforeEach(async ({ page }) => {
             (window as any).zipzapTest.loseAddAck = "";
             throw new Error("Response unavailable; retry this request");
           }
-          return args.requestId || "test";
+          return id;
         }
         if (command === "suggest_download") {
           if ((window as any).zipzapTest.holdProbe) await new Promise(() => {});
@@ -79,6 +89,9 @@ test.beforeEach(async ({ page }) => {
                   : "sample.zip"),
               total: 1048576,
               alternative: null,
+              destination:
+                (args.automaticFolder && (window as any).zipzapTest.autoFolder) || args.destination,
+              category: "compressed",
             }
           );
         }
@@ -129,13 +142,17 @@ test.beforeEach(async ({ page }) => {
           return;
         }
         if (command === "open_download") return;
-        if (command === "select_folder") return "C:\\Downloads";
+        if (command === "select_folder") return (window as any).zipzapTest.selectedFolder;
         if (command === "connect_browser") return;
         throw new Error("Unexpected mock command");
       },
     };
   });
   await page.goto("/");
+});
+
+test.afterEach(async ({ page }) => {
+  expect(browserErrors.get(page)).toEqual([]);
 });
 
 test("empty screen, keyboard form validation, and completed row", async ({ page }) => {
@@ -892,6 +909,108 @@ test("batch accepts exactly 100 preview rows and occupied names need explicit co
   await expect(
     page.getByRole("button", { name: "Add ready links (1)", exact: true }),
   ).toBeEnabled();
+});
+
+test("category edits save custom Unicode and multi-dot filters without moving old destinations", async ({
+  page,
+}) => {
+  await seed(page, [
+    sample("archive.tar.GZ", "completed"),
+    sample("note.عربي", "paused"),
+    sample("unknown", "completed"),
+  ]);
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await page.getByRole("button", { name: "Add category", exact: true }).click();
+  const rule = page.locator(".category-rules fieldset").last();
+  await rule.getByLabel("Category name", { exact: true }).fill("حزم خاصة");
+  await rule.getByLabel("Extensions, separated by commas", { exact: true }).fill("tar.gz, عربي");
+  await page.evaluate(() => {
+    (window as any).zipzapTest.selectedFolder = "C:\\Archives";
+  });
+  await rule.getByRole("button", { name: "Choose category folder حزم خاصة", exact: true }).click();
+  await page.getByRole("button", { name: "Save settings", exact: true }).click();
+  await page.getByRole("button", { name: "حزم خاصة", exact: true }).click();
+  await expect(page.locator("tbody .file-select")).toHaveText(["note.عربي", "archive.tar.GZ"]);
+  expect(
+    await page.evaluate(() =>
+      (window as any).zipzapTest.state.jobs.map((job: any) => job.destination),
+    ),
+  ).toEqual([
+    "C:\\Downloads\\archive.tar.GZ",
+    "C:\\Downloads\\note.عربي",
+    "C:\\Downloads\\unknown",
+  ]);
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await expect(
+    page.locator(".category-rules fieldset").last().getByLabel("Category name", { exact: true }),
+  ).toHaveValue("حزم خاصة");
+  await expect(
+    page.locator(".category-rules fieldset").last().locator("input[readonly]"),
+  ).toHaveValue("C:\\Archives");
+  await page.getByRole("button", { name: "Restore default categories", exact: true }).click();
+  await page.getByRole("button", { name: "Save settings", exact: true }).click();
+  await expect(page.getByRole("button", { name: "حزم خاصة", exact: true })).toHaveCount(0);
+  await expect(page.locator("tbody tr")).toHaveCount(3);
+  await page.getByRole("button", { name: "العربية", exact: true }).click();
+  await expect(page.getByRole("button", { name: "مضغوطة", exact: true })).toBeVisible();
+});
+
+test("category draft cancellation and localized rejected saves preserve existing rules", async ({
+  page,
+}) => {
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await page.locator("#category-name-compressed").fill("Unsaved label");
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("button", { name: "Compressed", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "العربية", exact: true }).click();
+  await page.getByRole("button", { name: "الإعدادات", exact: true }).click();
+  await expect(page.locator("#category-name-compressed")).toHaveValue("مضغوطة");
+  await page.evaluate(() => {
+    (window as any).zipzapTest.failSettings =
+      "An extension belongs to more than one category; remove the duplicate rule";
+  });
+  await page.locator("#category-ext-compressed").fill("ZIP, pdf");
+  await page.getByRole("button", { name: "حفظ الإعدادات", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("يوجد امتداد في أكثر من فئة");
+  await page.setViewportSize({ width: 375, height: 700 });
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+});
+
+test("manual category folder is reviewed before add and explicit folder choice takes precedence", async ({
+  page,
+}) => {
+  await page.evaluate(() => {
+    (window as any).zipzapTest.autoFolder = "C:\\Archives";
+  });
+  await page.getByRole("button", { name: "New download", exact: true }).click();
+  await page.locator("#url").fill("https://example.com/file.zip");
+  await page.locator("#filename").fill("file.zip");
+  await page.getByRole("button", { name: "Start download", exact: true }).click();
+  await expect(page.locator("#destination")).toHaveValue("C:\\Archives");
+  expect((await calls(page)).filter((call) => call.command === "add_download")).toHaveLength(0);
+  await page.getByRole("button", { name: "Start download", exact: true }).click();
+  await expect(page.getByRole("dialog")).not.toBeVisible();
+  expect(
+    (await calls(page)).filter((call) => call.command === "add_download")[0].args.destination,
+  ).toBe("C:\\Archives");
+  await page.getByRole("button", { name: "New download", exact: true }).click();
+  await page.locator("#url").fill("https://example.com/explicit.zip");
+  await page.locator("#filename").fill("explicit.zip");
+  await page.evaluate(() => {
+    (window as any).zipzapTest.selectedFolder = "C:\\Chosen";
+  });
+  await page.getByRole("button", { name: "Choose folder", exact: true }).click();
+  await expect(
+    page.getByRole("checkbox", { name: "Use category folder suggestions", exact: true }),
+  ).not.toBeChecked();
+  await page.getByRole("button", { name: "Start download", exact: true }).click();
+  const adds = (await calls(page)).filter((call) => call.command === "add_download");
+  expect(adds[1].args.destination).toBe("C:\\Chosen");
+  expect(
+    (await calls(page)).filter((call) => call.command === "suggest_download").at(-1)?.args
+      .automaticFolder,
+  ).toBe(false);
+  await expect(page.locator("tbody tr")).toHaveCount(2);
 });
 
 test("populated table is accessible in English and Arabic, including narrow viewports", async ({

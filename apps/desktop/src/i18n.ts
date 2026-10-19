@@ -1,6 +1,29 @@
 const en = {
   downloads: "Downloads",
   categories: "Categories",
+  categoryRules: "Category rules",
+  categoryName: "Category name",
+  categoryExtensions: "Extensions, separated by commas",
+  categoryFolder: "Choose category folder",
+  clearCategoryFolder: "Use default folder for",
+  removeCategory: "Remove category",
+  addCategory: "Add category",
+  newCategory: "New category",
+  restoreCategories: "Restore default categories",
+  categoryHint:
+    "Up to 16 categories. Literal extensions ignore case; the longest suffix wins (tar.gz before gz). An extension can belong to one category. Other handles unknown names. Changes affect suggestions and filters, never existing file locations.",
+  categoryFolderHint:
+    "No folder set: use the default download folder. An explicitly chosen download folder takes priority.",
+  categoryDuplicate:
+    "An extension appears in more than one category. Remove the duplicate and save again.",
+  categoryInvalid:
+    "Check category names, extension lists and folders; keep Other for unknown extensions.",
+  categoryExtensionsError:
+    "Use extensions such as zip or tar.gz, without paths, wildcards or empty parts.",
+  categoryUnavailable:
+    "The category or destination folder is unavailable. Restore it or choose an existing folder.",
+  automaticFolder: "Use category folder suggestions",
+  suggestedCategory: "Suggested category",
   compressed: "Compressed",
   documents: "Documents",
   music: "Music",
@@ -191,6 +214,27 @@ const en = {
 const ar: Record<keyof typeof en, string> = {
   downloads: "التنزيلات",
   categories: "الفئات",
+  categoryRules: "قواعد الفئات",
+  categoryName: "اسم الفئة",
+  categoryExtensions: "الامتدادات مفصولة بفواصل",
+  categoryFolder: "اختيار مجلد الفئة",
+  clearCategoryFolder: "استخدام المجلد الافتراضي لـ",
+  removeCategory: "حذف الفئة",
+  addCategory: "إضافة فئة",
+  newCategory: "فئة جديدة",
+  restoreCategories: "استعادة الفئات الافتراضية",
+  categoryHint:
+    "حتى 16 فئة. لا تُميز الامتدادات حالة الأحرف؛ اللاحقة الأطول تفوز (tar.gz قبل gz). لكل امتداد فئة واحدة. الملفات غير المعروفة تذهب إلى «ملفات أخرى». التغييرات تخص الاقتراحات والتصفية ولا تنقل الملفات السابقة.",
+  categoryFolderHint:
+    "دون مجلد محدد يُستخدم مجلد التنزيل الافتراضي. اختيار مجلد للتنزيل صراحةً له الأولوية.",
+  categoryDuplicate: "يوجد امتداد في أكثر من فئة. احذف التكرار ثم احفظ مجددًا.",
+  categoryInvalid:
+    "راجع أسماء الفئات والامتدادات والمجلدات، واحتفظ بفئة «ملفات أخرى» للامتدادات غير المعروفة.",
+  categoryExtensionsError:
+    "استخدم امتدادات مثل zip أو tar.gz دون مسارات أو رموز تعميم أو أجزاء فارغة.",
+  categoryUnavailable: "مجلد الفئة أو الحفظ غير متاح. استعده أو اختر مجلدًا موجودًا.",
+  automaticFolder: "استخدام اقتراحات مجلد الفئة",
+  suggestedCategory: "الفئة المقترحة",
   compressed: "مضغوطة",
   documents: "مستندات",
   music: "موسيقى",

@@ -13,6 +13,9 @@ fn fixture(schema: u32) -> (tempfile::TempDir, PathBuf, Connection, Vec<Job>, Se
     let db = Connection::open(&database).unwrap();
     db.execute_batch("CREATE TABLE jobs(id TEXT PRIMARY KEY, data TEXT NOT NULL); CREATE TABLE settings(id INTEGER PRIMARY KEY CHECK(id=1), data TEXT NOT NULL);").unwrap();
     db.pragma_update(None, "user_version", schema).unwrap();
+    if schema >= 3 {
+        db.execute_batch("CREATE TABLE queue(id INTEGER PRIMARY KEY CHECK(id=1), running INTEGER NOT NULL); INSERT INTO queue VALUES(1,0);").unwrap();
+    }
     let mut data: Value =
         serde_json::from_str(include_str!("fixtures/first-beta-state.json")).unwrap();
     let mut jobs: Vec<Job> = serde_json::from_value(data["jobs"].take()).unwrap();
@@ -59,7 +62,7 @@ fn snapshot(db: &Connection) -> (i64, Vec<(String, String)>, String) {
 
 #[test]
 fn first_beta_state_recovers_order_validators_parts_and_settings_on_reopen() {
-    for schema in [0, 1, 2] {
+    for schema in [0, 1, 2, 3] {
         let (folder, database, db, mut jobs, settings) = fixture(schema);
         jobs[1].status = Status::Paused;
         jobs[1].downloaded = 6;
@@ -74,8 +77,8 @@ fn first_beta_state_recovers_order_validators_parts_and_settings_on_reopen() {
                 serde_json::to_value(manager.settings()).unwrap(),
                 serde_json::to_value(&settings).unwrap()
             );
-            assert_eq!(snapshot(&db).0, 3);
-            assert!(manager.queue().running);
+            assert_eq!(snapshot(&db).0, 4);
+            assert_eq!(manager.queue().running, schema < 3);
             assert_eq!(
                 std::fs::read(folder.path().join(format!(".zipzap-{}.part0", jobs[1].id))).unwrap(),
                 b"prefix"
@@ -87,7 +90,7 @@ fn first_beta_state_recovers_order_validators_parts_and_settings_on_reopen() {
 
 #[test]
 fn failed_recovery_rolls_back_every_row_and_schema_then_retries() {
-    for schema in [0, 1, 2] {
+    for schema in [0, 1, 2, 3] {
         let (folder, database, db, jobs, _) = fixture(schema);
         db.execute_batch(&format!("CREATE TRIGGER reject_migration BEFORE UPDATE ON jobs WHEN OLD.id='{}' BEGIN SELECT RAISE(ABORT, 'injected migration failure'); END;", jobs[2].id)).unwrap();
         let before = snapshot(&db);
@@ -101,7 +104,7 @@ fn failed_recovery_rolls_back_every_row_and_schema_then_retries() {
                 |row| row.get::<_, i64>(0)
             )
             .unwrap(),
-            0
+            if schema < 3 { 0 } else { 1 }
         );
         assert_eq!(
             std::fs::read(folder.path().join(format!(".zipzap-{}.part0", jobs[1].id))).unwrap(),
@@ -161,7 +164,7 @@ fn mismatched_identity_and_overflowing_prefix_are_rejected_without_writes() {
 
 #[test]
 fn newer_schema_is_rejected_before_journal_or_record_changes() {
-    let (_folder, database, db, _, _) = fixture(4);
+    let (_folder, database, db, _, _) = fixture(5);
     let before = snapshot(&db);
     assert_eq!(
         db.pragma_query_value(None, "journal_mode", |r| r.get::<_, String>(0))
@@ -243,6 +246,7 @@ fn saved_backoff_reopens_paused_without_restarting_a_retry_deadline() {
 fn malformed_queue_state_and_order_are_rejected_without_resetting_saved_jobs() {
     for invalid in ["missing", "boolean", "duplicate", "overflow"] {
         let (_folder, database, db, jobs, _) = fixture(3);
+        db.execute_batch("DROP TABLE queue;").unwrap();
         if invalid != "missing" {
             db.execute_batch("CREATE TABLE queue(id INTEGER PRIMARY KEY, running INTEGER); INSERT INTO queue VALUES(1,0);").unwrap();
         }

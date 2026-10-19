@@ -87,17 +87,23 @@ async fn dispatch(manager: &Manager, value: &Value) -> Result<Value, String> {
             .and_then(|result| {
                 serde_json::to_value(result).map_err(|_| "Serialization failed".into())
             }),
-        "suggest" => manager
-            .suggest(
-                value["url"].as_str().ok_or("Missing URL")?,
-                Path::new(value["folder"].as_str().ok_or("Missing folder")?),
-                value["filename"].as_str(),
-                &tokio_util::sync::CancellationToken::new(),
-            )
-            .await
-            .and_then(|suggestion| {
+        "suggest" | "suggest_auto" => {
+            let url = value["url"].as_str().ok_or("Missing URL")?;
+            let folder = Path::new(value["folder"].as_str().ok_or("Missing folder")?);
+            let token = zipzap_core::CancellationToken::new();
+            let result = if value["command"] == "suggest_auto" {
+                manager
+                    .suggest_auto(url, folder, value["filename"].as_str(), &token)
+                    .await
+            } else {
+                manager
+                    .suggest(url, folder, value["filename"].as_str(), &token)
+                    .await
+            };
+            result.and_then(|suggestion| {
                 serde_json::to_value(suggestion).map_err(|_| "Serialization failed".into())
-            }),
+            })
+        }
         "add" => {
             let later = value
                 .get("later")
