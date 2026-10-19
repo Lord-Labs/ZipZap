@@ -123,6 +123,30 @@ Native receipt remains separate from enqueue success until #43. The synchronous
 `add` API retains the safe URL fallback when callers omit a filename; callers
 wanting server metadata use `suggest` before `add`.
 
+## Replacing an expired link (development version)
+
+`Manager::replace_link`, CLI `replace_link`, and the desktop **Replace link**
+action require a paused/failed job with no running worker. The replacement is
+explicit HTTP(S) input; no saved credentials or private URL are pasted into the
+dialog or notices. The shared validated one-byte transfer probe runs with a
+cancellable ten-second deadline, retaining TLS, redirects and bounds checks.
+
+Keep saved parts only if ranges are valid and the strong ETag, known total and
+complete final effective URL all match. The URL includes its query: a changed
+signed URL normally requires restarting, even if filename, size and ETag match.
+A different entry link can retain parts when it redirects to the exact same
+validated final resource. Weak/missing validators or a different final URL are
+not representation proof. Local prefix hashes are still checked on resume.
+
+If saved bytes exist but identity is unproven, `restart_required` returns without
+changing the job. Users must explicitly confirm discarding owned partials. The
+new URL and reset plan are saved before cleanup while the state lock blocks a
+concurrent resume. Save failure, cancellation before commit or concurrent job
+changes retain the prior recovery state. ID and destination never change; an
+updated job remains paused until an explicit Resume. Pending publication
+evidence must use its existing recovery path before any link replacement; final
+output is never removed or repurposed. No schema/dependency change is needed.
+
 ## Retry policy (development version)
 
 The shared worker classifies transient network failures, HTTP 408/500/502/503/504

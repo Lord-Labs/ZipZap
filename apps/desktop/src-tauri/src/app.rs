@@ -5,7 +5,7 @@ use std::{
 };
 use tauri::{Manager as _, State};
 use tauri_plugin_dialog::DialogExt;
-use zipzap_core::{CancellationToken, Manager, Settings, Status, Suggestion};
+use zipzap_core::{CancellationToken, LinkReplacement, Manager, Settings, Status, Suggestion};
 
 struct AppState {
     manager: Arc<Manager>,
@@ -28,6 +28,28 @@ async fn suggest_download(
     filename: Option<String>,
     state: State<'_, AppState>,
 ) -> Result<Suggestion, String> {
+    let token = begin_probe(&state, &id)?;
+    let result = state
+        .manager
+        .suggest(&url, Path::new(&destination), filename.as_deref(), &token)
+        .await;
+    finish_probe(&state, &id);
+    result
+}
+#[tauri::command]
+async fn replace_link(
+    probe_id: String,
+    id: String,
+    url: String,
+    restart: bool,
+    state: State<'_, AppState>,
+) -> Result<LinkReplacement, String> {
+    let token = begin_probe(&state, &probe_id)?;
+    let result = state.manager.replace_link(&id, &url, restart, &token).await;
+    finish_probe(&state, &probe_id);
+    result
+}
+fn begin_probe(state: &AppState, id: &str) -> Result<CancellationToken, String> {
     if id.len() > 128 {
         return Err("Invalid probe ID".into());
     }
@@ -36,19 +58,17 @@ async fn suggest_download(
         .probe
         .lock()
         .expect("probe lock")
-        .replace((id.clone(), token.clone()))
+        .replace((id.to_owned(), token.clone()))
     {
         previous.cancel();
     }
-    let result = state
-        .manager
-        .suggest(&url, Path::new(&destination), filename.as_deref(), &token)
-        .await;
+    Ok(token)
+}
+fn finish_probe(state: &AppState, id: &str) {
     let mut probe = state.probe.lock().expect("probe lock");
-    if probe.as_ref().is_some_and(|(current, _)| current == &id) {
+    if probe.as_ref().is_some_and(|(current, _)| current == id) {
         probe.take();
     }
-    result
 }
 #[tauri::command]
 fn cancel_probe(id: String, state: State<AppState>) {
@@ -244,6 +264,7 @@ pub fn run() {
             snapshot,
             add_download,
             suggest_download,
+            replace_link,
             cancel_probe,
             download_action,
             save_settings,

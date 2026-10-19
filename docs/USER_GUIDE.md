@@ -73,6 +73,16 @@ the localized reason, attempt and next retry time. A valid Retry-After from a
 interrupt the wait; reopening leaves interrupted work paused, and Retry starts
 a new bounded sequence. Certificate and file-validation checks remain enabled.
 
+For a paused/failed download, choose **Replace link** and paste a new direct
+HTTP/HTTPS link. Wait for its worker to stop first. ZipZap checks whether saved
+parts belong to the same validated final resource. If it cannot prove this,
+nothing changes until you explicitly confirm discarding partials and starting
+from the beginning. Matching filenames or sizes are not proof; changed signed
+links commonly need this restart. An updated download keeps its name/location
+and stays paused; choose Resume when ready. Closing the dialog cancels the check.
+If publication recovery is pending, repair/finish that recovery first. Keep
+private links out of public screenshots and reports.
+
 Settings control one to four simultaneous downloads, one to four connections per
 download, a shared speed limit (0 means unlimited), the default folder and
 language. The language button switches English/LTR and Arabic/RTL. Closing the

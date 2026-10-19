@@ -24,6 +24,7 @@ test.beforeEach(async ({ page }) => {
       failAction: "",
       suggestion: null,
       holdProbe: false,
+      restartRequired: false,
     };
     (window as any).__TAURI_INTERNALS__ = {
       invoke: async (command: string, args: any) => {
@@ -57,6 +58,15 @@ test.beforeEach(async ({ page }) => {
           );
         }
         if (command === "cancel_probe") return;
+        if (command === "replace_link") {
+          if ((window as any).zipzapTest.holdProbe) await new Promise(() => {});
+          if ((window as any).zipzapTest.restartRequired && !args.restart)
+            return { status: "restart_required" };
+          const job = state.jobs.find((job) => job.id === args.id);
+          job.url = args.url;
+          job.status = "paused";
+          return { status: "updated", retained_bytes: args.restart ? 0 : job.downloaded };
+        }
         if (command === "download_action") {
           if ((window as any).zipzapTest.failAction === args.action)
             throw new Error("Storage unavailable");
@@ -154,6 +164,64 @@ test("browser collision offers an editable fresh download without overwriting th
   await expect(page.locator("#filename")).toHaveValue("report (1).zip");
   await expect(page.locator("#url")).toHaveValue("https://example.com/browser-link");
   await page.locator("#filename").fill("my-report.zip");
+});
+
+test("link replacement asks before discarding saved parts and keeps private URLs out of notices", async ({
+  page,
+}) => {
+  await seed(page, [sample("expired.zip", "failed")]);
+  await page.getByRole("button", { name: "expired.zip", exact: true }).click();
+  await page.getByRole("button", { name: "Replace link", exact: true }).click();
+  const input = page.getByLabel("New direct download link", { exact: true });
+  await expect(input).toHaveValue("");
+  await expect(input).toBeFocused();
+  await input.fill("https://example.com/new?token=PRIVATE_QUERY");
+  await page.evaluate(() => {
+    (window as any).zipzapTest.restartRequired = true;
+  });
+  await page.getByRole("button", { name: "Check and replace", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("No changes were made");
+  const submit = page.getByRole("button", { name: "Discard partials and replace", exact: true });
+  await expect(submit).toBeDisabled();
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await page
+    .getByLabel("Discard saved partials and start this download from the beginning", {
+      exact: true,
+    })
+    .check();
+  await submit.click();
+  await expect(page.locator("dialog[open]")).toHaveCount(0);
+  await expect(page.getByRole("status").filter({ hasText: "Link updated" })).not.toContainText(
+    "PRIVATE_QUERY",
+  );
+  expect(
+    (await calls(page))
+      .filter((call) => call.command === "replace_link")
+      .map((call) => call.args.restart),
+  ).toEqual([false, true]);
+});
+
+test("Arabic link replacement is accessible and cancelling the dialog cancels its check", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 780, height: 560 });
+  await seed(page, [sample("expired.zip", "paused")]);
+  await page.getByRole("button", { name: "expired.zip", exact: true }).click();
+  await page.getByRole("button", { name: "العربية", exact: true }).click();
+  await page.getByRole("button", { name: "استبدال الرابط", exact: true }).click();
+  await page
+    .getByLabel("رابط التنزيل المباشر الجديد", { exact: true })
+    .fill("https://example.com/new");
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await page.screenshot({ path: ".research-local/ui/link-replacement-ar.png", fullPage: true });
+  await page.evaluate(() => {
+    (window as any).zipzapTest.holdProbe = true;
+  });
+  await page.getByRole("button", { name: "فحص الرابط واستبداله", exact: true }).click();
+  await page.keyboard.press("Escape");
+  await expect
+    .poll(async () => (await calls(page)).some((call) => call.command === "cancel_probe"))
+    .toBeTruthy();
 });
 
 test("Arabic switches direction and settings persist", async ({ page }) => {
