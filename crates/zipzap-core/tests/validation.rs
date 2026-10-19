@@ -64,6 +64,84 @@ fn persistent_queue_and_no_clobber_validation() {
 }
 
 #[test]
+fn batch_replay_reuses_accepted_ids_and_retries_only_rejected_insertions() {
+    let folder = tempfile::tempdir().unwrap();
+    let database = folder.path().join("state.sqlite");
+    let manager = Manager::open(&database).unwrap();
+    let id = "00000000-0000-4000-8000-000000000038";
+    let failed_id = "00000000-0000-4000-8000-000000000039";
+    let job = manager
+        .add_for_later_with_id("https://example.com/a", folder.path(), Some("a.bin"), id)
+        .unwrap();
+    let replay = manager
+        .add_for_later_with_id("https://example.com/a", folder.path(), Some("a.bin"), id)
+        .unwrap();
+    assert_eq!(job.id, replay.id);
+    assert_eq!(replay.status, Status::Paused);
+    assert_eq!(manager.jobs().len(), 1);
+    let db = rusqlite::Connection::open(&database).unwrap();
+    db.execute_batch("CREATE TRIGGER reject_insert BEFORE INSERT ON jobs BEGIN SELECT RAISE(ABORT, 'batch save failed'); END;").unwrap();
+    assert!(
+        manager
+            .add_with_id(
+                "https://example.com/b",
+                folder.path(),
+                Some("b.bin"),
+                failed_id
+            )
+            .is_err()
+    );
+    assert_eq!(manager.jobs().len(), 1);
+    db.execute_batch("DROP TRIGGER reject_insert;").unwrap();
+    manager
+        .add_with_id(
+            "https://example.com/b",
+            folder.path(),
+            Some("b.bin"),
+            failed_id,
+        )
+        .unwrap();
+    assert!(
+        manager
+            .add_with_id(
+                "file:///private",
+                folder.path(),
+                Some("bad.bin"),
+                "00000000-0000-4000-8000-000000000040"
+            )
+            .is_err()
+    );
+    assert!(
+        manager
+            .add_with_id(
+                "https://example.com/c",
+                folder.path(),
+                Some("a.bin"),
+                "00000000-0000-4000-8000-000000000041"
+            )
+            .is_err()
+    );
+    drop(manager);
+    let reopened = Manager::open(&database).unwrap();
+    assert_eq!(reopened.jobs().len(), 2);
+    assert_eq!(
+        reopened
+            .add_for_later_with_id("https://example.com/a", folder.path(), Some("a.bin"), id)
+            .unwrap()
+            .status,
+        Status::Paused
+    );
+    assert_eq!(reopened.jobs().len(), 2);
+    assert!(std::fs::read_dir(folder.path()).unwrap().all(|entry| {
+        !entry
+            .unwrap()
+            .file_name()
+            .to_string_lossy()
+            .starts_with(".zipzap-")
+    }));
+}
+
+#[test]
 fn failed_history_deletion_keeps_job_and_files_for_retry() {
     for status in [Status::Completed, Status::Cancelled, Status::Failed] {
         let folder = tempfile::tempdir().unwrap();

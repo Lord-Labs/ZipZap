@@ -4,6 +4,8 @@
   import { invoke } from "@tauri-apps/api/core";
 
   import Icon from "./Icon.svelte";
+  import BatchDialog from "./BatchDialog.svelte";
+  import defaultCategories from "../../../config/categories.json";
 
   import { dictionary, type Language } from "./i18n";
 
@@ -23,6 +25,12 @@
     failure_reason?: string | null;
   };
 
+  type Category = {
+    id: string;
+    name: string;
+    extensions: string[];
+    download_folder: string | null;
+  };
   type Settings = {
     max_concurrent: number;
     connections: number;
@@ -31,6 +39,7 @@
     download_folder: string | null;
     close_to_tray: boolean;
     notifications: boolean;
+    categories: Category[];
   };
 
   type Snapshot = {
@@ -44,7 +53,13 @@
     notice: string | null;
     browser_review?: { url: string; destination: string; suggestion: Suggestion } | null;
   };
-  type Suggestion = { filename: string; total: number | null; alternative: string | null };
+  type Suggestion = {
+    filename: string;
+    total: number | null;
+    alternative: string | null;
+    destination?: string;
+    category?: string;
+  };
 
   let jobs: Job[] = [];
   let queue = { running: true, waiting: [] as string[] };
@@ -59,6 +74,7 @@
     download_folder: null,
     close_to_tray: false,
     notifications: false,
+    categories: structuredClone(defaultCategories),
   };
 
   let language: Language = "en";
@@ -87,24 +103,35 @@
   let filter = "all";
 
   let category = "all";
-  let selectedId: string | null = null;
+  let selectedIds = new Set<string>();
+  let selectionAnchor = "";
+  let bulkBusy = false;
+  let bulkResults: { id: string; name: string; result: string }[] = [];
+  let confirmDialog: HTMLDialogElement;
+  let confirmTargets: Job[] = [];
+  let confirmValue = "";
+  let batchDialog: BatchDialog;
   let sortKey: "recent" | "filename" | "total" | "status" = "recent";
   let descending = false;
   let pausingAll = false;
 
-  const categories = ["compressed", "documents", "music", "programs", "video", "other"] as const;
+  $: categories = settings.categories;
+  const categoryName = (item: Category) =>
+    item.name ||
+    (dictionary(language) as Record<string, string>)[item.id] ||
+    dictionary(language).newCategory;
+  const categoryIcon = (id: string) =>
+    defaultCategories.some((item) => item.id === id) ? id : "folder";
   const fileCategory = (path: string) => {
-    const extension =
-      basename(path)
-        .match(/\.([^.]+)$/)?.[1]
-        .toLowerCase() || "";
-    if (/^(zip|rar|7z|gz|bz2|xz|tar|tgz|zst)$/.test(extension)) return "compressed";
-    if (/^(pdf|docx?|xlsx?|pptx?|txt|csv|epub|odt|rtf)$/.test(extension)) return "documents";
-    if (/^(mp3|m4a|wav|flac|ogg|aac|opus)$/.test(extension)) return "music";
-    if (/^(exe|msi|msix|appx|apk)$/.test(extension)) return "programs";
-    if (/^(mp4|mkv|webm|avi|mov|m4v)$/.test(extension)) return "video";
-    return "other";
+    const name = basename(path).toLowerCase();
+    return (
+      categories
+        .flatMap((item) => item.extensions.map((extension) => ({ id: item.id, extension })))
+        .filter((item) => name.endsWith(`.${item.extension.toLowerCase()}`))
+        .sort((a, b) => b.extension.length - a.extension.length)[0]?.id || "other"
+    );
   };
+  $: if (category !== "all" && !categories.some((item) => item.id === category)) category = "all";
 
   let search = "";
 
@@ -142,6 +169,7 @@
   let filename = "";
 
   let destination = "";
+  let explicitDestination = false;
 
   let formError = "";
   let suggestion: Suggestion | null = null;
@@ -168,6 +196,16 @@
 
   const errorMessage = (value: unknown) => {
     const raw = value instanceof Error ? value.message : String(value);
+    if (raw.startsWith("An extension belongs")) return text.categoryDuplicate;
+    if (raw.startsWith("Use literal extensions")) return text.categoryExtensionsError;
+    if (raw.startsWith("Category folder") || raw.startsWith("Category or destination folder"))
+      return text.categoryUnavailable;
+    if (
+      raw.startsWith("Invalid category") ||
+      raw.startsWith("Use between 1 and 16") ||
+      raw.startsWith("Keep the Other")
+    )
+      return text.categoryInvalid;
     if (raw.startsWith("Browser destination is occupied;")) return text.browserReviewHint;
     if (raw.startsWith("System tray")) return text.trayUnavailable;
     if (raw.startsWith("Windows notification could not")) return text.notificationFailed;
@@ -244,14 +282,85 @@
       return left.localeCompare(right, language, { numeric: true }) * (descending ? -1 : 1);
     });
 
-  $: if (selectedId && !filtered.some((job) => job.id === selectedId)) selectedId = null;
-  $: selected = filtered.find((job) => job.id === selectedId);
-  $: selectedBusy = !selected || busyIds.has(selected.id) || pausingAll;
+  $: if ([...selectedIds].some((id) => !filtered.some((job) => job.id === id)))
+    selectedIds = new Set([...selectedIds].filter((id) => filtered.some((job) => job.id === id)));
+  $: selectedJobs = filtered.filter((job) => selectedIds.has(job.id));
+  $: selected = selectedJobs.length === 1 ? selectedJobs[0] : undefined;
+  $: selectedBusy = !selected || busyIds.has(selected.id) || pausingAll || bulkBusy;
   $: canPause = selected && ["queued", "downloading"].includes(selected.status);
   $: canResume = selected && ["paused", "failed"].includes(selected.status);
   $: canCancel = selected && ["queued", "downloading", "paused"].includes(selected.status);
   $: canRemove = selected && ["completed", "failed", "cancelled"].includes(selected.status);
   $: queueIndex = selected ? queue.waiting.indexOf(selected.id) : -1;
+
+  function selectJob(job: Job, event: MouseEvent) {
+    if (bulkBusy) return;
+    const anchor = filtered.findIndex((item) => item.id === selectionAnchor);
+    const index = filtered.indexOf(job);
+    if (event.shiftKey && anchor >= 0) {
+      selectedIds = new Set(
+        filtered.slice(Math.min(anchor, index), Math.max(anchor, index) + 1).map((item) => item.id),
+      );
+    } else if (event.ctrlKey || event.metaKey) {
+      toggleSelection(job.id);
+    } else {
+      selectedIds = new Set([job.id]);
+    }
+    selectionAnchor = job.id;
+  }
+
+  function toggleSelection(id: string) {
+    const next = new Set(selectedIds);
+    if (!next.delete(id)) next.add(id);
+    selectedIds = next;
+    selectionAnchor = id;
+  }
+
+  const eligible = (job: Job, value: string) =>
+    value === "pause"
+      ? ["queued", "downloading"].includes(job.status)
+      : value === "resume"
+        ? ["paused", "failed"].includes(job.status)
+        : value === "remove"
+          ? ["completed", "failed", "cancelled"].includes(job.status)
+          : ["queued", "downloading", "paused"].includes(job.status);
+
+  function selectedAction(value: string) {
+    const targets = selectedJobs.filter((job) => eligible(job, value));
+    if (["cancel", "remove"].includes(value)) {
+      confirmTargets = [...targets];
+      confirmValue = value;
+      confirmDialog.showModal();
+    } else void bulkAction(value, targets);
+  }
+
+  async function bulkAction(value: string, targets: Job[]) {
+    bulkBusy = true;
+    bulkResults = [];
+    try {
+      for (const target of targets) {
+        const current = jobs.find((job) => job.id === target.id);
+        let result = text.actionUnavailable;
+        if (current && eligible(current, value)) {
+          const saved = await action(current, value);
+          result = saved ? text.actionDone : error;
+        }
+        bulkResults = [
+          ...bulkResults,
+          { id: target.id, name: basename(target.destination), result },
+        ];
+      }
+    } finally {
+      bulkBusy = false;
+    }
+  }
+
+  async function batchAdded() {
+    filter = "all";
+    category = "all";
+    search = "";
+    await refresh();
+  }
 
   function sortBy(key: "filename" | "total" | "status") {
     descending = sortKey === key ? !descending : false;
@@ -281,7 +390,10 @@
 
       jobs = value.jobs;
       queue = value.queue;
-      settings = value.settings;
+      settings = {
+        ...value.settings,
+        categories: value.settings.categories ?? structuredClone(defaultCategories),
+      };
       language = value.settings.language;
       folder = value.folder;
       version = value.version;
@@ -312,6 +424,7 @@
     url = "";
     filename = "";
     destination = folder;
+    explicitDestination = false;
     suggestion = null;
     addLater = false;
     addDialog.showModal();
@@ -352,11 +465,13 @@
       const result = await invoke<Suggestion>("suggest_download", {
         id,
         url,
-        destination,
+        destination: explicitDestination ? destination : folder,
+        automaticFolder: !explicitDestination,
         filename: filename.trim() || null,
       });
       if (probeId !== id) return null;
       suggestion = result;
+      if (!explicitDestination && result.destination) destination = result.destination;
       if (!filename.trim()) filename = result.filename;
       return result;
     } catch (e) {
@@ -376,6 +491,7 @@
     await newDownload();
     url = review.url;
     destination = review.destination;
+    explicitDestination = true;
     filename = review.suggestion.alternative || review.suggestion.filename;
     suggestion = { ...review.suggestion, filename, alternative: null };
     browserReview = null;
@@ -397,8 +513,15 @@
     }
 
     const hadName = !!filename.trim();
+    const previousDestination = destination;
     const checked = await checkName();
-    if (!checked || !hadName || checked.alternative) return;
+    if (
+      !checked ||
+      !hadName ||
+      checked.alternative ||
+      pathLabel(previousDestination).toLowerCase() !== pathLabel(destination).toLowerCase()
+    )
+      return;
     busy = true;
 
     try {
@@ -506,7 +629,11 @@
       const result = await invoke<string | null>("select_folder");
       if (result) {
         if (forSettings) draft = { ...draft, download_folder: result };
-        else destination = result;
+        else {
+          destination = result;
+          explicitDestination = true;
+          suggestion = null;
+        }
       }
     } catch (e) {
       formError = errorMessage(e);
@@ -556,10 +683,25 @@
   }
 
   function showSettings() {
-    draft = { ...settings, download_folder: folder };
+    draft = { ...structuredClone(settings), download_folder: folder };
     limitKiB = Math.round(settings.speed_limit / 1024);
     formError = "";
     settingsDialog.showModal();
+  }
+
+  async function chooseCategoryFolder(id: string) {
+    try {
+      const result = await invoke<string | null>("select_folder");
+      if (result)
+        draft = {
+          ...draft,
+          categories: draft.categories.map((item) =>
+            item.id === id ? { ...item, download_folder: result } : item,
+          ),
+        };
+    } catch (e) {
+      formError = errorMessage(e);
+    }
   }
 
   async function saveSettings(event: SubmitEvent) {
@@ -637,6 +779,9 @@
       <button class="tool add-tool" onclick={newDownload} aria-haspopup="dialog"
         ><Icon name="plus" /><span>{text.add}</span></button
       >
+      <button class="tool" onclick={() => batchDialog.open()} aria-haspopup="dialog"
+        ><Icon name="plus" /><span>{text.batchAdd}</span></button
+      >
       <span class="tool-divider" aria-hidden="true"></span>
       <button
         class="tool green"
@@ -659,7 +804,7 @@
       >
       <button
         class="tool orange"
-        disabled={!activeCount || pausingAll || busyIds.size > 0}
+        disabled={!activeCount || pausingAll || bulkBusy || busyIds.size > 0}
         onclick={pauseAll}><Icon name="pauseAll" /><span>{text.pauseAll}</span></button
       >
       <button
@@ -708,14 +853,14 @@
           ></button
         >
         <div class="category-children">
-          {#each categories as item}
+          {#each categories as item (item.id)}
             <button
-              class:chosen={category === item}
-              aria-current={category === item ? "page" : undefined}
+              class:chosen={category === item.id}
+              aria-current={category === item.id ? "page" : undefined}
               onclick={() => {
                 filter = "all";
-                category = item;
-              }}><Icon name={item} /><span>{text[item]}</span></button
+                category = item.id;
+              }}><Icon name={categoryIcon(item.id)} /><span>{categoryName(item)}</span></button
             >
           {/each}
         </div>
@@ -775,7 +920,7 @@
         <div class="panel-toolbar">
           <h2>
             {category !== "all"
-              ? text[category as (typeof categories)[number]]
+              ? categoryName(categories.find((item) => item.id === category)!)
               : filter === "all"
                 ? text.all
                 : filter === "active"
@@ -791,6 +936,40 @@
             /></label
           >
         </div>
+
+        <div class="selection-controls">
+          <label
+            ><input
+              type="checkbox"
+              aria-label={text.selectVisible}
+              checked={filtered.length > 0 && selectedJobs.length === filtered.length}
+              indeterminate={selectedJobs.length > 0 && selectedJobs.length < filtered.length}
+              disabled={!filtered.length || bulkBusy || pausingAll || busyIds.size > 0}
+              onchange={(event) =>
+                (selectedIds = new Set(
+                  event.currentTarget.checked ? filtered.map((job) => job.id) : [],
+                ))}
+            />{text.selectedCount}: {selectedJobs.length}</label
+          >
+          {#if selectedJobs.length > 1}
+            {#each [{ value: "pause", label: text.pauseSelected }, { value: "resume", label: text.resumeSelected }, { value: "cancel", label: text.cancelSelected }, { value: "remove", label: text.removeSelected }] as item}
+              <button
+                class="secondary"
+                disabled={bulkBusy ||
+                  pausingAll ||
+                  busyIds.size > 0 ||
+                  !selectedJobs.some((job) => eligible(job, item.value))}
+                onclick={() => selectedAction(item.value)}>{item.label}</button
+              >
+            {/each}
+          {/if}
+        </div>
+        <p class="selection-help helper">{text.selectionHelp}</p>
+        {#if bulkResults.length}<ul class="bulk-results" aria-live="polite">
+            {#each bulkResults as result (result.id)}<li>
+                <bdi>{result.name}</bdi>: {result.result}
+              </li>{/each}
+          </ul>{/if}
 
         <!-- svelte-ignore a11y_no_noninteractive_tabindex (Keyboard users need to scroll the table horizontally.) -->
         <div class="table-scroll" tabindex="0" role="region" aria-label={text.downloadTable}>
@@ -820,17 +999,28 @@
             >
             <tbody>
               {#each filtered as job (job.id)}
-                <tr class:selected={selectedId === job.id} class:failed={job.status === "failed"}>
+                <tr class:selected={selectedIds.has(job.id)} class:failed={job.status === "failed"}>
                   <td class="filename-cell"
-                    ><button
-                      class="file-select"
-                      aria-pressed={selectedId === job.id}
-                      onclick={() => (selectedId = job.id)}
-                      title={basename(job.destination)}
-                      ><Icon name={fileCategory(job.destination)} /><bdi
-                        >{basename(job.destination)}</bdi
-                      ></button
-                    >{#if job.error}<p class="job-error">
+                    ><div class="file-choice">
+                      <input
+                        type="checkbox"
+                        aria-label={`${text.selectFile} ${basename(job.destination)}`}
+                        checked={selectedIds.has(job.id)}
+                        disabled={bulkBusy || pausingAll || busyIds.has(job.id)}
+                        onchange={() => toggleSelection(job.id)}
+                      />
+                      <button
+                        class="file-select"
+                        aria-pressed={selectedIds.has(job.id)}
+                        disabled={bulkBusy}
+                        onclick={(event) => selectJob(job, event)}
+                        title={basename(job.destination)}
+                        ><Icon name={categoryIcon(fileCategory(job.destination))} /><bdi
+                          >{basename(job.destination)}</bdi
+                        ></button
+                      >
+                    </div>
+                    {#if job.error}<p class="job-error">
                         {failureMessages[job.failure_reason || ""] || errorMessage(job.error)}
                       </p>{/if}</td
                   >
@@ -947,6 +1137,37 @@
   </footer>
 </div>
 
+<BatchDialog
+  bind:this={batchDialog}
+  {language}
+  {folder}
+  desktop={isDesktop()}
+  message={errorMessage}
+  onadded={batchAdded}
+/>
+
+<dialog bind:this={confirmDialog} aria-labelledby="bulk-title">
+  <form
+    onsubmit={(event) => {
+      event.preventDefault();
+      confirmDialog.close();
+      void bulkAction(confirmValue, confirmTargets);
+    }}
+  >
+    <h2 id="bulk-title">{text.bulkConfirm} ({confirmTargets.length})</h2>
+    <p>{confirmValue === "cancel" ? text.bulkCancelHint : text.bulkRemoveHint}</p>
+    <ul>
+      {#each confirmTargets as job (job.id)}<li><bdi>{basename(job.destination)}</bdi></li>{/each}
+    </ul>
+    <div class="dialog-actions">
+      <button type="button" class="secondary" onclick={() => confirmDialog.close()}
+        >{text.close}</button
+      >
+      <button type="submit" class="primary">{text.confirmAction}</button>
+    </div>
+  </form>
+</dialog>
+
 <dialog bind:this={addDialog} aria-labelledby="add-title" onclose={cancelProbe}>
   <form onsubmit={addDownload}>
     <div class="dialog-title">
@@ -1000,6 +1221,18 @@
     </div>
     <p id="storage-help" class="helper">{text.storageUnknown} {text.storage}</p>
     <label class="helper"
+      ><input
+        type="checkbox"
+        checked={!explicitDestination}
+        disabled={busy}
+        onchange={(event) => {
+          explicitDestination = !event.currentTarget.checked;
+          suggestion = null;
+          if (!explicitDestination) destination = folder;
+        }}
+      />{text.automaticFolder}</label
+    >
+    <label class="helper"
       ><input type="checkbox" bind:checked={addLater} disabled={busy} />{text.addLater}</label
     >
     <div class="name-preview">
@@ -1008,6 +1241,12 @@
       >
       {#if suggestion}<p class="helper" role="status">
           {text.reviewNameHint}
+          {#if suggestion.category}<span
+              >{text.suggestedCategory}: {categoryName(
+                categories.find((item) => item.id === suggestion!.category) ||
+                  categories[categories.length - 1],
+              )}</span
+            >{/if}
           {#if suggestion.total !== null}<bdi dir="ltr">{bytes(suggestion.total)}</bdi>{/if}
         </p>{/if}
       {#if suggestion?.alternative}<p class="helper" role="status">
@@ -1151,6 +1390,106 @@
     </div>
     <p class="helper">{text.folderHint}</p>
     <p class="helper">{text.storage}</p>
+    <section class="category-rules" aria-label={text.categoryRules}>
+      <h3>{text.categoryRules}</h3>
+      <p class="helper">{text.categoryHint}</p>
+      {#each draft.categories as item (item.id)}
+        <fieldset>
+          <legend>{categoryName(item)}</legend>
+          <label for={`category-name-${item.id}`}>{text.categoryName}</label>
+          <input
+            id={`category-name-${item.id}`}
+            value={item.name || categoryName(item)}
+            maxlength="80"
+            disabled={busy}
+            oninput={(event) => {
+              item.name = event.currentTarget.value;
+              draft = { ...draft };
+            }}
+          />
+          {#if item.id !== "other"}
+            <label for={`category-ext-${item.id}`}>{text.categoryExtensions}</label>
+            <input
+              id={`category-ext-${item.id}`}
+              value={item.extensions.join(", ")}
+              dir="ltr"
+              maxlength="2100"
+              required
+              disabled={busy}
+              onchange={(event) => {
+                item.extensions = event.currentTarget.value
+                  .split(/[,،]/)
+                  .map((value) => value.trim())
+                  .filter(Boolean);
+                draft = { ...draft };
+              }}
+            />
+          {/if}
+          <label for={`category-folder-${item.id}`}>{text.destination}</label>
+          <input
+            id={`category-folder-${item.id}`}
+            value={item.download_folder ? pathLabel(item.download_folder) : text.categoryFolderHint}
+            readonly
+            dir={item.download_folder ? "ltr" : undefined}
+          />
+          <div class="category-actions">
+            <button
+              type="button"
+              class="secondary"
+              disabled={busy || !isDesktop()}
+              onclick={() => chooseCategoryFolder(item.id)}
+              aria-label={`${text.categoryFolder} ${categoryName(item)}`}
+              >{text.categoryFolder}</button
+            >
+            <button
+              type="button"
+              class="secondary"
+              disabled={busy || !item.download_folder}
+              onclick={() => {
+                item.download_folder = null;
+                draft = { ...draft };
+              }}
+              aria-label={`${text.clearCategoryFolder} ${categoryName(item)}`}
+              >{text.clearCategoryFolder} {categoryName(item)}</button
+            >
+            {#if item.id !== "other"}<button
+                type="button"
+                class="secondary"
+                disabled={busy}
+                onclick={() =>
+                  (draft = {
+                    ...draft,
+                    categories: draft.categories.filter((rule) => rule.id !== item.id),
+                  })}
+                aria-label={`${text.removeCategory} ${categoryName(item)}`}
+                >{text.removeCategory}</button
+              >{/if}
+          </div>
+        </fieldset>
+      {/each}
+      <div class="category-actions">
+        <button
+          type="button"
+          class="secondary"
+          disabled={busy || draft.categories.length >= 16}
+          onclick={() =>
+            (draft = {
+              ...draft,
+              categories: [
+                ...draft.categories,
+                { id: crypto.randomUUID(), name: "", extensions: [], download_folder: null },
+              ],
+            })}>{text.addCategory}</button
+        >
+        <button
+          type="button"
+          class="secondary"
+          disabled={busy}
+          onclick={() => (draft = { ...draft, categories: structuredClone(defaultCategories) })}
+          >{text.restoreCategories}</button
+        >
+      </div>
+    </section>
     <div class="browser-setting">
       <h3>{text.browser}</h3>
       <p class="helper">{connected ? text.connected : text.nativeError}</p>

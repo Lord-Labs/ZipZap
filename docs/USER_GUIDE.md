@@ -62,8 +62,9 @@ is rejected without resetting it. Do not lower its schema number or delete it
 to make an older app start; use the compatible app or restore a coherent backup
 with all instances closed. A saved folder on an offline drive does not prevent
 opening history. These changes are not in the published first beta; installer
-upgrade qualification remains pending. The development database uses schema 3
-for durable queue control (schema 2 introduced publication evidence). Older
+upgrade qualification remains pending. The development database uses schema 4
+for saved category folders (schema 3 added durable queue control; schema 2
+introduced publication evidence). Older
 ZipZap versions cannot open it; use a compatible app or a
 coherent pre-upgrade backup, never edit the schema number to force a downgrade.
 
@@ -121,6 +122,64 @@ these development changes are not in the published beta.
 
 The app never opens completed files automatically. Use **Open file** only when
 you trust the file; **Show in folder** reveals it without executing it.
+
+### Categories and suggested folders (development version)
+
+In Settings, edit **Category rules** to rename a group, change its comma-separated
+extensions or choose its save-folder suggestion. Add/remove groups up to 16;
+keep Other for unknown/no-extension names. Matching ignores case and uses the
+longest literal suffix, so tar.gz can override gz. An extension may belong to
+only one category; resolve a reported duplicate before saving. Unicode letters
+and numbers are supported; paths, wildcards and empty dot parts are rejected.
+
+Built-in names follow the selected language until renamed. Custom names remain
+as typed. **Restore default categories** resets the draft to the original six
+groups and clears folder rules; Save commits it, and Close discards edits.
+Rules and filters use saved settings across restart. Editing a category never
+moves a completed file or a partial download.
+
+New manual downloads use category folder suggestions after **Check filename**;
+review a changed folder before starting. Choosing a folder explicitly turns off
+automatic suggestions for that download; the checkbox can re-enable them.
+Browser requests use the same category rules after checking the server filename.
+Batch links keep their displayed common folder explicit. Existing/duplicate
+destinations still require a free name. An offline category folder is retained
+in Settings but new requests fail until it is restored or another folder is
+chosen. These changes require schema 4; older builds reject that state rather
+than ignore the saved folder choice. Native/browser/installer qualification for
+the next release remains pending.
+
+### Multiple files and links (development version)
+
+Use each row's checkbox with Tab/Space, **Select all visible downloads**, or
+Ctrl-click filenames to toggle selection. Shift-click selects a range in the
+current table order. Filtering deselects hidden rows. For several selected files,
+use **Pause selected**, **Resume / retry selected**, **Cancel selected downloads**
+or **Remove selected history**. Each action applies only to eligible states and
+reports every affected file, continuing after a failure. Retry applies only to
+files still eligible. Cancellation discards partial data; history removal also
+cleans recoverable partials while retaining completed output. Both bulk actions
+first list the affected files for confirmation. Changing a file's state while
+confirmation is open may make it ineligible; review that result rather than
+assuming every captured file changed.
+
+**Add multiple links** accepts one direct HTTP(S) link per line, up to 100.
+An oversized batch is rejected, not truncated. Choose the common save folder and
+start-now or add-for-later mode, then **Preview / recheck links**. Preview checks
+headers without creating jobs, shows invalid/duplicate links, suggested names,
+known sizes and filename conflicts. Edit a name and recheck to resolve conflicts;
+only included, checked rows with unique names can be added. Hold queue still
+governs start-now dispatch. Preview does not reserve a destination.
+
+Enqueue results appear per row. Accepted rows are skipped on retry; failed
+enqueue attempts retain their request IDs so a lost response can be retried
+without creating a second job. After an enqueue attempt, its name, folder and
+mode stay fixed for replay. Inspect the queue before creating a new batch with
+changed details. Closing discards this transient preview; it is not a saved
+import list. Closing during preview cancels its current metadata check. The
+Close button and Escape remain disabled until enqueue responses finish. These workflows are not in
+the published first beta; UI evidence uses mocked IPC, separate from native
+release qualification.
 
 ## Chrome and Edge
 

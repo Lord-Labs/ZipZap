@@ -373,6 +373,41 @@ try {
   passed.push(
     "metadata headers, Unicode, safe fallbacks, redirects and duplicate alternatives stay advisory",
   );
+  const categoryFolder = path.join(directory, "category-archives");
+  await mkdir(categoryFolder);
+  const categorySettings = await ask({ command: "settings" });
+  const previousCategories = structuredClone(categorySettings.categories);
+  categorySettings.categories[0].download_folder = categoryFolder;
+  await ask({ command: "settings", value: categorySettings });
+  const routed = await ask({
+    command: "suggest_auto",
+    url: `${base}/metadata-star`,
+    folder: directory,
+  });
+  assert.equal(routed.category, "compressed");
+  assert.equal(path.resolve(routed.destination).replace(/^\\\\\?\\/, ""), categoryFolder);
+  assert.equal(routed.alternative, null);
+  const routedJob = await ask({
+    command: "add",
+    url: `${base}/metadata-star`,
+    folder: routed.destination,
+    filename: routed.filename,
+  });
+  await complete(routedJob);
+  assert.equal(digest(await readFile(path.join(categoryFolder, routed.filename))), digest(bytes));
+  const explicitFolder = await ask({
+    command: "suggest",
+    url: `${base}/metadata-star`,
+    folder: directory,
+    filename: "explicit-category.zip",
+  });
+  assert.equal(path.resolve(explicitFolder.destination).replace(/^\\\\\?\\/, ""), directory);
+  categorySettings.categories = previousCategories;
+  await ask({ command: "settings", value: categorySettings });
+  assert.equal((await get(routedJob.id)).destination, routedJob.destination);
+  passed.push(
+    "server filename category suggests its folder, explicit destination wins, and rule edits keep completed output",
+  );
   for (const reason of ["same", "changed", "weak", "different-url", "different-query"]) {
     refreshExpired = false;
     refreshRevision = 1;
