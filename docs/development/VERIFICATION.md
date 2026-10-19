@@ -53,6 +53,25 @@ builds the frontend and extension, and runs Playwright/Axe on Ubuntu. Windows
 prepares the native sidecar before compiling the desktop. aria2 is historical
 evidence, not a CI dependency. The core fixture never changes OS trust.
 
+## Windows retry-clock fixture precision (#70)
+
+On 2026-10-19 one capped-retry fixture assertion failed before its cancellation
+checks; surrounding full runs passed. A separate local stdin/stdout probe compared
+Rust 1.99.0 `SystemTime::now` with a later Node 24.19.0 `Date.now` reading 5,000
+times. Rust's timestamp was 1–3 ms ahead in all samples. No clock setting was
+changed. This reproduces a cross-runtime observation mismatch, not excess retry
+sleep; the original failed sample did not capture its exact difference.
+
+The pinned [Node/V8 Windows clock](https://github.com/nodejs/node/blob/v24.19.0/deps/v8/src/base/platform/time.cc)
+resynchronizes a tick-based clock to `GetSystemTimeAsFileTime`; its source records
+approximately 1–15.6 ms system-clock resolution. The pinned
+[Rust Windows clock](https://github.com/rust-lang/rust/blob/1.99.0/library/std/src/sys/time/windows.rs)
+uses the precise system API. The fixture therefore allows 20 ms of Windows-only
+timestamp observation margin and reports deadline/current/remaining values on
+failure. Other platforms retain the strict bound. The application's 30-second
+retry cap and exact Rust duration test are unchanged; cancellation/shutdown and
+payload-integrity checks remain required. This is not a scheduler-clock policy.
+
 ## Engine gates (M1–M2)
 
 Use deterministic local HTTP fixtures instead of depending on third-party servers.
