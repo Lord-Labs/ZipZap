@@ -13,6 +13,11 @@ successful-check prerequisite. A future release needs a separate maintainer
 decision on hosted qualification before that workflow can proceed; never treat
 skipped checks as a release pass.
 
+The [daily-use beta qualification record](DAILY_USE_QUALIFICATION.md) separates
+current-main preparation from the remaining #46 startup evidence and #47
+candidate/installer gates. A merged implementation or passing preflight does
+not qualify a new installer.
+
 ## First-beta gates
 
 Verified for `0.1.0-beta.1` on 2026-10-17; see the
