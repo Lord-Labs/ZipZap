@@ -121,6 +121,7 @@ fn failed_checkpoint_does_not_advance_live_or_saved_prefix() {
                 j.segments[0].done = 12;
                 j.segments[0].hash = "unsaved hash".into();
                 j.validator = Some("unsaved validator".into());
+                j.recovery_mode = Some(RecoveryMode::ValidatedResume);
             })
             .is_err()
     );

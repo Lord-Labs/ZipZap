@@ -207,3 +207,21 @@ Repeat the following in a disposable Windows session/VM for release #47:
 Clock/zone mutation and physical sleep are not performed on the maintainer's
 session by the automated fixtures. The release candidate must record its own
 native acceptance; implementation acceptance does not qualify an installer.
+
+## Support export qualification: issue #45 (pending)
+
+Core privacy tests, Windows filesystem save/error tests and mocked IPC UI tests
+do not establish native dialog behavior. Prepare the isolated build above and
+manually check, without Computer Use of the active desktop:
+
+1. Open Support summary. Verify counts/codes and app/platform versions, with no
+   URLs, filenames, usernames, local paths or raw errors. Close/reopen to refresh.
+2. Export to a fresh JSON filename in the isolated downloads folder. Compare its
+   contents with the displayed preview. Cancel a second native save dialog and
+   verify no new summary file and a distinct cancellation message.
+3. Select the existing export or an unwritable disposable destination. Verify a
+   clear failure, unchanged original bytes and a retained preview for retry.
+   Do not change personal-folder permissions. Export successfully to a new name.
+4. Repeat dialog keyboard/focus/scroll checks in English and Arabic at 780×560.
+   Record source commit, actual outcomes and any defects. Keep private paths and
+   state outside Git. This issue remains open until native acceptance is recorded.

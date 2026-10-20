@@ -20,7 +20,9 @@ mod retry;
 pub use retry::FailureReason;
 #[cfg(test)]
 mod storage_tests;
+mod support;
 mod transfer;
+pub use support::RecoveryMode;
 mod view;
 pub use view::ViewPreferences;
 
@@ -38,7 +40,7 @@ use uuid::Uuid;
 
 pub type Result<T> = std::result::Result<T, String>;
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord)]
 #[serde(rename_all = "snake_case")]
 pub enum Status {
     Queued,
@@ -96,6 +98,8 @@ pub struct Job {
     pub failure_reason: Option<FailureReason>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub provenance: Option<Provenance>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recovery_mode: Option<RecoveryMode>,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -555,6 +559,7 @@ impl Manager {
             next_retry: None,
             failure_reason: None,
             provenance: None,
+            recovery_mode: None,
         };
         state
             .db

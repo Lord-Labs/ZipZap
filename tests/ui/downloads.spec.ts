@@ -49,6 +49,10 @@ test.beforeEach(async ({ page }) => {
       failSettings: "",
       autoFolder: "",
       selectedFolder: "C:\\Downloads",
+      failSupport: "",
+      supportOutcome: "saved",
+      supportPreview: "",
+      exportedSupport: [] as string[],
     };
     (window as any).__TAURI_INTERNALS__ = {
       invoke: async (command: string, args: any) => {
@@ -62,6 +66,31 @@ test.beforeEach(async ({ page }) => {
             },
           });
         calls.push({ command, args: structuredClone(args) });
+        if (command === "preview_support") {
+          if ((window as any).zipzapTest.failSupport === "preview")
+            throw new Error("PRIVATE-path-token");
+          const value = JSON.stringify(
+            {
+              format_version: 1,
+              app_version: state.version,
+              counts: { jobs: state.jobs.length },
+              browser_host_registered: !state.native_error,
+            },
+            null,
+            2,
+          );
+          (window as any).zipzapTest.supportPreview = value;
+          return value;
+        }
+        if (command === "export_support") {
+          if ((window as any).zipzapTest.failSupport === "export")
+            throw new Error("PRIVATE-path-token");
+          if ((window as any).zipzapTest.supportOutcome === "saved")
+            (window as any).zipzapTest.exportedSupport.push(
+              (window as any).zipzapTest.supportPreview,
+            );
+          return (window as any).zipzapTest.supportOutcome;
+        }
         if (command === "set_schedule") {
           if ((window as any).zipzapTest.failAction === "schedule")
             throw new Error("Storage unavailable");
@@ -174,6 +203,125 @@ test.beforeEach(async ({ page }) => {
 
 test.afterEach(async ({ page }) => {
   expect(browserErrors.get(page)).toEqual([]);
+});
+
+test("support preview is explicit and export preserves the preview across cancellation and write errors", async ({
+  page,
+}) => {
+  expect(
+    await page.evaluate(() =>
+      (window as any).zipzapTest.calls.some((call: any) => call.command === "preview_support"),
+    ),
+  ).toBe(false);
+  await page.getByRole("button", { name: "Support summary", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Support summary" });
+  const preview = await dialog.getByLabel("Redacted support preview").inputValue();
+  await expect(dialog.getByText(/Nothing uploads automatically/)).toBeVisible();
+  await page.evaluate(() => {
+    (window as any).zipzapTest.state.jobs.push({
+      id: "changed-after-preview",
+      url: "https://example.com/PRIVATE?token=secret",
+      destination: "C:\\PRIVATE\\file.bin",
+      status: "paused",
+      total: 1,
+      downloaded: 0,
+      speed: 0,
+      error: null,
+    });
+  });
+  await dialog.getByRole("button", { name: "Export preview…" }).click();
+  await expect(dialog.getByRole("status")).toContainText("Support summary saved");
+  expect(await page.evaluate(() => (window as any).zipzapTest.exportedSupport)).toEqual([preview]);
+  expect(
+    await page.evaluate(
+      () =>
+        (window as any).zipzapTest.calls.find((call: any) => call.command === "export_support")
+          .args,
+    ),
+  ).toEqual({});
+  await page.evaluate(() => {
+    (window as any).zipzapTest.supportOutcome = "cancelled";
+  });
+  await dialog.getByRole("button", { name: "Export preview…" }).click();
+  await expect(dialog.getByRole("status")).toContainText("No summary file was created");
+  await page.evaluate(() => {
+    (window as any).zipzapTest.failSupport = "export";
+  });
+  await dialog.getByRole("button", { name: "Export preview…" }).click();
+  await expect(dialog.getByRole("alert")).toBeFocused();
+  await expect(dialog.getByRole("alert")).toContainText("Choose a new filename");
+  await expect(dialog.getByLabel("Redacted support preview")).toHaveValue(preview);
+  await expect(dialog).not.toContainText("PRIVATE-path-token");
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("button", { name: "Support summary", exact: true })).toBeFocused();
+});
+
+test("support preview failure can be retried and Arabic preview remains accessible at minimum size", async ({
+  page,
+}) => {
+  await page.evaluate(() => {
+    (window as any).zipzapTest.failSupport = "preview";
+  });
+  await page.getByRole("button", { name: "Support summary", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Support summary" });
+  await expect(dialog.getByRole("alert")).toBeFocused();
+  await expect(dialog.getByRole("button", { name: "Export preview…" })).toBeDisabled();
+  await expect(dialog).not.toContainText("PRIVATE-path-token");
+  await page.keyboard.press("Escape");
+  await page.evaluate(() => {
+    (window as any).zipzapTest.failSupport = "";
+    (window as any).zipzapTest.state.settings.language = "ar";
+  });
+  await page.setViewportSize({ width: 780, height: 560 });
+  await page.getByRole("button", { name: "ملخص الدعم", exact: true }).click();
+  const arabic = page.getByRole("dialog", { name: "ملخص الدعم" });
+  await expect(arabic.getByLabel("معاينة الدعم المنقّحة")).toBeFocused();
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await page.screenshot({ path: "test-results/support-ar.png" });
+});
+
+test("recovery details use recorded facts and leave legacy or queued decisions unknown", async ({
+  page,
+}) => {
+  await page.evaluate(() => {
+    (window as any).zipzapTest.state.jobs = [
+      {
+        id: "recovery",
+        url: "https://example.com/file?token=PRIVATE",
+        destination: "C:\\Downloads\\recovery.bin",
+        status: "failed",
+        total: 1024,
+        downloaded: 512,
+        speed: 0,
+        error: "raw PRIVATE",
+        failure_reason: "authentication",
+        recovery_mode: null,
+        next_retry: Date.now() + 20000,
+        attempt: 2,
+      },
+    ];
+  });
+  await page.getByText("recovery.bin", { exact: true }).first().click();
+  await expect(page.getByText(/No recovery decision is recorded yet/)).toBeVisible();
+  await expect(page.getByText(/Obtain a new direct link/).last()).toBeVisible();
+  for (const [mode, message] of [
+    ["validated_resume", "Saved bytes and resource identity were validated"],
+    ["safe_restart", "Saved data was discarded"],
+    ["publication_recovery", "completed file was recovered"],
+    ["fresh", "New transfer; no saved bytes"],
+  ]) {
+    await page.evaluate((value) => {
+      (window as any).zipzapTest.state.jobs[0].recovery_mode = value;
+    }, mode);
+    await expect(page.getByText(message, { exact: false })).toBeVisible();
+  }
+  await page.evaluate(() => {
+    (window as any).zipzapTest.state.settings.language = "ar";
+    (window as any).zipzapTest.state.jobs[0].recovery_mode = "validated_resume";
+  });
+  await expect(
+    page.getByText("جرى التحقق من البايتات المحفوظة وهوية المورد قبل الاستئناف."),
+  ).toBeVisible();
 });
 
 test("queue schedule saves reviewed weekly/overnight and one-shot windows and disables without starting", async ({

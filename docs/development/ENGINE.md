@@ -273,6 +273,27 @@ updated job remains paused until an explicit Resume. Pending publication
 evidence must use its existing recovery path before any link replacement; final
 output is never removed or repurposed. No schema/dependency change is needed.
 
+## Recovery facts and support summary (development version)
+
+Jobs expose optional `recovery_mode` only after the core saves a transfer-plan
+decision, explicit link-replacement discard, or validated publication recovery.
+Values are `fresh`, `validated_resume`, `safe_restart`, `publication_recovery`;
+legacy/unstarted records default to absent. Prefix bytes and resource identity
+must pass existing checks before validated resume is recorded. Failed saves leave
+the previous fact intact. This descriptive field does not change schema 5 or
+authorize reuse, publication or overwriting. The latest attempt can update it.
+
+`support_summary` in the headless interface returns bounded JSON as a string;
+desktop preview uses the same allowlisted core data and retains its exact bytes
+for explicit export. Only fixed version/platform values, numeric Windows version,
+aggregate counts and typed codes/flags are included. No raw job, settings, errors,
+URLs, paths, timestamps or database contents are serialized. Maximum size is
+8 KiB, independent of private-string length or the 1000-job history limit.
+The native exporter accepts no client content/path, uses the save dialog and
+syncs/persists a temporary file without clobbering. See
+[ADR 0009](../architecture/0009-support-summary.md) for the privacy boundary and
+[native acceptance procedure](NATIVE_SMOKE.md) for pending Windows observations.
+
 ## Retry policy (development version)
 
 The shared worker classifies transient network failures, HTTP 408/500/502/503/504

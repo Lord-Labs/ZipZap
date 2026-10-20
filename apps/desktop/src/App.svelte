@@ -5,6 +5,7 @@
 
   import Icon from "./Icon.svelte";
   import BatchDialog from "./BatchDialog.svelte";
+  import SupportDialog from "./SupportDialog.svelte";
   import ScheduleDialog, { type ScheduleState } from "./ScheduleDialog.svelte";
   import defaultCategories from "../../../config/categories.json";
   import defaultView from "../../../config/view.json";
@@ -26,6 +27,7 @@
     next_retry?: number | null;
     failure_reason?: string | null;
     provenance?: "internet" | "unavailable" | null;
+    recovery_mode?: "fresh" | "validated_resume" | "safe_restart" | "publication_recovery" | null;
   };
 
   type Category = {
@@ -147,6 +149,13 @@
         .sort((a, b) => b.extension.length - a.extension.length)[0]?.id || "other"
     );
   };
+  $: recoveryMessages = {
+    fresh: text.recoveryFresh,
+    validated_resume: text.recoveryValidated,
+    safe_restart: text.recoveryRestart,
+    publication_recovery: text.recoveryPublication,
+  };
+  let supportDialog: SupportDialog;
   $: if (category !== "all" && !categories.some((item) => item.id === category)) category = "all";
 
   let search = "";
@@ -878,6 +887,12 @@
     </a>
     <h1>{text.downloads}</h1>
     <span class="app-version" dir="ltr">{version}</span>
+    <button
+      class="secondary"
+      disabled={!isDesktop()}
+      onclick={() => supportDialog.open()}
+      aria-haspopup="dialog">{text.supportTitle}</button
+    >
     <button class="language" onclick={switchLanguage}
       ><Icon name="globe" />{language === "en" ? "العربية" : "English"}</button
     >
@@ -1253,6 +1268,13 @@
             >
           </div>
           <p class="helper">{text.storage} {text.storageCaution}</p>
+          <div>
+            <strong>{text.recoveryTitle}</strong><span
+              >{selected.recovery_mode
+                ? recoveryMessages[selected.recovery_mode]
+                : text.recoveryUnknown}</span
+            >
+          </div>
           {#if selected.attempt}<div>
               <strong>{text.attempt}</strong><bdi dir="ltr"
                 >{new Intl.NumberFormat(language).format(selected.attempt)} / {new Intl.NumberFormat(
@@ -1301,6 +1323,7 @@
   desktop={isDesktop()}
   onsaved={refresh}
 />
+<SupportDialog bind:this={supportDialog} {language} />
 
 <dialog bind:this={confirmDialog} aria-labelledby="bulk-title">
   <form
@@ -1745,6 +1768,7 @@
     <div class="browser-setting">
       <h3>{text.browser}</h3>
       <p class="helper">{connected ? text.connected : text.nativeError}</p>
+      {#if !connected}<p class="helper">{text.nativeRecovery}</p>{/if}
       <button type="button" class="secondary" onclick={connectBrowser}>{text.connect}</button>
       <p class="helper">{text.browserHelp}</p>
     </div>

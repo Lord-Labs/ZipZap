@@ -80,6 +80,7 @@ pub(super) async fn download(
         effective,
     } = probe(&manager, &job.url, token).await?;
     let ranged = ranged && !single;
+    let had_saved_bytes = job.segments.iter().any(|segment| segment.done > 0);
     let mut reusable = ranged
         && job.validator == validator
         && job.effective_url.as_ref() == Some(&effective)
@@ -137,6 +138,13 @@ pub(super) async fn download(
         current.total = job.total;
         current.validator = job.validator.clone();
         current.effective_url = job.effective_url.clone();
+        current.recovery_mode = Some(if reusable && had_saved_bytes {
+            RecoveryMode::ValidatedResume
+        } else if had_saved_bytes || current.recovery_mode == Some(RecoveryMode::SafeRestart) {
+            RecoveryMode::SafeRestart
+        } else {
+            RecoveryMode::Fresh
+        });
     })?;
     if !reusable {
         cleanup(&job);

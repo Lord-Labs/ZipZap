@@ -1,4 +1,28 @@
 const en = {
+  supportTitle: "Support summary",
+  supportPrivacy:
+    "Preview app/platform versions, counts and safe error codes only. URLs, filenames, local paths, usernames, raw errors, cookies and databases are omitted. Nothing uploads automatically.",
+  supportNoClobber:
+    "Export saves this exact preview as JSON. Choose a new filename; existing files are kept.",
+  supportPreview: "Redacted support preview",
+  supportExport: "Export preview…",
+  supportLoading: "Preparing support summary…",
+  supportPreviewFailed:
+    "Could not prepare a support preview. Close this dialog, check storage, and try again.",
+  supportSaveFailed:
+    "Could not save the support summary. Choose a new filename in an existing writable folder and retry. Existing files are kept.",
+  supportSaved: "Support summary saved. Share it only when you choose.",
+  supportCancelled: "Export cancelled. No summary file was created.",
+  recoveryTitle: "Last recovery decision",
+  recoveryFresh: "New transfer; no saved bytes were reused.",
+  recoveryValidated: "Saved bytes and resource identity were validated before resuming.",
+  recoveryRestart: "Saved data was discarded for a safe restart from the beginning.",
+  recoveryPublication:
+    "The completed file was recovered after checking its digest and file identity.",
+  recoveryUnknown:
+    "No recovery decision is recorded yet. Resume checks have not been established by this history entry.",
+  nativeRecovery:
+    "Use Connect Chrome / Edge, enable the matching ZipZap extension, then restart the browser and retry. Update both app and extension if their protocol versions differ.",
   scheduleTitle: "Queue schedule",
   scheduleRunningOnly:
     "Runs only while ZipZap is open, including explicit tray mode. It cannot wake the computer or start the app.",
@@ -253,7 +277,7 @@ const en = {
   reasonRateLimited: "The server asked to slow down. Wait until the next retry time.",
   reasonHttp: "The server rejected the request. Check the direct download link, then retry.",
   reasonAuthentication:
-    "Access denied or authentication required. Check the link and its permissions.",
+    "Link access was denied or expired. Obtain a new direct link from the site, then use Replace link on the paused or failed download. Saved data may need an explicit safe restart.",
   reasonTls:
     "Secure connection failed. Check the server certificate and device clock; certificate validation stays enabled.",
   reasonInput: "This request is invalid or unsupported. Check the direct HTTP/HTTPS link.",
@@ -274,6 +298,27 @@ const en = {
     "Check the destination drive and NTFS support, then retry; saved checkpoints are kept.",
 };
 const ar: Record<keyof typeof en, string> = {
+  supportTitle: "ملخص الدعم",
+  supportPrivacy:
+    "تحتوي المعاينة على إصدارات التطبيق والنظام وأعداد مجمّعة ورموز أخطاء آمنة فقط. تُستبعد الروابط وأسماء الملفات والمسارات وأسماء المستخدمين والأخطاء الخام والكوكيز وقواعد البيانات. لا يُرفع شيء تلقائيًا.",
+  supportNoClobber:
+    "يحفظ التصدير هذه المعاينة نفسها بصيغة JSON. اختر اسمًا جديدًا؛ نحتفظ بالملفات الموجودة.",
+  supportPreview: "معاينة الدعم المنقّحة",
+  supportExport: "تصدير المعاينة…",
+  supportLoading: "جارٍ تجهيز ملخص الدعم…",
+  supportPreviewFailed: "تعذّر تجهيز معاينة الدعم. أغلق النافذة وتحقق من التخزين ثم أعد المحاولة.",
+  supportSaveFailed:
+    "تعذّر حفظ ملخص الدعم. اختر اسمًا جديدًا في مجلد موجود قابل للكتابة وأعد المحاولة. نحتفظ بالملفات الموجودة.",
+  supportSaved: "حُفظ ملخص الدعم. شاركه فقط عندما تختار ذلك.",
+  supportCancelled: "أُلغي التصدير. لم يُنشأ ملف ملخص.",
+  recoveryTitle: "آخر قرار للاستعادة",
+  recoveryFresh: "نقل جديد؛ لم تُعَد الاستفادة من بايتات محفوظة.",
+  recoveryValidated: "جرى التحقق من البايتات المحفوظة وهوية المورد قبل الاستئناف.",
+  recoveryRestart: "حُذفت البيانات المحفوظة لإعادة بدء آمنة من البداية.",
+  recoveryPublication: "استُعيد الملف المكتمل بعد التحقق من بصمته وهوية الملف.",
+  recoveryUnknown: "لم يُسجّل قرار استعادة بعد. هذا السجل لا يثبت إجراء فحوص الاستئناف.",
+  nativeRecovery:
+    "استخدم ربط Chrome / Edge، وفعّل إضافة ZipZap المتوافقة، ثم أعد تشغيل المتصفح وحاول مجددًا. حدّث التطبيق والإضافة معًا إذا اختلف إصدار البروتوكول.",
   scheduleTitle: "جدولة الطابور",
   scheduleRunningOnly:
     "تعمل فقط أثناء بقاء ZipZap مفتوحًا، بما في ذلك وضع علبة النظام الذي تختاره. لا توقظ الحاسوب ولا تشغّل التطبيق.",
@@ -521,7 +566,8 @@ const ar: Record<keyof typeof en, string> = {
   reasonServer: "الخادم غير متاح مؤقتًا. حاول لاحقًا إذا انتهت المحاولات المحدودة.",
   reasonRateLimited: "طلب الخادم تخفيف الطلبات. انتظر موعد المحاولة التالية.",
   reasonHttp: "رفض الخادم الطلب. تحقق من رابط التنزيل المباشر ثم أعد المحاولة.",
-  reasonAuthentication: "رُفض الوصول أو يلزم تسجيل دخول. تحقق من الرابط وصلاحياته.",
+  reasonAuthentication:
+    "رُفض الوصول إلى الرابط أو انتهت صلاحيته. احصل على رابط مباشر جديد من الموقع، ثم استخدم استبدال الرابط للتنزيل المتوقف أو الفاشل. قد تتطلب البيانات المحفوظة إعادة بدء آمنة بموافقتك.",
   reasonTls:
     "فشل الاتصال الآمن. تحقق من شهادة الخادم وساعة الجهاز؛ يبقى التحقق من الشهادات مفعّلًا.",
   reasonInput: "الطلب غير صالح أو غير مدعوم. تحقق من رابط HTTP/HTTPS المباشر.",
