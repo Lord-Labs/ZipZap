@@ -141,7 +141,8 @@ remaining five were warm reopens. Neither window-handle readiness nor the
 observer's delayed table check establishes precise painted startup. The latter
 is only an upper bound and must not become a product latency budget. No boot,
 sign-out or system cache flush was performed; repeated true cold starts remain
-missing, so #46 and PR #76 stay open/draft.
+missing, so #46 stays open. The maintainer approved merging the completed
+measurement slice in PR #76 on 2026-10-20, retaining this acceptance gap.
 
 Before any optimization, use these **investigation ceilings** for this same
 native observation workload: app/core working set 48 MiB, private bytes 16 MiB,
