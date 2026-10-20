@@ -52,8 +52,10 @@ foreach ($zipzapCount in @(100, 1000)) {
         $zipzapHumanReadyMs = $zipzapWatch.Elapsed.TotalMilliseconds
         $zipzapRunSamples = @()
         foreach ($zipzapSecond in 1..20) {
-            $zipzapProcesses = @(Get-CimInstance Win32_Process | Select-Object ProcessId, ParentProcessId, Name)
-            $zipzapOwned = @([int]$zipzapProcess.Id)
+            $zipzapProcesses = @(Get-CimInstance Win32_Process | Select-Object ProcessId, ParentProcessId, Name, CommandLine)
+            # A warm WebView browser may outlive its original parent; include only this random profile.
+            $zipzapOwned = @([int]$zipzapProcess.Id) + @($zipzapProcesses | Where-Object { $_.Name -eq 'msedgewebview2.exe' -and $_.CommandLine -like "*$($zipzapMetadata.identifier)*" } | ForEach-Object { [int]$_.ProcessId })
+            $zipzapOwned = @($zipzapOwned | Select-Object -Unique)
             do {
                 $zipzapPrevious = $zipzapOwned.Count
                 $zipzapOwned += @($zipzapProcesses | Where-Object { $_.ParentProcessId -in $zipzapOwned -and $_.ProcessId -notin $zipzapOwned } | ForEach-Object { [int]$_.ProcessId })
@@ -75,6 +77,7 @@ foreach ($zipzapCount in @(100, 1000)) {
                 }
             }
             if (-not ($zipzapMetrics | Where-Object { $_.group -eq 'app-core' })) { throw 'App exited during sampling' }
+            if (-not ($zipzapMetrics | Where-Object { $_.group -eq 'webview2' })) { throw 'No isolated WebView2 process found; measurement is incomplete' }
             $zipzapRunSamples += @{ elapsedMs = $zipzapWatch.Elapsed.TotalMilliseconds; processes = $zipzapMetrics }
             Start-Sleep -Seconds 1
         }
@@ -90,6 +93,7 @@ foreach ($zipzapCount in @(100, 1000)) {
         @{
             date = [DateTime]::UtcNow.ToString('o'); sourceCommit = $zipzapMetadata.sourceCommit
             executableSha256 = $zipzapMetadata.sha256; profile = $zipzapMetadata.profile
+            collectorSha256 = (Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToLowerInvariant()
             webview2 = $zipzapWebViewVersion; environment = $zipzapNativeHost
             limits = 'Human timing includes reaction time. Handle-ready is not painted-ready. 1s sampling can miss peaks; working sets share pages and must not be called unique physical RAM. Collector overhead is excluded. No UI automation or OS cache flush.'
             runs = $zipzapSamples

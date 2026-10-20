@@ -1,0 +1,1300 @@
+{
+  "sourceCommit": "bd983e3125065fa2b6175c8eccb42af035efb483",
+  "sourceTrees": {
+    "core": "7f41e0a5043a307632bc42190536ec76027a7eac",
+    "desktop": "6f243a29a9453f40e33644c9207caefedd4b6d96"
+  },
+  "worktree": "",
+  "date": "2026-10-20T15:42:09.476Z",
+  "environment": {
+    "os": "Windows_NT 10.0.26200 x64",
+    "cpu": "13th Gen Intel(R) Core(TM) i5-13450HX",
+    "logicalCpus": 16,
+    "ramBytes": 16873545728,
+    "node": "v24.19.0",
+    "rust": "rustc 1.99.0 (b940084d7 2026-09-28)",
+    "engineSha256": "b11dd4b97c518d795805a39c43bff903ad8df523bb3ae8c38ecdbfac4b70adcb",
+    "profile": "release, thin LTO, one codegen unit, stripped; Vite production bundle",
+    "chromium": "149.0.7827.55"
+  },
+  "fixture": {
+    "bytes": 8388608,
+    "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+    "chunkBytes": 65536
+  },
+  "transfers": [
+    {
+      "scenario": "paced",
+      "repetition": 1,
+      "connections": 1,
+      "elapsedMs": 1571.7847,
+      "MiBPerSecond": 5.08975561347556,
+      "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+      "peakResponseStreams": 1,
+      "requests": 2,
+      "attempts": 1,
+      "cpuSeconds": 0.328125,
+      "peakWorkingSetBytes": 10313728,
+      "privateBytes": 2834432,
+      "workingSetBytes": 10178560
+    },
+    {
+      "scenario": "paced",
+      "repetition": 1,
+      "connections": 4,
+      "elapsedMs": 550.4668000000001,
+      "MiBPerSecond": 14.533119890245874,
+      "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+      "peakResponseStreams": 4,
+      "requests": 5,
+      "attempts": 1,
+      "cpuSeconds": 0.28125,
+      "peakWorkingSetBytes": 11542528,
+      "privateBytes": 3842048,
+      "workingSetBytes": 11116544
+    },
+    {
+      "scenario": "paced",
+      "repetition": 2,
+      "connections": 4,
+      "elapsedMs": 514.7956000000004,
+      "MiBPerSecond": 15.5401483617964,
+      "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+      "peakResponseStreams": 4,
+      "requests": 5,
+      "attempts": 1,
+      "cpuSeconds": 0.3125,
+      "peakWorkingSetBytes": 11550720,
+      "privateBytes": 3915776,
+      "workingSetBytes": 11145216
+    },
+    {
+      "scenario": "paced",
+      "repetition": 2,
+      "connections": 1,
+      "elapsedMs": 1469.1353,
+      "MiBPerSecond": 5.445380013671989,
+      "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+      "peakResponseStreams": 1,
+      "requests": 2,
+      "attempts": 1,
+      "cpuSeconds": 0.1875,
+      "peakWorkingSetBytes": 10375168,
+      "privateBytes": 2805760,
+      "workingSetBytes": 10162176
+    },
+    {
+      "scenario": "paced",
+      "repetition": 3,
+      "connections": 1,
+      "elapsedMs": 1473.2509999999993,
+      "MiBPerSecond": 5.430167703941829,
+      "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+      "peakResponseStreams": 1,
+      "requests": 2,
+      "attempts": 1,
+      "cpuSeconds": 0.234375,
+      "peakWorkingSetBytes": 10592256,
+      "privateBytes": 2805760,
+      "workingSetBytes": 10158080
+    },
+    {
+      "scenario": "paced",
+      "repetition": 3,
+      "connections": 4,
+      "elapsedMs": 455.02560000000085,
+      "MiBPerSecond": 17.581428385567722,
+      "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+      "peakResponseStreams": 4,
+      "requests": 5,
+      "attempts": 1,
+      "cpuSeconds": 0.28125,
+      "peakWorkingSetBytes": 11759616,
+      "privateBytes": 4841472,
+      "workingSetBytes": 11485184
+    },
+    {
+      "scenario": "latency",
+      "repetition": 1,
+      "connections": 1,
+      "elapsedMs": 1594.9961999999996,
+      "MiBPerSecond": 5.015685930787799,
+      "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+      "peakResponseStreams": 1,
+      "requests": 2,
+      "attempts": 1,
+      "cpuSeconds": 0.234375,
+      "peakWorkingSetBytes": 10297344,
+      "privateBytes": 2867200,
+      "workingSetBytes": 10182656
+    },
+    {
+      "scenario": "latency",
+      "repetition": 1,
+      "connections": 4,
+      "elapsedMs": 718.6818999999996,
+      "MiBPerSecond": 11.131489467036815,
+      "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+      "peakResponseStreams": 4,
+      "requests": 5,
+      "attempts": 1,
+      "cpuSeconds": 0.34375,
+      "peakWorkingSetBytes": 11513856,
+      "privateBytes": 4022272,
+      "workingSetBytes": 11145216
+    },
+    {
+      "scenario": "latency",
+      "repetition": 2,
+      "connections": 4,
+      "elapsedMs": 706.3963000000003,
+      "MiBPerSecond": 11.325087631404633,
+      "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+      "peakResponseStreams": 4,
+      "requests": 5,
+      "attempts": 1,
+      "cpuSeconds": 0.21875,
+      "peakWorkingSetBytes": 11886592,
+      "privateBytes": 4268032,
+      "workingSetBytes": 11497472
+    },
+    {
+      "scenario": "latency",
+      "repetition": 2,
+      "connections": 1,
+      "elapsedMs": 1630.4053999999996,
+      "MiBPerSecond": 4.906755092935782,
+      "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+      "peakResponseStreams": 1,
+      "requests": 2,
+      "attempts": 1,
+      "cpuSeconds": 0.359375,
+      "peakWorkingSetBytes": 10383360,
+      "privateBytes": 2875392,
+      "workingSetBytes": 10190848
+    },
+    {
+      "scenario": "latency",
+      "repetition": 3,
+      "connections": 1,
+      "elapsedMs": 1647.1986999999972,
+      "MiBPerSecond": 4.856730399313704,
+      "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+      "peakResponseStreams": 1,
+      "requests": 2,
+      "attempts": 1,
+      "cpuSeconds": 0.328125,
+      "peakWorkingSetBytes": 10403840,
+      "privateBytes": 2977792,
+      "workingSetBytes": 10391552
+    },
+    {
+      "scenario": "latency",
+      "repetition": 3,
+      "connections": 4,
+      "elapsedMs": 696.4670000000006,
+      "MiBPerSecond": 11.486545665480193,
+      "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+      "peakResponseStreams": 4,
+      "requests": 5,
+      "attempts": 1,
+      "cpuSeconds": 0.328125,
+      "peakWorkingSetBytes": 11673600,
+      "privateBytes": 4358144,
+      "workingSetBytes": 11341824
+    },
+    {
+      "scenario": "unequal-segments",
+      "repetition": 1,
+      "connections": 1,
+      "elapsedMs": 1760.5987999999998,
+      "MiBPerSecond": 4.543908583829548,
+      "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+      "peakResponseStreams": 1,
+      "requests": 2,
+      "attempts": 1,
+      "cpuSeconds": 0.328125,
+      "peakWorkingSetBytes": 10330112,
+      "privateBytes": 3084288,
+      "workingSetBytes": 10280960
+    },
+    {
+      "scenario": "unequal-segments",
+      "repetition": 1,
+      "connections": 4,
+      "elapsedMs": 818.8388000000014,
+      "MiBPerSecond": 9.769932738898044,
+      "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+      "peakResponseStreams": 4,
+      "requests": 5,
+      "attempts": 1,
+      "cpuSeconds": 0.296875,
+      "peakWorkingSetBytes": 11640832,
+      "privateBytes": 3903488,
+      "workingSetBytes": 10731520
+    },
+    {
+      "scenario": "unequal-segments",
+      "repetition": 2,
+      "connections": 4,
+      "elapsedMs": 733.7033999999985,
+      "MiBPerSecond": 10.903588561808512,
+      "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+      "peakResponseStreams": 4,
+      "requests": 5,
+      "attempts": 1,
+      "cpuSeconds": 0.125,
+      "peakWorkingSetBytes": 11636736,
+      "privateBytes": 4390912,
+      "workingSetBytes": 11235328
+    },
+    {
+      "scenario": "unequal-segments",
+      "repetition": 2,
+      "connections": 1,
+      "elapsedMs": 1585.6245999999992,
+      "MiBPerSecond": 5.045330401660017,
+      "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+      "peakResponseStreams": 1,
+      "requests": 2,
+      "attempts": 1,
+      "cpuSeconds": 0.21875,
+      "peakWorkingSetBytes": 10366976,
+      "privateBytes": 2854912,
+      "workingSetBytes": 10207232
+    },
+    {
+      "scenario": "unequal-segments",
+      "repetition": 3,
+      "connections": 1,
+      "elapsedMs": 1503.1203999999998,
+      "MiBPerSecond": 5.322261609914948,
+      "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+      "peakResponseStreams": 1,
+      "requests": 2,
+      "attempts": 1,
+      "cpuSeconds": 0.171875,
+      "peakWorkingSetBytes": 10366976,
+      "privateBytes": 2838528,
+      "workingSetBytes": 10317824
+    },
+    {
+      "scenario": "unequal-segments",
+      "repetition": 3,
+      "connections": 4,
+      "elapsedMs": 750.9233999999997,
+      "MiBPerSecond": 10.653550015887111,
+      "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+      "peakResponseStreams": 4,
+      "requests": 5,
+      "attempts": 1,
+      "cpuSeconds": 0.1875,
+      "peakWorkingSetBytes": 11857920,
+      "privateBytes": 4464640,
+      "workingSetBytes": 11231232
+    },
+    {
+      "scenario": "range-refusal",
+      "repetition": 1,
+      "connections": 1,
+      "elapsedMs": 1372.061700000002,
+      "MiBPerSecond": 5.830641581205851,
+      "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+      "peakResponseStreams": 1,
+      "requests": 2,
+      "attempts": 1,
+      "cpuSeconds": 0.1875,
+      "peakWorkingSetBytes": 10473472,
+      "privateBytes": 3018752,
+      "workingSetBytes": 10457088
+    },
+    {
+      "scenario": "range-refusal",
+      "repetition": 1,
+      "connections": 4,
+      "elapsedMs": 1395.3524000000034,
+      "MiBPerSecond": 5.733318694259586,
+      "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+      "peakResponseStreams": 1,
+      "requests": 2,
+      "attempts": 1,
+      "cpuSeconds": 0.21875,
+      "peakWorkingSetBytes": 10448896,
+      "privateBytes": 3002368,
+      "workingSetBytes": 10436608
+    },
+    {
+      "scenario": "range-refusal",
+      "repetition": 2,
+      "connections": 4,
+      "elapsedMs": 1315.914300000004,
+      "MiBPerSecond": 6.079423257274411,
+      "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+      "peakResponseStreams": 1,
+      "requests": 2,
+      "attempts": 1,
+      "cpuSeconds": 0.1875,
+      "peakWorkingSetBytes": 10366976,
+      "privateBytes": 2838528,
+      "workingSetBytes": 10338304
+    },
+    {
+      "scenario": "range-refusal",
+      "repetition": 2,
+      "connections": 1,
+      "elapsedMs": 1448.5792999999976,
+      "MiBPerSecond": 5.522652436079967,
+      "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+      "peakResponseStreams": 1,
+      "requests": 2,
+      "attempts": 1,
+      "cpuSeconds": 0.109375,
+      "peakWorkingSetBytes": 10420224,
+      "privateBytes": 2887680,
+      "workingSetBytes": 10383360
+    },
+    {
+      "scenario": "range-refusal",
+      "repetition": 3,
+      "connections": 1,
+      "elapsedMs": 1346.8060000000041,
+      "MiBPerSecond": 5.939979477370887,
+      "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+      "peakResponseStreams": 1,
+      "requests": 2,
+      "attempts": 1,
+      "cpuSeconds": 0.125,
+      "peakWorkingSetBytes": 10399744,
+      "privateBytes": 2895872,
+      "workingSetBytes": 10379264
+    },
+    {
+      "scenario": "range-refusal",
+      "repetition": 3,
+      "connections": 4,
+      "elapsedMs": 1349.0282000000007,
+      "MiBPerSecond": 5.930194787625638,
+      "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+      "peakResponseStreams": 1,
+      "requests": 2,
+      "attempts": 1,
+      "cpuSeconds": 0.21875,
+      "peakWorkingSetBytes": 10399744,
+      "privateBytes": 2883584,
+      "workingSetBytes": 10375168
+    },
+    {
+      "scenario": "rate-limit",
+      "repetition": 1,
+      "connections": 1,
+      "elapsedMs": 2454.7748999999967,
+      "MiBPerSecond": 3.258954619423561,
+      "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+      "peakResponseStreams": 1,
+      "requests": 3,
+      "attempts": 2,
+      "cpuSeconds": 0.1875,
+      "peakWorkingSetBytes": 10371072,
+      "privateBytes": 2818048,
+      "workingSetBytes": 10170368
+    },
+    {
+      "scenario": "rate-limit",
+      "repetition": 1,
+      "connections": 4,
+      "elapsedMs": 1523.4473999999973,
+      "MiBPerSecond": 5.251247926249383,
+      "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+      "peakResponseStreams": 4,
+      "requests": 6,
+      "attempts": 2,
+      "cpuSeconds": 0.1875,
+      "peakWorkingSetBytes": 11816960,
+      "privateBytes": 4218880,
+      "workingSetBytes": 11431936
+    },
+    {
+      "scenario": "rate-limit",
+      "repetition": 2,
+      "connections": 4,
+      "elapsedMs": 1497.6547999999966,
+      "MiBPerSecond": 5.341684879586416,
+      "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+      "peakResponseStreams": 4,
+      "requests": 6,
+      "attempts": 2,
+      "cpuSeconds": 0.140625,
+      "peakWorkingSetBytes": 11665408,
+      "privateBytes": 4395008,
+      "workingSetBytes": 11395072
+    },
+    {
+      "scenario": "rate-limit",
+      "repetition": 2,
+      "connections": 1,
+      "elapsedMs": 2347.0023999999976,
+      "MiBPerSecond": 3.4086032464219076,
+      "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+      "peakResponseStreams": 1,
+      "requests": 3,
+      "attempts": 2,
+      "cpuSeconds": 0.15625,
+      "peakWorkingSetBytes": 10235904,
+      "privateBytes": 2789376,
+      "workingSetBytes": 10141696
+    },
+    {
+      "scenario": "rate-limit",
+      "repetition": 3,
+      "connections": 1,
+      "elapsedMs": 2414.380299999997,
+      "MiBPerSecond": 3.313479653557482,
+      "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+      "peakResponseStreams": 1,
+      "requests": 3,
+      "attempts": 2,
+      "cpuSeconds": 0.203125,
+      "peakWorkingSetBytes": 10412032,
+      "privateBytes": 2854912,
+      "workingSetBytes": 10207232
+    },
+    {
+      "scenario": "rate-limit",
+      "repetition": 3,
+      "connections": 4,
+      "elapsedMs": 1557.2419999999984,
+      "MiBPerSecond": 5.137287589212215,
+      "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+      "peakResponseStreams": 4,
+      "requests": 6,
+      "attempts": 2,
+      "cpuSeconds": 0.25,
+      "peakWorkingSetBytes": 11952128,
+      "privateBytes": 4239360,
+      "workingSetBytes": 11296768
+    },
+    {
+      "scenario": "tls",
+      "repetition": 1,
+      "connections": 1,
+      "elapsedMs": 1477.5440000000017,
+      "MiBPerSecond": 5.4143903667166535,
+      "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+      "peakResponseStreams": 1,
+      "requests": 2,
+      "attempts": 1,
+      "cpuSeconds": 0.515625,
+      "peakWorkingSetBytes": 14217216,
+      "privateBytes": 4386816,
+      "workingSetBytes": 14217216
+    },
+    {
+      "scenario": "tls",
+      "repetition": 1,
+      "connections": 4,
+      "elapsedMs": 603.8372000000018,
+      "MiBPerSecond": 13.248604093951112,
+      "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+      "peakResponseStreams": 4,
+      "requests": 5,
+      "attempts": 1,
+      "cpuSeconds": 0.3125,
+      "peakWorkingSetBytes": 15486976,
+      "privateBytes": 6070272,
+      "workingSetBytes": 15220736
+    },
+    {
+      "scenario": "tls",
+      "repetition": 2,
+      "connections": 4,
+      "elapsedMs": 602.0545000000056,
+      "MiBPerSecond": 13.287833576528246,
+      "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+      "peakResponseStreams": 4,
+      "requests": 5,
+      "attempts": 1,
+      "cpuSeconds": 0.21875,
+      "peakWorkingSetBytes": 15310848,
+      "privateBytes": 5914624,
+      "workingSetBytes": 15216640
+    },
+    {
+      "scenario": "tls",
+      "repetition": 2,
+      "connections": 1,
+      "elapsedMs": 1400.4103000000032,
+      "MiBPerSecond": 5.712611511069278,
+      "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+      "peakResponseStreams": 1,
+      "requests": 2,
+      "attempts": 1,
+      "cpuSeconds": 0.25,
+      "peakWorkingSetBytes": 14397440,
+      "privateBytes": 4698112,
+      "workingSetBytes": 14397440
+    },
+    {
+      "scenario": "tls",
+      "repetition": 3,
+      "connections": 1,
+      "elapsedMs": 1573.5408000000025,
+      "MiBPerSecond": 5.084075354131261,
+      "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+      "peakResponseStreams": 1,
+      "requests": 2,
+      "attempts": 1,
+      "cpuSeconds": 0.203125,
+      "peakWorkingSetBytes": 14237696,
+      "privateBytes": 4423680,
+      "workingSetBytes": 14237696
+    },
+    {
+      "scenario": "tls",
+      "repetition": 3,
+      "connections": 4,
+      "elapsedMs": 530.1949000000022,
+      "MiBPerSecond": 15.088790933296352,
+      "sha256": "52785dcc575cd392f0e3c7bd72585332f2283ba9dea6859ad08ba6a93ee97706",
+      "peakResponseStreams": 4,
+      "requests": 5,
+      "attempts": 1,
+      "cpuSeconds": 0.21875,
+      "peakWorkingSetBytes": 15605760,
+      "privateBytes": 6098944,
+      "workingSetBytes": 15429632
+    }
+  ],
+  "histories": [
+    {
+      "rows": 100,
+      "startupKind": "warm OS cache; fresh core process/browser context",
+      "samples": [
+        {
+          "language": "en",
+          "repetition": 1,
+          "coreStartupMs": 37.7155999999959,
+          "browserRenderMs": 408.66130000000703,
+          "searchToTwoFramesMs": [
+            18.200000047683716, 22.299999952316284, 19.100000023841858, 27.199999928474426,
+            18.100000023841858
+          ],
+          "sortThroughCoreSaveMs": [141.96190000000934, 88.53680000000168],
+          "snapshotToTwoFramesMs": [
+            134.90000009536743, 91.20000004768372, 51, 43.299999952316284, 33.10000002384186,
+            53.09999990463257, 26.799999952316284
+          ],
+          "snapshots": [
+            {
+              "bridgeMs": 4.239300000001094,
+              "jsonBytes": 43551
+            },
+            {
+              "bridgeMs": 2.828800000002957,
+              "jsonBytes": 43553
+            },
+            {
+              "bridgeMs": 2.264599999994971,
+              "jsonBytes": 43552
+            },
+            {
+              "bridgeMs": 1.7655999999988126,
+              "jsonBytes": 43552
+            },
+            {
+              "bridgeMs": 1.4741000000067288,
+              "jsonBytes": 43552
+            },
+            {
+              "bridgeMs": 3.8522000000084518,
+              "jsonBytes": 43552
+            },
+            {
+              "bridgeMs": 2.048900000008871,
+              "jsonBytes": 43552
+            }
+          ],
+          "jsHeapUsedBytes": 14218160,
+          "rendererTaskSecondsDuring3s": 0.080596,
+          "cpuSeconds": 0.03125,
+          "peakWorkingSetBytes": 9617408,
+          "privateBytes": 2494464,
+          "workingSetBytes": 9142272
+        },
+        {
+          "language": "en",
+          "repetition": 2,
+          "coreStartupMs": 63.13969999999972,
+          "browserRenderMs": 160.48549999999523,
+          "searchToTwoFramesMs": [
+            16.799999952316284, 22, 26.299999952316284, 10.399999976158142, 26
+          ],
+          "sortThroughCoreSaveMs": [113.73750000000291, 130.98240000000806],
+          "snapshotToTwoFramesMs": [
+            109.19999992847443, 84.10000002384186, 68.59999990463257, 33.39999997615814,
+            49.200000047683716, 28, 42.5, 37.89999997615814
+          ],
+          "snapshots": [
+            {
+              "bridgeMs": 2.420300000012503,
+              "jsonBytes": 43551
+            },
+            {
+              "bridgeMs": 2.8989000000001397,
+              "jsonBytes": 43553
+            },
+            {
+              "bridgeMs": 2.408400000000256,
+              "jsonBytes": 43552
+            },
+            {
+              "bridgeMs": 1.3666999999986729,
+              "jsonBytes": 43552
+            },
+            {
+              "bridgeMs": 2.054099999993923,
+              "jsonBytes": 43552
+            },
+            {
+              "bridgeMs": 1.3392000000021653,
+              "jsonBytes": 43552
+            },
+            {
+              "bridgeMs": 2.48070000000007,
+              "jsonBytes": 43552
+            },
+            {
+              "bridgeMs": 1.8202999999921303,
+              "jsonBytes": 43552
+            }
+          ],
+          "jsHeapUsedBytes": 6596016,
+          "rendererTaskSecondsDuring3s": 0.09572500000000006,
+          "cpuSeconds": 0.046875,
+          "peakWorkingSetBytes": 9613312,
+          "privateBytes": 2764800,
+          "workingSetBytes": 9224192
+        },
+        {
+          "language": "en",
+          "repetition": 3,
+          "coreStartupMs": 56.3637000000017,
+          "browserRenderMs": 257.1445999999996,
+          "searchToTwoFramesMs": [28.5, 27.5, 20.5, 25.600000023841858, 23.700000047683716],
+          "sortThroughCoreSaveMs": [153.07170000000042, 138.0067999999883],
+          "snapshotToTwoFramesMs": [
+            159.70000004768372, 109.29999995231628, 49.800000071525574, 60.799999952316284, 47,
+            37.200000047683716, 56.5, 39.5
+          ],
+          "snapshots": [
+            {
+              "bridgeMs": 7.254999999990105,
+              "jsonBytes": 43551
+            },
+            {
+              "bridgeMs": 1.6767000000108965,
+              "jsonBytes": 43553
+            },
+            {
+              "bridgeMs": 2.8096000000077765,
+              "jsonBytes": 43553
+            },
+            {
+              "bridgeMs": 3.036999999996624,
+              "jsonBytes": 43552
+            },
+            {
+              "bridgeMs": 1.4302999999927124,
+              "jsonBytes": 43552
+            },
+            {
+              "bridgeMs": 1.3249999999970896,
+              "jsonBytes": 43552
+            },
+            {
+              "bridgeMs": 3.4182999999902677,
+              "jsonBytes": 43552
+            },
+            {
+              "bridgeMs": 1.3840999999956694,
+              "jsonBytes": 43552
+            },
+            {
+              "bridgeMs": 6.790099999998347,
+              "jsonBytes": 43552
+            }
+          ],
+          "jsHeapUsedBytes": 10267324,
+          "rendererTaskSecondsDuring3s": 0.10365199999999997,
+          "cpuSeconds": 0.015625,
+          "peakWorkingSetBytes": 9625600,
+          "privateBytes": 2695168,
+          "workingSetBytes": 9240576
+        },
+        {
+          "language": "ar",
+          "repetition": 1,
+          "coreStartupMs": 54.32700000000477,
+          "browserRenderMs": 236.89340000000084,
+          "searchToTwoFramesMs": [
+            20.299999952316284, 31, 26.399999976158142, 20.700000047683716, 25.799999952316284
+          ],
+          "sortThroughCoreSaveMs": [98.9042000000045, 75.00319999999192],
+          "snapshotToTwoFramesMs": [
+            161.80000007152557, 57.89999997615814, 54, 30.800000071525574, 34.10000002384186, 40,
+            48.60000002384186
+          ],
+          "snapshots": [
+            {
+              "bridgeMs": 4.449900000006892,
+              "jsonBytes": 43551
+            },
+            {
+              "bridgeMs": 1.9722000000037951,
+              "jsonBytes": 43553
+            },
+            {
+              "bridgeMs": 1.526899999997113,
+              "jsonBytes": 43552
+            },
+            {
+              "bridgeMs": 1.3171000000002095,
+              "jsonBytes": 43552
+            },
+            {
+              "bridgeMs": 3.4200999999884516,
+              "jsonBytes": 43552
+            },
+            {
+              "bridgeMs": 3.453800000002957,
+              "jsonBytes": 43552
+            },
+            {
+              "bridgeMs": 4.315700000006473,
+              "jsonBytes": 43552
+            }
+          ],
+          "jsHeapUsedBytes": 11088772,
+          "rendererTaskSecondsDuring3s": 0.08649299999999999,
+          "cpuSeconds": 0.03125,
+          "peakWorkingSetBytes": 9609216,
+          "privateBytes": 2646016,
+          "workingSetBytes": 9179136
+        },
+        {
+          "language": "ar",
+          "repetition": 2,
+          "coreStartupMs": 35.85120000000461,
+          "browserRenderMs": 168.11999999999534,
+          "searchToTwoFramesMs": [
+            27.59999990463257, 26, 22.100000023841858, 16.59999990463257, 24.799999952316284
+          ],
+          "sortThroughCoreSaveMs": [129.66389999999956, 92.39590000000317],
+          "snapshotToTwoFramesMs": [
+            117.90000009536743, 90.90000009536743, 45.59999990463257, 24.5, 65.40000009536743,
+            29.799999952316284, 41.800000071525574, 37.10000002384186
+          ],
+          "snapshots": [
+            {
+              "bridgeMs": 3.6705000000074506,
+              "jsonBytes": 43551
+            },
+            {
+              "bridgeMs": 5.227999999988242,
+              "jsonBytes": 43553
+            },
+            {
+              "bridgeMs": 2.952099999994971,
+              "jsonBytes": 43552
+            },
+            {
+              "bridgeMs": 1.75,
+              "jsonBytes": 43552
+            },
+            {
+              "bridgeMs": 3.9369000000006054,
+              "jsonBytes": 43552
+            },
+            {
+              "bridgeMs": 1.4682000000029802,
+              "jsonBytes": 43552
+            },
+            {
+              "bridgeMs": 1.5175000000017462,
+              "jsonBytes": 43552
+            },
+            {
+              "bridgeMs": 2.102500000008149,
+              "jsonBytes": 43552
+            }
+          ],
+          "jsHeapUsedBytes": 11543816,
+          "rendererTaskSecondsDuring3s": 0.09593299999999999,
+          "cpuSeconds": 0.046875,
+          "peakWorkingSetBytes": 9601024,
+          "privateBytes": 2473984,
+          "workingSetBytes": 9097216
+        },
+        {
+          "language": "ar",
+          "repetition": 3,
+          "coreStartupMs": 41.83529999999155,
+          "browserRenderMs": 194.6761000000115,
+          "searchToTwoFramesMs": [25.59999990463257, 30, 25.199999928474426, 20, 17.5],
+          "sortThroughCoreSaveMs": [157.12230000000272, 132.7624999999971],
+          "snapshotToTwoFramesMs": [
+            136.10000002384186, 104.70000004768372, 48.5, 64.89999997615814, 54.89999997615814,
+            42.800000071525574, 26.399999976158142, 47.699999928474426
+          ],
+          "snapshots": [
+            {
+              "bridgeMs": 3.510999999998603,
+              "jsonBytes": 43551
+            },
+            {
+              "bridgeMs": 3.6252999999996973,
+              "jsonBytes": 43553
+            },
+            {
+              "bridgeMs": 2.718699999997625,
+              "jsonBytes": 43553
+            },
+            {
+              "bridgeMs": 1.7700999999942724,
+              "jsonBytes": 43552
+            },
+            {
+              "bridgeMs": 1.8117999999958556,
+              "jsonBytes": 43552
+            },
+            {
+              "bridgeMs": 1.5936000000074273,
+              "jsonBytes": 43552
+            },
+            {
+              "bridgeMs": 1.6601000000082422,
+              "jsonBytes": 43552
+            },
+            {
+              "bridgeMs": 1.8773999999975786,
+              "jsonBytes": 43552
+            },
+            {
+              "bridgeMs": 3.150000000008731,
+              "jsonBytes": 43552
+            }
+          ],
+          "jsHeapUsedBytes": 11545144,
+          "rendererTaskSecondsDuring3s": 0.09468300000000007,
+          "cpuSeconds": 0.015625,
+          "peakWorkingSetBytes": 9588736,
+          "privateBytes": 2560000,
+          "workingSetBytes": 9080832
+        }
+      ]
+    },
+    {
+      "rows": 1000,
+      "startupKind": "warm OS cache; fresh core process/browser context",
+      "samples": [
+        {
+          "language": "en",
+          "repetition": 1,
+          "coreStartupMs": 44.69229999999516,
+          "browserRenderMs": 450.54009999999835,
+          "searchToTwoFramesMs": [
+            24.300000071525574, 31, 64.89999997615814, 25.600000023841858, 25.90000009536743
+          ],
+          "sortThroughCoreSaveMs": [498.1322999999975, 470.2636999999959],
+          "snapshotToTwoFramesMs": [
+            396.1999999284744, 300.6999999284744, 208.10000002384186, 454.60000002384186, 399.5,
+            284.10000002384186, 270.5, 400.5, 209.5, 272.60000002384186
+          ],
+          "snapshots": [
+            {
+              "bridgeMs": 13.793700000009267,
+              "jsonBytes": 424251
+            },
+            {
+              "bridgeMs": 30.86720000000787,
+              "jsonBytes": 424251
+            },
+            {
+              "bridgeMs": 12.570099999997183,
+              "jsonBytes": 424251
+            },
+            {
+              "bridgeMs": 10.700499999991735,
+              "jsonBytes": 424253
+            },
+            {
+              "bridgeMs": 13.579000000012456,
+              "jsonBytes": 424252
+            },
+            {
+              "bridgeMs": 15.341199999995297,
+              "jsonBytes": 424252
+            },
+            {
+              "bridgeMs": 17.973999999987427,
+              "jsonBytes": 424252
+            },
+            {
+              "bridgeMs": 27.41129999999248,
+              "jsonBytes": 424252
+            },
+            {
+              "bridgeMs": 10.816099999996368,
+              "jsonBytes": 424252
+            },
+            {
+              "bridgeMs": 26.32730000000447,
+              "jsonBytes": 424252
+            }
+          ],
+          "jsHeapUsedBytes": 36363164,
+          "rendererTaskSecondsDuring3s": 0.6955290000000001,
+          "cpuSeconds": 0.265625,
+          "peakWorkingSetBytes": 15835136,
+          "privateBytes": 4071424,
+          "workingSetBytes": 10711040
+        },
+        {
+          "language": "en",
+          "repetition": 2,
+          "coreStartupMs": 57.91049999999814,
+          "browserRenderMs": 545.5708000000013,
+          "searchToTwoFramesMs": [
+            30.199999928474426, 26, 31.100000023841858, 42.5, 28.800000071525574
+          ],
+          "sortThroughCoreSaveMs": [1023.6548999999941, 868.8159000000014],
+          "snapshotToTwoFramesMs": [
+            497.7999999523163, 211.89999997615814, 257.10000002384186, 311.5, 690.5,
+            259.10000002384186, 553.2000000476837, 355.1999999284744, 269.7000000476837,
+            341.2000000476837, 368.5
+          ],
+          "snapshots": [
+            {
+              "bridgeMs": 11.15580000000773,
+              "jsonBytes": 424251
+            },
+            {
+              "bridgeMs": 11.118499999996857,
+              "jsonBytes": 424251
+            },
+            {
+              "bridgeMs": 19.339299999992363,
+              "jsonBytes": 424251
+            },
+            {
+              "bridgeMs": 17.451500000010128,
+              "jsonBytes": 424251
+            },
+            {
+              "bridgeMs": 11.31239999999525,
+              "jsonBytes": 424253
+            },
+            {
+              "bridgeMs": 17.25239999999758,
+              "jsonBytes": 424253
+            },
+            {
+              "bridgeMs": 26.675700000007055,
+              "jsonBytes": 424252
+            },
+            {
+              "bridgeMs": 20.575399999986985,
+              "jsonBytes": 424252
+            },
+            {
+              "bridgeMs": 22.45219999999972,
+              "jsonBytes": 424252
+            },
+            {
+              "bridgeMs": 21.246500000008382,
+              "jsonBytes": 424252
+            },
+            {
+              "bridgeMs": 23.043399999995017,
+              "jsonBytes": 424252
+            }
+          ],
+          "jsHeapUsedBytes": 47180152,
+          "rendererTaskSecondsDuring3s": 0.6915239999999998,
+          "cpuSeconds": 0.265625,
+          "peakWorkingSetBytes": 15904768,
+          "privateBytes": 3624960,
+          "workingSetBytes": 10276864
+        },
+        {
+          "language": "en",
+          "repetition": 3,
+          "coreStartupMs": 74.36650000000373,
+          "browserRenderMs": 583.7566999999981,
+          "searchToTwoFramesMs": [
+            37.700000047683716, 36.800000071525574, 23, 22.700000047683716, 34.200000047683716
+          ],
+          "sortThroughCoreSaveMs": [461.9117999999871, 733.2073999999993],
+          "snapshotToTwoFramesMs": [
+            482.60000002384186, 383.60000002384186, 197.89999997615814, 456.89999997615814,
+            277.2999999523163, 450.2000000476837, 253.09999990463257, 378.89999997615814,
+            267.60000002384186, 198.29999995231628, 275.7000000476837
+          ],
+          "snapshots": [
+            {
+              "bridgeMs": 23.452799999999115,
+              "jsonBytes": 424251
+            },
+            {
+              "bridgeMs": 30.291299999997136,
+              "jsonBytes": 424251
+            },
+            {
+              "bridgeMs": 16.282200000001467,
+              "jsonBytes": 424251
+            },
+            {
+              "bridgeMs": 13.052800000004936,
+              "jsonBytes": 424253
+            },
+            {
+              "bridgeMs": 21.788799999994808,
+              "jsonBytes": 424253
+            },
+            {
+              "bridgeMs": 10.11799999998766,
+              "jsonBytes": 424252
+            },
+            {
+              "bridgeMs": 28.905500000008033,
+              "jsonBytes": 424252
+            },
+            {
+              "bridgeMs": 21.154900000008638,
+              "jsonBytes": 424252
+            },
+            {
+              "bridgeMs": 14.443100000004051,
+              "jsonBytes": 424252
+            },
+            {
+              "bridgeMs": 9.974799999996321,
+              "jsonBytes": 424252
+            },
+            {
+              "bridgeMs": 23.565600000001723,
+              "jsonBytes": 424252
+            }
+          ],
+          "jsHeapUsedBytes": 47516728,
+          "rendererTaskSecondsDuring3s": 0.6676519999999999,
+          "cpuSeconds": 0.34375,
+          "peakWorkingSetBytes": 15917056,
+          "privateBytes": 3715072,
+          "workingSetBytes": 10362880
+        },
+        {
+          "language": "ar",
+          "repetition": 1,
+          "coreStartupMs": 87.85050000000047,
+          "browserRenderMs": 564.7786000000051,
+          "searchToTwoFramesMs": [
+            25.199999928474426, 46.199999928474426, 39.89999997615814, 118.60000002384186,
+            41.799999952316284
+          ],
+          "sortThroughCoreSaveMs": [690.6702000000078, 425.81179999999586],
+          "snapshotToTwoFramesMs": [
+            507.09999990463257, 186.5, 216.70000004768372, 253, 425.09999990463257,
+            382.7000000476837, 228.79999995231628, 219.60000002384186, 313.2000000476837,
+            267.1999999284744
+          ],
+          "snapshots": [
+            {
+              "bridgeMs": 11.263999999995576,
+              "jsonBytes": 424251
+            },
+            {
+              "bridgeMs": 18.327900000003865,
+              "jsonBytes": 424251
+            },
+            {
+              "bridgeMs": 14.552999999999884,
+              "jsonBytes": 424251
+            },
+            {
+              "bridgeMs": 15.802899999995134,
+              "jsonBytes": 424251
+            },
+            {
+              "bridgeMs": 13.033299999995506,
+              "jsonBytes": 424253
+            },
+            {
+              "bridgeMs": 21.8295000000071,
+              "jsonBytes": 424252
+            },
+            {
+              "bridgeMs": 14.115999999994528,
+              "jsonBytes": 424252
+            },
+            {
+              "bridgeMs": 11.517500000001746,
+              "jsonBytes": 424252
+            },
+            {
+              "bridgeMs": 20.771999999997206,
+              "jsonBytes": 424252
+            },
+            {
+              "bridgeMs": 18.32589999999618,
+              "jsonBytes": 424252
+            }
+          ],
+          "jsHeapUsedBytes": 48924908,
+          "rendererTaskSecondsDuring3s": 0.5716760000000001,
+          "cpuSeconds": 0.265625,
+          "peakWorkingSetBytes": 15908864,
+          "privateBytes": 5562368,
+          "workingSetBytes": 10919936
+        },
+        {
+          "language": "ar",
+          "repetition": 2,
+          "coreStartupMs": 68.57279999999446,
+          "browserRenderMs": 732.347299999994,
+          "searchToTwoFramesMs": [
+            29.899999976158142, 37.799999952316284, 22.700000047683716, 28.200000047683716, 25
+          ],
+          "sortThroughCoreSaveMs": [846.584600000002, 908.4614000000001],
+          "snapshotToTwoFramesMs": [
+            656.6999999284744, 173.89999997615814, 182.60000002384186, 328.60000002384186,
+            502.7999999523163, 251, 612.2000000476837, 272.90000009536743, 269.90000009536743,
+            277.89999997615814, 288.3000000715256
+          ],
+          "snapshots": [
+            {
+              "bridgeMs": 14.291100000002189,
+              "jsonBytes": 424251
+            },
+            {
+              "bridgeMs": 12.754000000000815,
+              "jsonBytes": 424251
+            },
+            {
+              "bridgeMs": 15.373599999991711,
+              "jsonBytes": 424251
+            },
+            {
+              "bridgeMs": 12.575599999981932,
+              "jsonBytes": 424251
+            },
+            {
+              "bridgeMs": 12.290999999997439,
+              "jsonBytes": 424253
+            },
+            {
+              "bridgeMs": 19.52530000000843,
+              "jsonBytes": 424253
+            },
+            {
+              "bridgeMs": 21.97959999999148,
+              "jsonBytes": 424252
+            },
+            {
+              "bridgeMs": 19.82159999999567,
+              "jsonBytes": 424252
+            },
+            {
+              "bridgeMs": 10.079799999977695,
+              "jsonBytes": 424252
+            },
+            {
+              "bridgeMs": 21.44570000001113,
+              "jsonBytes": 424252
+            },
+            {
+              "bridgeMs": 26.047600000019884,
+              "jsonBytes": 424252
+            }
+          ],
+          "jsHeapUsedBytes": 52597504,
+          "rendererTaskSecondsDuring3s": 0.5684780000000003,
+          "cpuSeconds": 0.3125,
+          "peakWorkingSetBytes": 15888384,
+          "privateBytes": 4014080,
+          "workingSetBytes": 10649600
+        },
+        {
+          "language": "ar",
+          "repetition": 3,
+          "coreStartupMs": 57.046200000011595,
+          "browserRenderMs": 501.27390000000014,
+          "searchToTwoFramesMs": [
+            24.899999976158142, 46.299999952316284, 29, 25.5, 22.700000047683716
+          ],
+          "sortThroughCoreSaveMs": [452.7091000000073, 475.41870000000927],
+          "snapshotToTwoFramesMs": [
+            449.5, 197.10000002384186, 326.3000000715256, 396.6999999284744, 441.6999999284744,
+            211.60000002384186, 226.29999995231628, 258.2999999523163, 239.10000002384186,
+            307.3000000715256
+          ],
+          "snapshots": [
+            {
+              "bridgeMs": 12.662199999991572,
+              "jsonBytes": 424251
+            },
+            {
+              "bridgeMs": 25.02160000000731,
+              "jsonBytes": 424251
+            },
+            {
+              "bridgeMs": 12.716899999999441,
+              "jsonBytes": 424251
+            },
+            {
+              "bridgeMs": 17.027499999996508,
+              "jsonBytes": 424253
+            },
+            {
+              "bridgeMs": 11.019499999994878,
+              "jsonBytes": 424252
+            },
+            {
+              "bridgeMs": 12.043600000004517,
+              "jsonBytes": 424252
+            },
+            {
+              "bridgeMs": 16.94550000000163,
+              "jsonBytes": 424252
+            },
+            {
+              "bridgeMs": 11.871399999974528,
+              "jsonBytes": 424252
+            },
+            {
+              "bridgeMs": 18.542400000005728,
+              "jsonBytes": 424252
+            },
+            {
+              "bridgeMs": 16.418100000009872,
+              "jsonBytes": 424252
+            }
+          ],
+          "jsHeapUsedBytes": 49363152,
+          "rendererTaskSecondsDuring3s": 0.5549140000000001,
+          "cpuSeconds": 0.21875,
+          "peakWorkingSetBytes": 15863808,
+          "privateBytes": 3710976,
+          "workingSetBytes": 10358784
+        }
+      ]
+    }
+  ],
+  "limits": [
+    "Loopback response delay/pacing models server behavior, not WAN RTT or packet loss.",
+    "Server and client share a host; local caches are warm and no cache flush occurs.",
+    "Chromium uses a real core JSON-lines bridge, not Tauri IPC or native WebView2.",
+    "No native/cold-boot/installer or IDM measurement; no optimization/before-after claim.",
+    "Three repetitions are descriptive samples, not a statistically powered population."
+  ],
+  "untrustedTlsRejected": true
+}

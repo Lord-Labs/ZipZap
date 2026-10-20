@@ -13,6 +13,12 @@ The separately recorded [engine strategy comparison](engine-strategy.md) uses a
 local HTTP fixture with reqwest/Tokio and an official aria2 Windows binary. It
 does not analyze IDM or establish production performance.
 
+The [daily-use performance baseline](performance.md) records current-core
+controlled transfers and the bundled UI with a real headless-core bridge for
+issue #46, including raw repetitions, investigation budgets and no-go decisions
+on speculative optimization. Actual WebView2/cold-start resource qualification
+remains pending; Chromium results do not establish native app performance.
+
 ## Next-phase study
 
 The [next-phase feature study](next-phase-features.md) maps the inspected ZipZap
