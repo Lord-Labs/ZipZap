@@ -1,4 +1,6 @@
 # Build the actual desktop with an isolated identity, state and no native sidecar.
+param([switch]$Release)
+
 $ErrorActionPreference = 'Stop'
 $zipzapRoot = Split-Path $PSScriptRoot -Parent
 $zipzapRunId = [guid]::NewGuid().ToString('N')
@@ -20,16 +22,20 @@ $zipzapConfigPath = Join-Path $zipzapRun 'tauri.smoke.json'
 $zipzapConfig | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $zipzapConfigPath -Encoding utf8
 Push-Location (Join-Path $zipzapRoot 'apps/desktop')
 try {
-    & (Join-Path $zipzapRoot 'node_modules/.bin/tauri.cmd') build --debug --no-bundle --config $zipzapConfigPath
+    $zipzapBuildArguments = @('build', '--no-bundle', '--config', $zipzapConfigPath)
+    if (-not $Release) { $zipzapBuildArguments += '--debug' }
+    & (Join-Path $zipzapRoot 'node_modules/.bin/tauri.cmd') @zipzapBuildArguments
     if ($LASTEXITCODE -ne 0) { throw 'Smoke desktop build failed' }
 } finally {
     Pop-Location
 }
 $zipzapBinary = Join-Path $zipzapRun 'zipzap-smoke.exe'
-Copy-Item -LiteralPath (Join-Path $zipzapRoot 'target/debug/zipzap-desktop.exe') -Destination $zipzapBinary
+$zipzapProfile = if ($Release) { 'release' } else { 'debug' }
+Copy-Item -LiteralPath (Join-Path $zipzapRoot "target/$zipzapProfile/zipzap-desktop.exe") -Destination $zipzapBinary
 if (Test-Path (Join-Path $zipzapRun 'zipzap-native.exe')) { throw 'Smoke directory must not contain a native host' }
 $zipzapMetadata = @{
     runFile = Join-Path $zipzapRun 'run.json'
+    profile = $zipzapProfile
     sourceCommit = (& git -C $zipzapRoot rev-parse HEAD)
     worktree = @(& git -C $zipzapRoot status --short)
     identifier = $zipzapIdentifier
