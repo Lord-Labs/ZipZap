@@ -107,6 +107,9 @@ before sharing. The collector has parser/guard checks but no agent-run positive
 native trial. Native startup/resource distributions and budgets remain pending
 until those results exist. Do not close #46 or qualify #47 from headless data.
 
+Run `./scripts/test-native-performance.ps1` to exercise the eight collector
+refusal paths with non-executable fixture files. It never launches a window.
+
 ## Decisions
 
 No adaptive segmentation or connection-cap change is implemented by this issue.
