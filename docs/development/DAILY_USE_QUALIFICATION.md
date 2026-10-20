@@ -145,3 +145,69 @@ Draft release notes are available in [English](../releases/0.2.0-beta.1.md) and
 [Arabic](../releases/0.2.0-beta.1.ar.md). README/security support still identifies
 the published first beta. Candidate build/verification evidence follows when run;
 neither #47 nor M6 is complete from packaging alone.
+
+### Local candidate build and checks
+
+Built from clean commit `aaeecaffa47758c5ac1adecb1c176f5687464651` in PR #78:
+core tree `0e3fe3576d903cafbb5f22c700512faa34e3149e`, desktop tree
+`1b278549d058342c3a7f12e91f53e5a19d5be38c`. Later evidence-only documentation
+does not change these build inputs. Third-party dependency graphs are unchanged;
+only workspace version entries changed in the lockfiles:
+
+| Input             | SHA-256                                                            |
+| ----------------- | ------------------------------------------------------------------ |
+| Cargo.lock        | `4690200a28fca92a2063b47ee5b8c002ac014bb7b1f059ef240646754418b686` |
+| package-lock.json | `05a845c037ca97f402cd22df7b9fece73897bc7de91450ef895a6a496e96a47f` |
+
+- `npm run check` passed with five Node tests and zero Svelte errors/warnings.
+  Rust formatting, clippy with warnings denied, all 70 workspace tests and the
+  locked workspace build passed. The six Rust probe scenarios and all 48
+  production engine scenarios passed, including migration/resume, exact output,
+  publication/storage failures and real local-time scheduling.
+- The first `npx playwright test` run used eight workers alongside Rust
+  verification: 43 passed and two hit the unchanged 30-second deadline. Recovery
+  details stalled during an evaluation (16.2 s in the trace); schedule navigation
+  timed out before its test body. Failed traces were preserved privately before
+  rerunning. Both tests passed alone with `--workers=1` (4.9 s / 1.4 s), then
+  all 45 passed with `npx playwright test --workers=2` (52.7 s). No source or
+  timeout was changed between runs. Contention is a hypothesis, not a diagnosed
+  root cause or repaired product defect; the failed run remains a failed run.
+- A separate loopback transfer checked the compiled core's support-summary
+  version and actual HTTP `User-Agent`: `0.2.0-beta.1` and
+  `ZipZap/0.2.0-beta.1`, with an intact completed empty output. Built extension
+  version `0.2.0`, original identity and exact minimal permissions were asserted.
+- Refreshed npm/Cargo audits again reported zero vulnerability advisories with
+  the same advisory database commit and five informational warnings above.
+  License collection again succeeded for 371 entries and five Cargo MPL archives.
+- `npm run desktop:build` passed, including release native sidecar, frontend,
+  desktop and NSIS packaging. Windows executable ProductVersion is
+  `0.2.0-beta.1`; executable SHA-256 is
+  `65031abf3e4544ce80a545681ae72d60f6ba13f05b7ca95b01904abeb483d4fa`.
+  `Get-AuthenticodeSignature` reports **NotSigned** for the installer.
+
+The local candidate folder is
+`.research-local/qualification-47/candidate-aaeecaf/`. It contains the same six
+payload kinds as the retained release workflow. Every entry in the browser ZIP
+(10 files) and source ZIP (five archives) was hashed against its source; all
+matched. All six checksum-manifest entries were reread and verified:
+
+| Local payload                               | SHA-256                                                            |
+| ------------------------------------------- | ------------------------------------------------------------------ |
+| ZipZap_0.2.0-beta.1_x64-setup.exe           | `1972bd9ca3b9291c72ffbe057da2c299a947bdd1d9a9116fd603115c63c702b1` |
+| ZipZap_browser_0.2.0-beta.1.zip             | `ad4909a5f2bb9836123d35f1a4a9c9d3f03714095959fbb9e69015f0293c5015` |
+| ZipZap_third-party-sources_0.2.0-beta.1.zip | `b4e276a972471923161d52d22095541ec0ca675268070f23d5f6e425813ab1b8` |
+| THIRD_PARTY_LICENSES.txt                    | `8f1f57abb7bde8ba2dc27d7404675b63c075c932cdb8f20cd7b228f03eab478d` |
+| dependencies.json                           | `da4736c03f08ad091dc028990d8b1ecbc4939d4597c3a492a141872309033c92` |
+| LICENSE                                     | `86c61424f3af99d567c4386400a28c9f47b0e33a6228a59b671c81797b266120` |
+
+Installer size: 4,175,830 bytes. `SHA256SUMS.txt` SHA-256:
+`ecaf60840da28fbf22b64d117738ad042b533be3de573a39f3d4cb620c5d7993`.
+These are local candidate hashes, not hosted-build or published-release hashes;
+do not reuse them for a later rebuilt artifact without comparison. Bit-for-bit
+rebuild reproducibility was not tested.
+
+No candidate installer was executed, no active-desktop/native-browser lifecycle
+was driven and no normal state/registration changed. The same-candidate
+upgrade/repair/uninstall/reinstall, native/browser/OS-session matrix and raw #46
+cold-start evidence remain release gates. Hosted checks were skipped under #54,
+not passed; no workflow, tag or release was created.
