@@ -119,7 +119,8 @@ skips its window, a gap hold moves forward by the gap, and repeated times use
 their first occurrence. The next start is shown in local time. If local time or
 state saving fails, new starts are blocked with repair advice. See
 [the scheduling policy](architecture/0008-queue-schedule.md). Real Windows
-sleep/resume qualification is still pending; clock fixtures are separate evidence.
+sleep/resume acceptance was reported by the maintainer on 2026-10-20; the release
+candidate must repeat its own qualification. Clock fixtures are separate evidence.
 
 In the development version, Settings offers **Keep downloads running in the
 system tray when closing the window**, off by default. When enabled, closing

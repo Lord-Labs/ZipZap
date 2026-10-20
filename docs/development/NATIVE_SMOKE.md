@@ -180,12 +180,15 @@ The maintainer's manual acceptance permits implementation review to finish.
 Release #47 must retain this evidence distinction and repeat its candidate's
 checks; headless, process-kill and mocked tests are not native observations.
 
-## Queue schedule qualification: issue #42 (pending)
+## Queue schedule qualification: issue #42
 
-Automated clock/zone/storage and mocked UI checks are separate from real Windows
-sleep/resume evidence. No native schedule observation is claimed here. Use the
-isolated smoke build and fixture above in a disposable Windows session/VM;
-further Computer Use of the maintainer's active desktop remains prohibited.
+On 2026-10-20, after agreeing to test the prepared isolated schedule build, the
+maintainer reported that the test succeeded and explicitly requested merging
+PR #74. The prepared implementation was `472569d`. This is maintainer-reported
+native acceptance, not agent-observed Computer Use. No additional OS-session
+times, per-scenario output or hashes were supplied, so none are inferred here.
+Further Computer Use of the maintainer's active desktop remains prohibited.
+Repeat the following in a disposable Windows session/VM for release #47:
 
 1. Save a future one-shot window and queue a local fixture download. Verify it
    waits, starts once, finishes with the expected SHA-256, and stays complete on
@@ -202,5 +205,5 @@ further Computer Use of the maintainer's active desktop remains prohibited.
    sleep/start/hold times, queue results and output hashes, including failures.
 
 Clock/zone mutation and physical sleep are not performed on the maintainer's
-session by the automated fixtures. The issue stays open until native acceptance
-is recorded or the maintainer explicitly changes its qualification scope.
+session by the automated fixtures. The release candidate must record its own
+native acceptance; implementation acceptance does not qualify an installer.

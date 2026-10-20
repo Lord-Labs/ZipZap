@@ -136,7 +136,7 @@ missed starts are skipped. DST gaps/folds, zone changes, clock jumps and the
 Core fixtures inject clocks/zones and rejected saves; the HTTP fixture also
 crosses a real minute boundary and compares the completed bytes after restart.
 These checks do not establish actual Windows sleep/resume or native WebView2
-acceptance; see the [pending qualification procedure](NATIVE_SMOKE.md).
+acceptance; see the [maintainer-reported acceptance and release procedure](NATIVE_SMOKE.md).
 
 ## Desktop lifecycle (development version)
 
