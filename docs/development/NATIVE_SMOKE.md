@@ -179,3 +179,31 @@ Repeat against the release candidate in an isolated Windows environment:
 The maintainer's manual acceptance permits implementation review to finish.
 Release #47 must retain this evidence distinction and repeat its candidate's
 checks; headless, process-kill and mocked tests are not native observations.
+
+## Queue schedule qualification: issue #42
+
+On 2026-10-20, after agreeing to test the prepared isolated schedule build, the
+maintainer reported that the test succeeded and explicitly requested merging
+PR #74. The prepared implementation was `472569d`. This is maintainer-reported
+native acceptance, not agent-observed Computer Use. No additional OS-session
+times, per-scenario output or hashes were supplied, so none are inferred here.
+Further Computer Use of the maintainer's active desktop remains prohibited.
+Repeat the following in a disposable Windows session/VM for release #47:
+
+1. Save a future one-shot window and queue a local fixture download. Verify it
+   waits, starts once, finishes with the expected SHA-256, and stays complete on
+   reopen. Verify English/Arabic local next-run labels, keyboard/error focus,
+   dialog scrolling at 780×560 and saved weekly/overnight fields.
+2. Choose a short weekly window. Manually Hold after its start; repeated polling
+   must not restart it. At the scheduled hold, active work may finish but waiting
+   jobs must remain queued. Tray menu Start/Hold must follow the shared state.
+3. Sleep the disposable system across a start by more than 90 seconds and resume:
+   the missed start must stay skipped. Start manually, sleep across a hold, and
+   verify new dispatch is held on resume. Do not sleep the active work host.
+4. Quit/reopen inside a window: no automatic catch-up. Re-enable/edit only when
+   intentionally choosing a new future start. Record commit, OS, zone, actual
+   sleep/start/hold times, queue results and output hashes, including failures.
+
+Clock/zone mutation and physical sleep are not performed on the maintainer's
+session by the automated fixtures. The release candidate must record its own
+native acceptance; implementation acceptance does not qualify an installer.

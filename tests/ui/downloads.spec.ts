@@ -9,7 +9,15 @@ test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     const state = {
       jobs: [] as any[],
-      queue: { running: true },
+      queue: {
+        running: true,
+        schedule: {
+          config: null as any,
+          next_start: null as number | null,
+          time_zone: "Africa/Cairo",
+          error: null as string | null,
+        },
+      },
       settings: {
         max_concurrent: 2,
         connections: 2,
@@ -48,11 +56,20 @@ test.beforeEach(async ({ page }) => {
           return structuredClone({
             ...state,
             queue: {
+              schedule: state.queue.schedule,
               running: state.queue.running,
               waiting: state.jobs.filter((job) => job.status === "queued").map((job) => job.id),
             },
           });
         calls.push({ command, args: structuredClone(args) });
+        if (command === "set_schedule") {
+          if ((window as any).zipzapTest.failAction === "schedule")
+            throw new Error("Storage unavailable");
+          state.queue.schedule.config = args.config;
+          if (args.config) state.queue.running = false;
+          state.queue.schedule.next_start = args.config ? 1792652400 : null;
+          return;
+        }
         if (command === "save_settings") {
           if ((window as any).zipzapTest.failSettings)
             throw new Error((window as any).zipzapTest.failSettings);
@@ -157,6 +174,83 @@ test.beforeEach(async ({ page }) => {
 
 test.afterEach(async ({ page }) => {
   expect(browserErrors.get(page)).toEqual([]);
+});
+
+test("queue schedule saves reviewed weekly/overnight and one-shot windows and disables without starting", async ({
+  page,
+}) => {
+  await page.getByRole("button", { name: "Queue schedule", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Queue schedule" });
+  await expect(dialog.getByText(/Runs only while ZipZap is open/)).toBeVisible();
+  await dialog.getByLabel("Schedule mode").selectOption("weekly");
+  await dialog.getByLabel("Tuesday", { exact: true }).uncheck();
+  await dialog.getByLabel("Start queue at").fill("22:00");
+  await dialog.getByLabel("Hold queue at").fill("06:00");
+  await dialog.getByRole("button", { name: "Save schedule", exact: true }).click();
+  await expect(dialog).not.toBeVisible();
+  await expect(page.getByText("Queue held", { exact: true })).toBeVisible();
+  expect(await page.evaluate(() => (window as any).zipzapTest.state.queue.schedule.config)).toEqual(
+    { timing: { kind: "weekly", weekdays: [1, 3, 4, 5] }, start_minute: 1320, stop_minute: 360 },
+  );
+  await expect(page.getByText(/Next scheduled start:/)).toContainText("Africa/Cairo");
+  await page.getByRole("button", { name: "Queue schedule", exact: true }).click();
+  await expect(dialog.getByLabel("Start queue at")).toHaveValue("22:00");
+  await expect(dialog.getByLabel("Tuesday", { exact: true })).not.toBeChecked();
+  await dialog.getByLabel("Schedule mode").selectOption("once");
+  await dialog.getByLabel("Start date").fill("2099-03-01");
+  await dialog.getByRole("button", { name: "Save schedule", exact: true }).click();
+  expect(
+    await page.evaluate(() => (window as any).zipzapTest.state.queue.schedule.config.timing),
+  ).toEqual({ kind: "once", date: "2099-03-01" });
+  await page.getByRole("button", { name: "Queue schedule", exact: true }).click();
+  await dialog.getByLabel("Schedule mode").selectOption("off");
+  await dialog.getByRole("button", { name: "Save schedule", exact: true }).click();
+  await expect(page.getByText("Queue held", { exact: true })).toBeVisible();
+  expect(
+    await page.evaluate(() => (window as any).zipzapTest.state.queue.schedule.config),
+  ).toBeNull();
+});
+
+test("schedule validation/save failures keep the dialog and focus the error; Arabic policy is accessible", async ({
+  page,
+}) => {
+  await page.getByRole("button", { name: "Queue schedule", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Queue schedule" });
+  await dialog.getByLabel("Schedule mode").selectOption("weekly");
+  for (const day of ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"])
+    await dialog.getByLabel(day, { exact: true }).uncheck();
+  await dialog.getByRole("button", { name: "Save schedule", exact: true }).click();
+  await expect(dialog.getByRole("alert")).toBeFocused();
+  await expect(dialog.getByRole("alert")).toContainText("at least one weekday");
+  expect(
+    await page.evaluate(() =>
+      (window as any).zipzapTest.calls.some((call: any) => call.command === "set_schedule"),
+    ),
+  ).toBe(false);
+  await dialog.getByLabel("Monday", { exact: true }).check();
+  await page.evaluate(() => {
+    (window as any).zipzapTest.failAction = "schedule";
+  });
+  await dialog.getByRole("button", { name: "Save schedule", exact: true }).click();
+  await expect(dialog.getByRole("alert")).toBeFocused();
+  await expect(dialog.getByRole("alert")).toContainText("previous saved state is kept");
+  expect(await page.evaluate(() => (window as any).zipzapTest.state.queue.running)).toBe(true);
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("button", { name: "Queue schedule", exact: true })).toBeFocused();
+  await page.evaluate(() => {
+    (window as any).zipzapTest.state.settings.language = "ar";
+    (window as any).zipzapTest.state.queue.schedule.error = "save failed";
+  });
+  await page.setViewportSize({ width: 780, height: 560 });
+  await page.getByRole("button", { name: "جدولة الطابور", exact: true }).click();
+  const arabic = page.getByRole("dialog", { name: "جدولة الطابور" });
+  await arabic.getByLabel("وضع الجدولة").selectOption("weekly");
+  await arabic.getByText("سياسة الساعة والسكون والتحكم اليدوي").click();
+  await expect(arabic.getByText(/إعادة التشغيل تعلّق الطابور/)).toBeVisible();
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await page.screenshot({ path: "test-results/schedule-ar.png" });
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("alert")).toContainText("بدء التنزيلات الجديدة محظور");
 });
 
 test("zone metadata failure stays distinct from successful bytes in English and Arabic", async ({

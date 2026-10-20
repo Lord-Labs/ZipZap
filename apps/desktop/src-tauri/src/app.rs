@@ -37,6 +37,16 @@ fn move_waiting(id: String, direction: String, state: State<AppState>) -> Result
     state.manager.move_waiting(&id, &direction)
 }
 #[tauri::command]
+fn set_schedule(
+    config: Option<zipzap_core::Schedule>,
+    app: tauri::AppHandle,
+    state: State<AppState>,
+) -> Result<(), String> {
+    state.manager.set_schedule(config)?;
+    lifecycle::update_menu(&app);
+    Ok(())
+}
+#[tauri::command]
 async fn suggest_download(
     id: String,
     url: String,
@@ -409,6 +419,7 @@ pub fn run() {
             add_download,
             set_queue_running,
             move_waiting,
+            set_schedule,
             suggest_download,
             replace_link,
             cancel_probe,

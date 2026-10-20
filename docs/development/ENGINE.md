@@ -37,8 +37,9 @@ that output as described below.
 
 ## Saved-state upgrades (development version)
 
-Startup accepts schemas 0/1/2/3/4 and upgrades to schema 4 for category destination
-rules. Schema 3 introduced durable queue control
+Startup accepts schemas 0/1/2/3/4/5 and upgrades to schema 5 for the one-queue
+schedule in [ADR 0008](../architecture/0008-queue-schedule.md). Schema 4 added
+category destination rules. Schema 3 introduced durable queue control
 in [ADR 0005](../architecture/0005-durable-queue.md). Schema 2 introduced the
 optional publication evidence in [ADR 0004](../architecture/0004-publication-recovery.md).
 [ADR 0003](../architecture/0003-atomic-state-upgrades.md) defines the atomic upgrade
@@ -115,6 +116,27 @@ uses the same insertion/validation as manual/browser requests. Snapshots expose
 run/hold and waiting IDs in priority order. Keyboard move controls show waiting
 rank independently of table sorting. Ineligible hosts can be skipped under the
 existing per-host limit; global/host limits and old-worker exit guards remain.
+
+## Local queue schedule (development version)
+
+The Manager owns one optional local start/hold window. `schedule` reads its state;
+supplying `value` saves a `Schedule` or `null` to disable. A schedule has
+`timing: {kind: "once", date: "YYYY-MM-DD"}` or
+`timing: {kind: "weekly", weekdays: [1, 2, 3, 4, 5]}` (Monday is 1), and
+`start_minute`/`stop_minute` between 0 and 1439. Equal times are rejected; an
+earlier stop belongs to the next day. Snapshots expose the saved config, next
+start as Unix seconds, current zone and a bounded runtime error.
+
+The existing dispatch loop checks the clock once per observed second while a
+schedule is enabled. Schedule events and the run/hold gate commit together;
+failed transitions block new dispatch until repaired. Manual controls consume
+already due events. Enabling or reopening holds the queue until a future start;
+missed starts are skipped. DST gaps/folds, zone changes, clock jumps and the
+90-second lateness policy are defined in [ADR 0008](../architecture/0008-queue-schedule.md).
+Core fixtures inject clocks/zones and rejected saves; the HTTP fixture also
+crosses a real minute boundary and compares the completed bytes after restart.
+These checks do not establish actual Windows sleep/resume or native WebView2
+acceptance; see the [maintainer-reported acceptance and release procedure](NATIVE_SMOKE.md).
 
 ## Desktop lifecycle (development version)
 

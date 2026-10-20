@@ -5367,6 +5367,7 @@ name = "zipzap-core"
 version = "0.1.0-beta.1"
 dependencies = [
  "httpdate",
+ "jiff",
  "native-tls",
  "reqwest",
  "rusqlite",

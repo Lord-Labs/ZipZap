@@ -5,6 +5,7 @@
 
   import Icon from "./Icon.svelte";
   import BatchDialog from "./BatchDialog.svelte";
+  import ScheduleDialog, { type ScheduleState } from "./ScheduleDialog.svelte";
   import defaultCategories from "../../../config/categories.json";
   import defaultView from "../../../config/view.json";
 
@@ -47,7 +48,7 @@
 
   type Snapshot = {
     jobs: Job[];
-    queue: { running: boolean; waiting: string[] };
+    queue: { running: boolean; waiting: string[]; schedule?: ScheduleState };
     settings: Settings;
     folder: string;
     version: string;
@@ -65,7 +66,8 @@
   };
 
   let jobs: Job[] = [];
-  let queue = { running: true, waiting: [] as string[] };
+  let queue: Snapshot["queue"] = { running: true, waiting: [] };
+  let scheduleDialog: ScheduleDialog;
   let queueBusy = false;
   let addLater = false;
 
@@ -999,7 +1001,22 @@
           >{queue.running ? text.holdQueue : text.startQueue}</button
         >
         <span class="helper">{text.queueHoldHint}</span>
+        <button class="secondary" disabled={!isDesktop()} onclick={() => scheduleDialog.open()}
+          >{text.scheduleTitle}</button
+        >
+        {#if queue.schedule?.config}
+          <span class="helper"
+            >{text.scheduleNext}: {queue.schedule.next_start === null
+              ? text.scheduleNoNext
+              : new Date(queue.schedule.next_start * 1000).toLocaleString(
+                  language === "ar" ? "ar-EG" : "en",
+                )} <bdi>{queue.schedule.time_zone}</bdi></span
+          >
+        {/if}
       </section>
+      {#if queue.schedule?.error}<p class="message error" role="alert">
+          {text.scheduleRuntimeFailed}
+        </p>{/if}
       {#if error}<div class="message error" role="alert">
           <Icon name="alert" /><span>{error}</span><button
             class="icon-button"
@@ -1275,6 +1292,14 @@
   desktop={isDesktop()}
   message={errorMessage}
   onadded={batchAdded}
+/>
+
+<ScheduleDialog
+  bind:this={scheduleDialog}
+  {language}
+  state={queue.schedule}
+  desktop={isDesktop()}
+  onsaved={refresh}
 />
 
 <dialog bind:this={confirmDialog} aria-labelledby="bulk-title">

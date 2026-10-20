@@ -215,12 +215,18 @@ impl Notices {
 pub fn watch(app: AppHandle) {
     let manager = app.state::<AppState>().manager.clone();
     let mut notices = Notices::new(&manager.jobs(), Instant::now());
+    let mut queue_running = manager.queue().running;
     tauri::async_runtime::spawn(async move {
         loop {
             if manager.is_stopping() {
                 break;
             }
             let settings = manager.settings();
+            let running = manager.queue().running;
+            if running != queue_running {
+                update_menu(&app);
+                queue_running = running;
+            }
             if let Some((completed, failed)) =
                 notices.poll(&manager.jobs(), settings.notifications, Instant::now())
             {

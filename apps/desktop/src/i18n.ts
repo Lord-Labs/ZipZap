@@ -1,4 +1,40 @@
 const en = {
+  scheduleTitle: "Queue schedule",
+  scheduleRunningOnly:
+    "Runs only while ZipZap is open, including explicit tray mode. It cannot wake the computer or start the app.",
+  scheduleMode: "Schedule mode",
+  scheduleOff: "Disabled",
+  scheduleOnce: "Once on a date",
+  scheduleWeekly: "Selected weekdays",
+  scheduleDate: "Start date",
+  scheduleDays: "Start weekdays",
+  scheduleWeekdays: "Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday",
+  scheduleStart: "Start queue at",
+  scheduleStop: "Hold queue at",
+  scheduleOvernight:
+    "A hold time earlier than the start is on the next day. Active transfers finish; individually paused downloads stay paused.",
+  scheduleEnableHint:
+    "Saving an enabled schedule holds new starts until the next future start. A missed or current window is not replayed.",
+  scheduleDisableHint:
+    "Disabling keeps the queue's current run/hold state. Use Start queue when ready.",
+  scheduleZone: "System time zone",
+  scheduleZoneUnknown: "Unavailable",
+  schedulePolicy: "Clock, sleep and manual control policy",
+  scheduleMissed:
+    "Restart holds the queue. Starts missed by over 90 seconds, including after sleep or a forward clock jump, are skipped; due holds still apply. A detected time-zone change holds the queue. Zone detection may take up to five minutes.",
+  scheduleDst:
+    "A start in a daylight-saving gap skips that window; a hold in a gap moves forward by the gap. Repeated times use their first occurrence. Moving the clock backward cannot repeat a consumed start.",
+  scheduleManual:
+    "Manual Start/Hold wins over events already due. The next future boundary can act again. Each local start date runs at most once.",
+  scheduleNext: "Next scheduled start",
+  scheduleNoNext: "No future start",
+  scheduleInvalid: "Choose different valid times and at least one weekday for a weekly schedule.",
+  scheduleSaveFailed:
+    "Could not save the schedule. Check that a one-shot start is in the future and outside a daylight-saving gap, then check storage and retry. The previous saved state is kept.",
+  scheduleRuntimeFailed:
+    "The schedule could not read local time or save a transition. New starts are blocked. Repair storage or the system time zone and retry, or disable the schedule.",
+  scheduleSave: "Save schedule",
+  scheduleSaving: "Saving schedule…",
   provenanceUnavailable:
     "Download bytes are complete, but Windows Internet origin metadata could not be saved. Keep security warnings enabled and open only files you trust.",
   downloads: "Downloads",
@@ -238,6 +274,42 @@ const en = {
     "Check the destination drive and NTFS support, then retry; saved checkpoints are kept.",
 };
 const ar: Record<keyof typeof en, string> = {
+  scheduleTitle: "جدولة الطابور",
+  scheduleRunningOnly:
+    "تعمل فقط أثناء بقاء ZipZap مفتوحًا، بما في ذلك وضع علبة النظام الذي تختاره. لا توقظ الحاسوب ولا تشغّل التطبيق.",
+  scheduleMode: "وضع الجدولة",
+  scheduleOff: "معطّلة",
+  scheduleOnce: "مرة واحدة في تاريخ محدد",
+  scheduleWeekly: "أيام محددة من الأسبوع",
+  scheduleDate: "تاريخ البدء",
+  scheduleDays: "أيام البدء",
+  scheduleWeekdays: "الاثنين|الثلاثاء|الأربعاء|الخميس|الجمعة|السبت|الأحد",
+  scheduleStart: "بدء الطابور عند",
+  scheduleStop: "تعليق الطابور عند",
+  scheduleOvernight:
+    "إذا سبق وقت التعليق وقت البدء، يكون التعليق في اليوم التالي. تكتمل التنزيلات النشطة وتبقى التنزيلات الموقوفة يدويًا متوقفة.",
+  scheduleEnableHint:
+    "حفظ جدول مفعّل يعلّق بدء التنزيلات حتى موعد بدء مستقبلي. لا تُعاد نافذة فاتت أو بدأت بالفعل.",
+  scheduleDisableHint:
+    "تعطيل الجدولة يحافظ على حالة تشغيل الطابور أو تعليقه. اضغط بدء الطابور عندما تكون مستعدًا.",
+  scheduleZone: "المنطقة الزمنية للنظام",
+  scheduleZoneUnknown: "غير متاحة",
+  schedulePolicy: "سياسة الساعة والسكون والتحكم اليدوي",
+  scheduleMissed:
+    "إعادة التشغيل تعلّق الطابور. يُتجاوز بدء فات بأكثر من 90 ثانية، بما في ذلك بعد السكون أو تقديم الساعة، ويُطبّق التعليق المستحق. اكتشاف تغيير المنطقة الزمنية يعلّق الطابور، وقد يستغرق الاكتشاف حتى خمس دقائق.",
+  scheduleDst:
+    "تُتجاوز النافذة إذا وقع البدء في فجوة التوقيت الصيفي، ويُرحّل التعليق داخل الفجوة بمقدارها. يُستخدم الظهور الأول للأوقات المتكررة. إرجاع الساعة لا يعيد بدءًا سبق تنفيذه.",
+  scheduleManual:
+    "البدء أو التعليق اليدوي له الأولوية على المواعيد المستحقة بالفعل، ويمكن للموعد المستقبلي التالي أن يعمل. يُستهلك كل تاريخ بدء محلي مرة واحدة فقط.",
+  scheduleNext: "البدء المجدول التالي",
+  scheduleNoNext: "لا يوجد بدء مستقبلي",
+  scheduleInvalid: "اختر وقتين صالحين مختلفين ويومًا واحدًا على الأقل للجدول الأسبوعي.",
+  scheduleSaveFailed:
+    "تعذّر حفظ الجدولة. تأكد أن البدء لمرة واحدة في المستقبل وخارج فجوة التوقيت الصيفي، ثم تحقق من التخزين وأعد المحاولة. تبقى الحالة المحفوظة السابقة.",
+  scheduleRuntimeFailed:
+    "تعذّر على الجدولة قراءة التوقيت المحلي أو حفظ الانتقال. بدء التنزيلات الجديدة محظور. أصلح التخزين أو المنطقة الزمنية للنظام وأعد المحاولة، أو عطّل الجدولة.",
+  scheduleSave: "حفظ الجدولة",
+  scheduleSaving: "جارٍ حفظ الجدولة…",
   provenanceUnavailable:
     "اكتملت بيانات التنزيل، لكن تعذّر حفظ علامة منشأ الإنترنت في Windows. أبقِ تحذيرات الأمان مفعّلة وافتح الملفات الموثوقة فقط.",
   downloads: "التنزيلات",

@@ -25,6 +25,7 @@ Windows graph are not a claim of distributed platform support. See the
 | winreg                                                           | Per-user browser host registration     | MIT                                     |
 | windows-sys                                                      | Windows publication file identity      | MIT OR Apache-2.0                       |
 | native-tls, httpdate                                             | TLS failure classification, HTTP dates | MIT OR Apache-2.0                       |
+| Jiff                                                             | Local queue schedule and DST rules     | Unlicense OR MIT                        |
 | Svelte, Vite, TypeScript                                         | UI and build tools                     | MIT; Apache-2.0 for TypeScript          |
 | Prettier and Svelte plugin                                       | Formatting                             | MIT                                     |
 | Playwright / Axe                                                 | UI behavior and accessibility checks   | Apache-2.0; MPL-2.0 for Axe             |

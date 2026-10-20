@@ -63,6 +63,14 @@ async fn main() {
 
 async fn dispatch(manager: &Manager, value: &Value) -> Result<Value, String> {
     match value["command"].as_str().unwrap_or("") {
+        "schedule" => {
+            if let Some(config) = value.get("value") {
+                manager.set_schedule(
+                    serde_json::from_value(config.clone()).map_err(|_| "Invalid schedule")?,
+                )?;
+            }
+            Ok(json!(manager.queue()))
+        }
         "queue" => {
             if let Some(running) = value.get("running") {
                 manager.set_queue_running(running.as_bool().ok_or("Invalid queue state")?)?;
