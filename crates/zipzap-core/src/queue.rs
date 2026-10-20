@@ -4,6 +4,7 @@ use super::*;
 pub struct QueueState {
     pub running: bool,
     pub waiting: Vec<String>,
+    pub schedule: ScheduleState,
 }
 
 impl Manager {
@@ -11,6 +12,7 @@ impl Manager {
         let state = self.state.lock().expect("state lock");
         QueueState {
             running: state.queue_running,
+            schedule: schedule::snapshot(&state),
             waiting: state
                 .jobs
                 .iter()
@@ -22,15 +24,7 @@ impl Manager {
 
     pub fn set_queue_running(&self, running: bool) -> Result<()> {
         let mut state = self.state.lock().expect("state lock");
-        let changed = state
-            .db
-            .execute("UPDATE queue SET running=?1 WHERE id=1", [running])
-            .map_err(db_error)?;
-        if changed != 1 {
-            return Err("Saved queue state is missing; repair storage before retrying".into());
-        }
-        state.queue_running = running;
-        Ok(())
+        schedule::manual_gate(&mut state, running, jiff::Timestamp::now().as_second())
     }
 
     pub fn move_waiting(&self, id: &str, direction: &str) -> Result<()> {

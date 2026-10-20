@@ -7,6 +7,8 @@ mod link_refresh;
 pub use link_refresh::LinkReplacement;
 mod queue;
 pub use queue::QueueState;
+mod schedule;
+pub use schedule::{Schedule, ScheduleState, ScheduleTiming};
 #[cfg(test)]
 mod persistence_tests;
 mod provenance;
@@ -153,6 +155,7 @@ struct State {
     settings: Settings,
     samples: HashMap<String, (Instant, u64)>,
     queue_running: bool,
+    schedule: schedule::Runtime,
 }
 fn destination_queued(state: &State, path: &Path) -> bool {
     state.jobs.iter().any(|job| {
@@ -245,7 +248,7 @@ impl Manager {
         let schema: i64 = db
             .pragma_query_value(None, "user_version", |r| r.get(0))
             .map_err(db_error)?;
-        if schema > 4 {
+        if schema > 5 {
             return Err("Database was created by a newer ZipZap version".into());
         }
         db.pragma_update(None, "journal_mode", "WAL")
@@ -257,7 +260,7 @@ impl Manager {
             .map_err(db_error)?;
         tx.execute_batch("CREATE TABLE IF NOT EXISTS jobs (id TEXT PRIMARY KEY, data TEXT NOT NULL); CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY CHECK(id=1), data TEXT NOT NULL);").map_err(db_error)?;
         tx.execute_batch("CREATE TABLE IF NOT EXISTS queue (id INTEGER PRIMARY KEY CHECK(id=1), running INTEGER NOT NULL CHECK(running IN(0,1)));").map_err(db_error)?;
-        let queue_running = if schema < 3 {
+        let mut queue_running = if schema < 3 {
             tx.execute("INSERT INTO queue VALUES(1,1)", [])
                 .map_err(db_error)?;
             true
@@ -273,6 +276,7 @@ impl Manager {
                 _ => return Err("Invalid saved queue; database retained for recovery".into()),
             }
         };
+        let schedule = schedule::load(&tx, schema, &mut queue_running)?;
         let mut jobs = Vec::new();
         {
             let mut statement = tx
@@ -385,7 +389,7 @@ impl Manager {
             )
             .map_err(db_error)?;
         }
-        tx.pragma_update(None, "user_version", 4)
+        tx.pragma_update(None, "user_version", 5)
             .map_err(db_error)?;
         tx.commit().map_err(db_error)?;
         drop(publication_guards);
@@ -400,6 +404,7 @@ impl Manager {
                 settings,
                 samples: HashMap::new(),
                 queue_running,
+                schedule,
             }),
             client,
             stop: CancellationToken::new(),
@@ -629,6 +634,7 @@ impl Manager {
                 }
                 let pending = {
                     let mut state = manager.state.lock().expect("state lock");
+                    schedule::tick_system(&mut state);
                     let mut pending = Vec::new();
                     let mut hosts: HashMap<String, usize> = HashMap::new();
                     for job in &state.jobs {
@@ -636,7 +642,7 @@ impl Manager {
                             *hosts.entry(host(&job.url)).or_default() += 1;
                         }
                     }
-                    let capacity = if state.queue_running {
+                    let capacity = if schedule::allows_dispatch(&state) {
                         state
                             .settings
                             .max_concurrent

@@ -62,8 +62,8 @@ is rejected without resetting it. Do not lower its schema number or delete it
 to make an older app start; use the compatible app or restore a coherent backup
 with all instances closed. A saved folder on an offline drive does not prevent
 opening history. These changes are not in the published first beta; installer
-upgrade qualification remains pending. The development database uses schema 4
-for saved category folders (schema 3 added durable queue control; schema 2
+upgrade qualification remains pending. The development database uses schema 5
+for queue scheduling (schema 4 added category folders; schema 3 added durable queue control; schema 2
 introduced publication evidence). Older
 ZipZap versions cannot open it; use a compatible app or a
 coherent pre-upgrade backup, never edit the schema number to force a downgrade.
@@ -100,6 +100,26 @@ language. The language button switches English/LTR and Arabic/RTL. By default,
 closing the window pauses running work; queued work starts when the app next opens. Resume
 paused work explicitly. Resume can safely restart when the server cannot prove
 the resource has not changed. See [recovery limits](development/ENGINE.md).
+
+In the development version, **Queue schedule** saves one start/hold window for a
+date or selected weekdays. Times follow the system time zone shown in the dialog;
+weekdays refer to the start date. A hold earlier than the start is on the following
+day. Saving an enabled schedule holds new starts until a future boundary. Active
+downloads finish and individually paused downloads stay paused. Disabling keeps
+the current run/hold state; use Start queue when ready.
+
+Scheduling requires ZipZap to remain open, including explicitly enabled tray
+mode. It cannot wake the computer or start the app. Restart holds the queue and
+skips missed/current starts. Starts missed by over 90 seconds after sleep or a
+forward clock jump are skipped; due holds apply. Manual Start/Hold consumes due
+events and wins over duplicate ticks; a future boundary can act again. Moving
+the clock backward cannot repeat a consumed start. A detected zone change holds
+the queue; system-zone detection can take up to five minutes. A DST-gap start
+skips its window, a gap hold moves forward by the gap, and repeated times use
+their first occurrence. The next start is shown in local time. If local time or
+state saving fails, new starts are blocked with repair advice. See
+[the scheduling policy](architecture/0008-queue-schedule.md). Real Windows
+sleep/resume qualification is still pending; clock fixtures are separate evidence.
 
 In the development version, Settings offers **Keep downloads running in the
 system tray when closing the window**, off by default. When enabled, closing

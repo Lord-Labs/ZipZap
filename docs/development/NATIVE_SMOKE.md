@@ -179,3 +179,28 @@ Repeat against the release candidate in an isolated Windows environment:
 The maintainer's manual acceptance permits implementation review to finish.
 Release #47 must retain this evidence distinction and repeat its candidate's
 checks; headless, process-kill and mocked tests are not native observations.
+
+## Queue schedule qualification: issue #42 (pending)
+
+Automated clock/zone/storage and mocked UI checks are separate from real Windows
+sleep/resume evidence. No native schedule observation is claimed here. Use the
+isolated smoke build and fixture above in a disposable Windows session/VM;
+further Computer Use of the maintainer's active desktop remains prohibited.
+
+1. Save a future one-shot window and queue a local fixture download. Verify it
+   waits, starts once, finishes with the expected SHA-256, and stays complete on
+   reopen. Verify English/Arabic local next-run labels, keyboard/error focus,
+   dialog scrolling at 780×560 and saved weekly/overnight fields.
+2. Choose a short weekly window. Manually Hold after its start; repeated polling
+   must not restart it. At the scheduled hold, active work may finish but waiting
+   jobs must remain queued. Tray menu Start/Hold must follow the shared state.
+3. Sleep the disposable system across a start by more than 90 seconds and resume:
+   the missed start must stay skipped. Start manually, sleep across a hold, and
+   verify new dispatch is held on resume. Do not sleep the active work host.
+4. Quit/reopen inside a window: no automatic catch-up. Re-enable/edit only when
+   intentionally choosing a new future start. Record commit, OS, zone, actual
+   sleep/start/hold times, queue results and output hashes, including failures.
+
+Clock/zone mutation and physical sleep are not performed on the maintainer's
+session by the automated fixtures. The issue stays open until native acceptance
+is recorded or the maintainer explicitly changes its qualification scope.

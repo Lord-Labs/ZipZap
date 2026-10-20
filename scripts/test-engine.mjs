@@ -776,6 +776,48 @@ try {
   await action(later, "cancel");
   passed.push("holding lets active work finish while new additions wait in the shared queue");
 
+  // Cross one real minute boundary to cover the production clock and dispatch loop.
+  const scheduledAt = new Date(Math.ceil((Date.now() + 5000) / 60000) * 60000);
+  const localDate = `${scheduledAt.getFullYear()}-${String(scheduledAt.getMonth() + 1).padStart(2, "0")}-${String(scheduledAt.getDate()).padStart(2, "0")}`;
+  const startMinute = scheduledAt.getHours() * 60 + scheduledAt.getMinutes();
+  const window = {
+    timing: { kind: "once", date: localDate },
+    start_minute: startMinute,
+    stop_minute: (startMinute + 1) % 1440,
+  };
+  const scheduledQueue = await ask({ command: "schedule", value: window });
+  assert.equal(scheduledQueue.running, false);
+  assert.equal(scheduledQueue.schedule.next_start, scheduledAt.getTime() / 1000);
+  const scheduled = await add("/small", "scheduled.bin");
+  const scheduledRequests = requests.length;
+  await delay(150);
+  assert.equal((await get(scheduled.id)).status, "queued");
+  assert.equal(requests.length, scheduledRequests);
+  await until(
+    scheduled.id,
+    (job) => ["completed", "failed"].includes(job.status),
+    Math.ceil((scheduledAt.getTime() - Date.now()) / 1000) + 15,
+  );
+  await complete(scheduled, bytes.subarray(0, 256 * 1024));
+  await ask({ command: "queue", running: false });
+  await assert.rejects(
+    ask({ command: "schedule", value: { ...window, timing: { kind: "weekly", weekdays: [] } } }),
+    /weekdays/,
+  );
+  assert.deepEqual((await ask({ command: "queue" })).schedule.config, window);
+  await stop();
+  start();
+  const reopenedSchedule = await ask({ command: "queue" });
+  assert.equal(reopenedSchedule.running, false);
+  assert.deepEqual(reopenedSchedule.schedule.config, window);
+  assert.equal((await get(scheduled.id)).status, "completed");
+  await ask({ command: "schedule", value: null });
+  assert.equal((await ask({ command: "queue" })).running, false);
+  await ask({ command: "queue", running: true });
+  passed.push(
+    "real local-time start dispatches once, preserves exact bytes and schedule/hold across restart",
+  );
+
   await ask({
     command: "settings",
     value: { max_concurrent: 2, connections: 4, speed_limit: 0, language: "en" },
