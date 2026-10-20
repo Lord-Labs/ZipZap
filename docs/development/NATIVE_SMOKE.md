@@ -9,6 +9,9 @@ Use a local test build, never personal history or a normal browser profile.
 1. Install the [development prerequisites](SETUP.md), run `npm ci`, then run
    `./scripts/prepare-desktop-smoke.ps1` from PowerShell in the repository.
    It builds the bundled frontend and debug desktop without an installer.
+   Use `-Release` for the separately recorded
+   [performance procedure](../research/performance.md); debug measurements do not
+   establish release performance.
 2. Keep the printed `run.json` path/metadata under `.research-local/native-smoke/`.
    Each preparation creates a unique `com.zipzap.smoke.<random-id>` identity,
    separate app state and a fresh downloads folder. The window starts with a
