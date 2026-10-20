@@ -371,7 +371,7 @@ try {
               queue,
               settings,
               folder: directory,
-              version: "0.1.0-beta.1",
+              version: "0.2.0-beta.1",
               tray_available: false,
               native_error: "Unavailable in headless benchmark",
               notice: null,

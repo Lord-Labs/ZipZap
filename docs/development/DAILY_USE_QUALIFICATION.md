@@ -2,8 +2,8 @@
 
 Preparation recorded on 2026-10-20 against reviewed main
 `dd2ad091a4c4d4c2dee7d12f64d6ffb6cbd82506`, after PR #76. This is a preflight
-record, not candidate acceptance. Only `0.1.0-beta.1` is published. The proposed
-`0.2.0-beta.1` version has not been applied or packaged here.
+record, not candidate acceptance. Only `0.1.0-beta.1` is published. At this
+preflight snapshot, `0.2.0-beta.1` had not yet been applied or packaged.
 
 Issues #29–#45 are closed; #46 remains open for repeated real cold-boot startup
 and precise painted-readiness evidence/budgets. The maintainer approved merging
@@ -45,7 +45,7 @@ The same production trees must be reverified when a candidate is frozen.
 
 Hosted GitHub checks were **skipped**, not passed, under #54. No workflow was
 dispatched. The retained release workflow still requires successful hosted
-Repository checks and offers only `0.1.0-beta.1`; do not remove that gate as a
+Repository checks; do not remove that gate as a
 side effect of preparation. A separate maintainer decision is needed before
 hosted release qualification, followed by separate publication authorization.
 
@@ -126,3 +126,22 @@ normal native-host registry keys. A workspace install path alone does not isolat
 those resources. Run it only in the disposable Windows session; it neither proves
 a beta.1 cross-version upgrade nor substitutes for the extended lifecycle matrix.
 Do not use it against personal state or replace normal registrations on this host.
+
+## Candidate preparation continuation: 2026-10-20
+
+The maintainer reported that all tests succeeded and requested continuation
+after reviewing the preparation summary. This is maintainer-reported acceptance,
+separate from agent-observed checks. No per-scenario candidate identity, cold-boot
+raw repetitions, painted-readiness timings or new startup budgets were supplied;
+none are inferred. #46 retains that quantitative evidence gap. Tests of earlier
+builds cannot establish lifecycle acceptance of a subsequently built installer.
+
+The candidate branch applies `0.2.0-beta.1` to desktop/core/native manifests and
+lockfiles and `0.2.0` to the Manifest V3 extension, retaining its public identity
+and minimal permissions. The initial UI version and HTTP user agent follow their
+package versions. The manual release workflow offers the new version, retaining
+its successful-hosted-check and protected publishing gates; no dispatch is implied.
+Draft release notes are available in [English](../releases/0.2.0-beta.1.md) and
+[Arabic](../releases/0.2.0-beta.1.ar.md). README/security support still identifies
+the published first beta. Candidate build/verification evidence follows when run;
+neither #47 nor M6 is complete from packaging alone.
