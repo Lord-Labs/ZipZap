@@ -254,7 +254,7 @@ try {
         const sha256 = hash(await readFile(done.destination));
         assert.equal(sha256, expectedHash);
         if (name === "range-refusal") assert.ok(requests.every((r) => !r.range || r.probe));
-        if (name === "rate-limit") assert.ok(done.attempt > 0);
+        if (name === "rate-limit") assert.ok(done.attempt >= 2);
         assert.ok(peak <= connections);
         results.transfers.push({
           scenario: name,
