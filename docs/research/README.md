@@ -16,8 +16,9 @@ does not analyze IDM or establish production performance.
 The [daily-use performance baseline](performance.md) records current-core
 controlled transfers and the bundled UI with a real headless-core bridge for
 issue #46, including raw repetitions, investigation budgets and no-go decisions
-on speculative optimization. Actual WebView2/cold-start resource qualification
-remains pending; Chromium results do not establish native app performance.
+on speculative optimization. Actual WebView2 resource/interaction repetitions
+are recorded separately; repeated cold-start qualification remains pending.
+Chromium results do not establish native app performance.
 
 ## Next-phase study
 

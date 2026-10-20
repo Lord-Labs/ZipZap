@@ -1,5 +1,12 @@
 # Native Windows desktop smoke test
 
+For #46 on 2026-10-20 the maintainer explicitly authorized the agent to operate
+the prepared isolated performance build, superseding the previous active-desktop
+restriction for that test. Six actual Windows/WebView2 runs and their collector
+WAL-replacement defect/fix are recorded in the
+[performance baseline](../research/performance.md). Earlier maintainer-reported
+acceptance remains distinct; no cold boot or installer qualification is implied.
+
 This procedure exercises actual WebView2, Tauri commands, the shared Rust
 Manager, SQLite and downloaded files. It complements the mocked IPC UI tests.
 Use a local test build, never personal history or a normal browser profile.

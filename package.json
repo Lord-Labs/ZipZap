@@ -12,7 +12,7 @@
     "format": "prettier --write .",
     "check:format": "prettier --check .",
     "check:links": "node scripts/check-links.mjs",
-    "test": "node --test scripts/check-links.test.mjs",
+    "test": "node --test scripts/check-links.test.mjs scripts/prepare-performance-history.test.mjs",
     "check": "npm run check:format && npm run check:links && npm test && npm run check:ui",
     "dev": "npm run dev --workspace @zipzap/desktop",
     "build:web": "npm run build --workspace @zipzap/desktop",

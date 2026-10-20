@@ -1,0 +1,6559 @@
+{
+  "executableSha256": "f33df3170a23a48e8dc3716075e429369fb18e91f5865151876e816f18a75af9",
+  "limits": "Observed table timing includes operator reaction or tool latency. Handle-ready is not painted-ready. 1s sampling can miss peaks; working sets share pages and must not be called unique physical RAM. Collector overhead is excluded. No OS cache flush. Observer and interaction details are recorded separately.",
+  "collectorSha256": "9a114947f29e304e265dd488a8e2de0b8d04f4afc1d72fe6aaf7567efa37458c",
+  "runs": [
+    {
+      "samples": [
+        {
+          "elapsedMs": 47040.0633,
+          "processes": [
+            {
+              "pid": 24604,
+              "cpuSeconds": 1.59375,
+              "privateBytes": 7561216,
+              "workingSetBytes": 35274752,
+              "group": "app-core"
+            },
+            {
+              "pid": 21088,
+              "cpuSeconds": 15.390625,
+              "privateBytes": 57679872,
+              "workingSetBytes": 146182144,
+              "group": "webview2"
+            },
+            {
+              "pid": 22080,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3502080,
+              "workingSetBytes": 19648512,
+              "group": "webview2"
+            },
+            {
+              "pid": 21760,
+              "cpuSeconds": 0.859375,
+              "privateBytes": 132898816,
+              "workingSetBytes": 101294080,
+              "group": "webview2"
+            },
+            {
+              "pid": 9544,
+              "cpuSeconds": 0.28125,
+              "privateBytes": 12296192,
+              "workingSetBytes": 40312832,
+              "group": "webview2"
+            },
+            {
+              "pid": 15044,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20553728,
+              "group": "webview2"
+            },
+            {
+              "pid": 5456,
+              "cpuSeconds": 1.890625,
+              "privateBytes": 68882432,
+              "workingSetBytes": 118882304,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 48448.9427,
+          "processes": [
+            {
+              "pid": 24604,
+              "cpuSeconds": 1.671875,
+              "privateBytes": 7503872,
+              "workingSetBytes": 35287040,
+              "group": "app-core"
+            },
+            {
+              "pid": 21088,
+              "cpuSeconds": 15.953125,
+              "privateBytes": 58167296,
+              "workingSetBytes": 146726912,
+              "group": "webview2"
+            },
+            {
+              "pid": 22080,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3502080,
+              "workingSetBytes": 19648512,
+              "group": "webview2"
+            },
+            {
+              "pid": 21760,
+              "cpuSeconds": 0.890625,
+              "privateBytes": 132915200,
+              "workingSetBytes": 101302272,
+              "group": "webview2"
+            },
+            {
+              "pid": 9544,
+              "cpuSeconds": 0.28125,
+              "privateBytes": 12296192,
+              "workingSetBytes": 40312832,
+              "group": "webview2"
+            },
+            {
+              "pid": 15044,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20553728,
+              "group": "webview2"
+            },
+            {
+              "pid": 5456,
+              "cpuSeconds": 1.9375,
+              "privateBytes": 69058560,
+              "workingSetBytes": 119394304,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 49798.3279,
+          "processes": [
+            {
+              "pid": 24604,
+              "cpuSeconds": 1.796875,
+              "privateBytes": 7634944,
+              "workingSetBytes": 35340288,
+              "group": "app-core"
+            },
+            {
+              "pid": 21088,
+              "cpuSeconds": 16.328125,
+              "privateBytes": 49004544,
+              "workingSetBytes": 140242944,
+              "group": "webview2"
+            },
+            {
+              "pid": 22080,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3502080,
+              "workingSetBytes": 19648512,
+              "group": "webview2"
+            },
+            {
+              "pid": 21760,
+              "cpuSeconds": 0.90625,
+              "privateBytes": 138575872,
+              "workingSetBytes": 102453248,
+              "group": "webview2"
+            },
+            {
+              "pid": 9544,
+              "cpuSeconds": 0.28125,
+              "privateBytes": 12296192,
+              "workingSetBytes": 40312832,
+              "group": "webview2"
+            },
+            {
+              "pid": 15044,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20553728,
+              "group": "webview2"
+            },
+            {
+              "pid": 5456,
+              "cpuSeconds": 2.015625,
+              "privateBytes": 69521408,
+              "workingSetBytes": 120573952,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 51188.8379,
+          "processes": [
+            {
+              "pid": 24604,
+              "cpuSeconds": 1.8125,
+              "privateBytes": 7622656,
+              "workingSetBytes": 35340288,
+              "group": "app-core"
+            },
+            {
+              "pid": 21088,
+              "cpuSeconds": 16.375,
+              "privateBytes": 49504256,
+              "workingSetBytes": 140742656,
+              "group": "webview2"
+            },
+            {
+              "pid": 22080,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3502080,
+              "workingSetBytes": 19648512,
+              "group": "webview2"
+            },
+            {
+              "pid": 21760,
+              "cpuSeconds": 0.921875,
+              "privateBytes": 138559488,
+              "workingSetBytes": 102359040,
+              "group": "webview2"
+            },
+            {
+              "pid": 9544,
+              "cpuSeconds": 0.28125,
+              "privateBytes": 12296192,
+              "workingSetBytes": 40312832,
+              "group": "webview2"
+            },
+            {
+              "pid": 15044,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20553728,
+              "group": "webview2"
+            },
+            {
+              "pid": 5456,
+              "cpuSeconds": 2.03125,
+              "privateBytes": 69705728,
+              "workingSetBytes": 120688640,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 52574.8178,
+          "processes": [
+            {
+              "pid": 24604,
+              "cpuSeconds": 1.84375,
+              "privateBytes": 7507968,
+              "workingSetBytes": 35344384,
+              "group": "app-core"
+            },
+            {
+              "pid": 21088,
+              "cpuSeconds": 16.421875,
+              "privateBytes": 49504256,
+              "workingSetBytes": 140718080,
+              "group": "webview2"
+            },
+            {
+              "pid": 22080,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3502080,
+              "workingSetBytes": 19648512,
+              "group": "webview2"
+            },
+            {
+              "pid": 21760,
+              "cpuSeconds": 0.9375,
+              "privateBytes": 137949184,
+              "workingSetBytes": 102359040,
+              "group": "webview2"
+            },
+            {
+              "pid": 9544,
+              "cpuSeconds": 0.28125,
+              "privateBytes": 12296192,
+              "workingSetBytes": 40312832,
+              "group": "webview2"
+            },
+            {
+              "pid": 15044,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20553728,
+              "group": "webview2"
+            },
+            {
+              "pid": 5456,
+              "cpuSeconds": 2.0625,
+              "privateBytes": 69898240,
+              "workingSetBytes": 120877056,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 53842.7078,
+          "processes": [
+            {
+              "pid": 24604,
+              "cpuSeconds": 2.015625,
+              "privateBytes": 7254016,
+              "workingSetBytes": 35115008,
+              "group": "app-core"
+            },
+            {
+              "pid": 21088,
+              "cpuSeconds": 16.890625,
+              "privateBytes": 56934400,
+              "workingSetBytes": 147640320,
+              "group": "webview2"
+            },
+            {
+              "pid": 22080,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3502080,
+              "workingSetBytes": 19648512,
+              "group": "webview2"
+            },
+            {
+              "pid": 21760,
+              "cpuSeconds": 0.96875,
+              "privateBytes": 141131776,
+              "workingSetBytes": 104333312,
+              "group": "webview2"
+            },
+            {
+              "pid": 9544,
+              "cpuSeconds": 0.28125,
+              "privateBytes": 12296192,
+              "workingSetBytes": 40312832,
+              "group": "webview2"
+            },
+            {
+              "pid": 15044,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20553728,
+              "group": "webview2"
+            },
+            {
+              "pid": 5456,
+              "cpuSeconds": 2.21875,
+              "privateBytes": 74657792,
+              "workingSetBytes": 126390272,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 55174.7493,
+          "processes": [
+            {
+              "pid": 24604,
+              "cpuSeconds": 2.0625,
+              "privateBytes": 7229440,
+              "workingSetBytes": 35143680,
+              "group": "app-core"
+            },
+            {
+              "pid": 21088,
+              "cpuSeconds": 17.4375,
+              "privateBytes": 55898112,
+              "workingSetBytes": 147083264,
+              "group": "webview2"
+            },
+            {
+              "pid": 22080,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3502080,
+              "workingSetBytes": 19648512,
+              "group": "webview2"
+            },
+            {
+              "pid": 21760,
+              "cpuSeconds": 1,
+              "privateBytes": 140984320,
+              "workingSetBytes": 104189952,
+              "group": "webview2"
+            },
+            {
+              "pid": 9544,
+              "cpuSeconds": 0.28125,
+              "privateBytes": 12296192,
+              "workingSetBytes": 40312832,
+              "group": "webview2"
+            },
+            {
+              "pid": 15044,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20553728,
+              "group": "webview2"
+            },
+            {
+              "pid": 5456,
+              "cpuSeconds": 2.25,
+              "privateBytes": 75603968,
+              "workingSetBytes": 127135744,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 56614.2946,
+          "processes": [
+            {
+              "pid": 24604,
+              "cpuSeconds": 2.09375,
+              "privateBytes": 7237632,
+              "workingSetBytes": 35115008,
+              "group": "app-core"
+            },
+            {
+              "pid": 21088,
+              "cpuSeconds": 17.953125,
+              "privateBytes": 60248064,
+              "workingSetBytes": 154771456,
+              "group": "webview2"
+            },
+            {
+              "pid": 22080,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3502080,
+              "workingSetBytes": 19648512,
+              "group": "webview2"
+            },
+            {
+              "pid": 21760,
+              "cpuSeconds": 1.03125,
+              "privateBytes": 139988992,
+              "workingSetBytes": 103657472,
+              "group": "webview2"
+            },
+            {
+              "pid": 9544,
+              "cpuSeconds": 0.296875,
+              "privateBytes": 12296192,
+              "workingSetBytes": 40312832,
+              "group": "webview2"
+            },
+            {
+              "pid": 15044,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20553728,
+              "group": "webview2"
+            },
+            {
+              "pid": 5456,
+              "cpuSeconds": 2.3125,
+              "privateBytes": 75628544,
+              "workingSetBytes": 127082496,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 57980.9577,
+          "processes": [
+            {
+              "pid": 24604,
+              "cpuSeconds": 2.140625,
+              "privateBytes": 7593984,
+              "workingSetBytes": 35315712,
+              "group": "app-core"
+            },
+            {
+              "pid": 21088,
+              "cpuSeconds": 18.328125,
+              "privateBytes": 60227584,
+              "workingSetBytes": 154906624,
+              "group": "webview2"
+            },
+            {
+              "pid": 22080,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3502080,
+              "workingSetBytes": 19648512,
+              "group": "webview2"
+            },
+            {
+              "pid": 21760,
+              "cpuSeconds": 1.0625,
+              "privateBytes": 139984896,
+              "workingSetBytes": 103653376,
+              "group": "webview2"
+            },
+            {
+              "pid": 9544,
+              "cpuSeconds": 0.296875,
+              "privateBytes": 12296192,
+              "workingSetBytes": 40312832,
+              "group": "webview2"
+            },
+            {
+              "pid": 15044,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20553728,
+              "group": "webview2"
+            },
+            {
+              "pid": 5456,
+              "cpuSeconds": 2.359375,
+              "privateBytes": 75689984,
+              "workingSetBytes": 127299584,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 59331.7338,
+          "processes": [
+            {
+              "pid": 24604,
+              "cpuSeconds": 2.140625,
+              "privateBytes": 7577600,
+              "workingSetBytes": 35323904,
+              "group": "app-core"
+            },
+            {
+              "pid": 21088,
+              "cpuSeconds": 18.640625,
+              "privateBytes": 59576320,
+              "workingSetBytes": 154181632,
+              "group": "webview2"
+            },
+            {
+              "pid": 22080,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3502080,
+              "workingSetBytes": 19648512,
+              "group": "webview2"
+            },
+            {
+              "pid": 21760,
+              "cpuSeconds": 1.09375,
+              "privateBytes": 139677696,
+              "workingSetBytes": 103624704,
+              "group": "webview2"
+            },
+            {
+              "pid": 9544,
+              "cpuSeconds": 0.296875,
+              "privateBytes": 12296192,
+              "workingSetBytes": 40312832,
+              "group": "webview2"
+            },
+            {
+              "pid": 15044,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20553728,
+              "group": "webview2"
+            },
+            {
+              "pid": 5456,
+              "cpuSeconds": 2.375,
+              "privateBytes": 76439552,
+              "workingSetBytes": 128000000,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 60699.3477,
+          "processes": [
+            {
+              "pid": 24604,
+              "cpuSeconds": 2.171875,
+              "privateBytes": 7143424,
+              "workingSetBytes": 35082240,
+              "group": "app-core"
+            },
+            {
+              "pid": 21088,
+              "cpuSeconds": 19.015625,
+              "privateBytes": 57290752,
+              "workingSetBytes": 152834048,
+              "group": "webview2"
+            },
+            {
+              "pid": 22080,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3272704,
+              "workingSetBytes": 13766656,
+              "group": "webview2"
+            },
+            {
+              "pid": 21760,
+              "cpuSeconds": 1.09375,
+              "privateBytes": 139546624,
+              "workingSetBytes": 103559168,
+              "group": "webview2"
+            },
+            {
+              "pid": 9544,
+              "cpuSeconds": 0.3125,
+              "privateBytes": 12029952,
+              "workingSetBytes": 40235008,
+              "group": "webview2"
+            },
+            {
+              "pid": 15044,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7593984,
+              "workingSetBytes": 20582400,
+              "group": "webview2"
+            },
+            {
+              "pid": 5456,
+              "cpuSeconds": 2.40625,
+              "privateBytes": 75284480,
+              "workingSetBytes": 127062016,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 62054.4504,
+          "processes": [
+            {
+              "pid": 24604,
+              "cpuSeconds": 2.203125,
+              "privateBytes": 7450624,
+              "workingSetBytes": 35217408,
+              "group": "app-core"
+            },
+            {
+              "pid": 21088,
+              "cpuSeconds": 19.328125,
+              "privateBytes": 55115776,
+              "workingSetBytes": 151437312,
+              "group": "webview2"
+            },
+            {
+              "pid": 22080,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3219456,
+              "workingSetBytes": 13713408,
+              "group": "webview2"
+            },
+            {
+              "pid": 21760,
+              "cpuSeconds": 1.09375,
+              "privateBytes": 138899456,
+              "workingSetBytes": 102948864,
+              "group": "webview2"
+            },
+            {
+              "pid": 9544,
+              "cpuSeconds": 0.328125,
+              "privateBytes": 12029952,
+              "workingSetBytes": 40181760,
+              "group": "webview2"
+            },
+            {
+              "pid": 15044,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7593984,
+              "workingSetBytes": 20586496,
+              "group": "webview2"
+            },
+            {
+              "pid": 5456,
+              "cpuSeconds": 2.46875,
+              "privateBytes": 73334784,
+              "workingSetBytes": 124817408,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 63453.9962,
+          "processes": [
+            {
+              "pid": 24604,
+              "cpuSeconds": 2.234375,
+              "privateBytes": 7548928,
+              "workingSetBytes": 35356672,
+              "group": "app-core"
+            },
+            {
+              "pid": 21088,
+              "cpuSeconds": 19.53125,
+              "privateBytes": 56475648,
+              "workingSetBytes": 152911872,
+              "group": "webview2"
+            },
+            {
+              "pid": 22080,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3219456,
+              "workingSetBytes": 13713408,
+              "group": "webview2"
+            },
+            {
+              "pid": 21760,
+              "cpuSeconds": 1.125,
+              "privateBytes": 138899456,
+              "workingSetBytes": 102948864,
+              "group": "webview2"
+            },
+            {
+              "pid": 9544,
+              "cpuSeconds": 0.328125,
+              "privateBytes": 12029952,
+              "workingSetBytes": 40181760,
+              "group": "webview2"
+            },
+            {
+              "pid": 15044,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7593984,
+              "workingSetBytes": 20586496,
+              "group": "webview2"
+            },
+            {
+              "pid": 5456,
+              "cpuSeconds": 2.515625,
+              "privateBytes": 72867840,
+              "workingSetBytes": 124882944,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 64797.3095,
+          "processes": [
+            {
+              "pid": 24604,
+              "cpuSeconds": 2.265625,
+              "privateBytes": 7536640,
+              "workingSetBytes": 35328000,
+              "group": "app-core"
+            },
+            {
+              "pid": 21088,
+              "cpuSeconds": 19.90625,
+              "privateBytes": 57745408,
+              "workingSetBytes": 153726976,
+              "group": "webview2"
+            },
+            {
+              "pid": 22080,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3219456,
+              "workingSetBytes": 13713408,
+              "group": "webview2"
+            },
+            {
+              "pid": 21760,
+              "cpuSeconds": 1.140625,
+              "privateBytes": 138899456,
+              "workingSetBytes": 102948864,
+              "group": "webview2"
+            },
+            {
+              "pid": 9544,
+              "cpuSeconds": 0.328125,
+              "privateBytes": 11788288,
+              "workingSetBytes": 40005632,
+              "group": "webview2"
+            },
+            {
+              "pid": 15044,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7593984,
+              "workingSetBytes": 20586496,
+              "group": "webview2"
+            },
+            {
+              "pid": 5456,
+              "cpuSeconds": 2.609375,
+              "privateBytes": 69636096,
+              "workingSetBytes": 122052608,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 66120.482,
+          "processes": [
+            {
+              "pid": 24604,
+              "cpuSeconds": 2.296875,
+              "privateBytes": 7532544,
+              "workingSetBytes": 35278848,
+              "group": "app-core"
+            },
+            {
+              "pid": 21088,
+              "cpuSeconds": 20.140625,
+              "privateBytes": 57745408,
+              "workingSetBytes": 153735168,
+              "group": "webview2"
+            },
+            {
+              "pid": 22080,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3219456,
+              "workingSetBytes": 13713408,
+              "group": "webview2"
+            },
+            {
+              "pid": 21760,
+              "cpuSeconds": 1.15625,
+              "privateBytes": 138891264,
+              "workingSetBytes": 102940672,
+              "group": "webview2"
+            },
+            {
+              "pid": 9544,
+              "cpuSeconds": 0.328125,
+              "privateBytes": 11788288,
+              "workingSetBytes": 40005632,
+              "group": "webview2"
+            },
+            {
+              "pid": 15044,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7593984,
+              "workingSetBytes": 20586496,
+              "group": "webview2"
+            },
+            {
+              "pid": 5456,
+              "cpuSeconds": 2.65625,
+              "privateBytes": 69320704,
+              "workingSetBytes": 121610240,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 67455.9338,
+          "processes": [
+            {
+              "pid": 24604,
+              "cpuSeconds": 2.296875,
+              "privateBytes": 7462912,
+              "workingSetBytes": 35315712,
+              "group": "app-core"
+            },
+            {
+              "pid": 21088,
+              "cpuSeconds": 20.296875,
+              "privateBytes": 53641216,
+              "workingSetBytes": 150228992,
+              "group": "webview2"
+            },
+            {
+              "pid": 22080,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3219456,
+              "workingSetBytes": 13713408,
+              "group": "webview2"
+            },
+            {
+              "pid": 21760,
+              "cpuSeconds": 1.15625,
+              "privateBytes": 138895360,
+              "workingSetBytes": 102944768,
+              "group": "webview2"
+            },
+            {
+              "pid": 9544,
+              "cpuSeconds": 0.328125,
+              "privateBytes": 11788288,
+              "workingSetBytes": 40005632,
+              "group": "webview2"
+            },
+            {
+              "pid": 15044,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7593984,
+              "workingSetBytes": 20586496,
+              "group": "webview2"
+            },
+            {
+              "pid": 5456,
+              "cpuSeconds": 2.6875,
+              "privateBytes": 70012928,
+              "workingSetBytes": 122310656,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 68785.3577,
+          "processes": [
+            {
+              "pid": 24604,
+              "cpuSeconds": 2.390625,
+              "privateBytes": 7151616,
+              "workingSetBytes": 35082240,
+              "group": "app-core"
+            },
+            {
+              "pid": 21088,
+              "cpuSeconds": 20.625,
+              "privateBytes": 56389632,
+              "workingSetBytes": 152256512,
+              "group": "webview2"
+            },
+            {
+              "pid": 22080,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3219456,
+              "workingSetBytes": 13713408,
+              "group": "webview2"
+            },
+            {
+              "pid": 21760,
+              "cpuSeconds": 1.15625,
+              "privateBytes": 138846208,
+              "workingSetBytes": 102928384,
+              "group": "webview2"
+            },
+            {
+              "pid": 9544,
+              "cpuSeconds": 0.328125,
+              "privateBytes": 11784192,
+              "workingSetBytes": 40001536,
+              "group": "webview2"
+            },
+            {
+              "pid": 15044,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7593984,
+              "workingSetBytes": 20586496,
+              "group": "webview2"
+            },
+            {
+              "pid": 5456,
+              "cpuSeconds": 2.71875,
+              "privateBytes": 70852608,
+              "workingSetBytes": 123109376,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 70095.9664,
+          "processes": [
+            {
+              "pid": 24604,
+              "cpuSeconds": 2.453125,
+              "privateBytes": 7430144,
+              "workingSetBytes": 35295232,
+              "group": "app-core"
+            },
+            {
+              "pid": 21088,
+              "cpuSeconds": 20.828125,
+              "privateBytes": 56991744,
+              "workingSetBytes": 152997888,
+              "group": "webview2"
+            },
+            {
+              "pid": 22080,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3219456,
+              "workingSetBytes": 13713408,
+              "group": "webview2"
+            },
+            {
+              "pid": 21760,
+              "cpuSeconds": 1.171875,
+              "privateBytes": 138838016,
+              "workingSetBytes": 102920192,
+              "group": "webview2"
+            },
+            {
+              "pid": 9544,
+              "cpuSeconds": 0.328125,
+              "privateBytes": 11833344,
+              "workingSetBytes": 40050688,
+              "group": "webview2"
+            },
+            {
+              "pid": 15044,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7593984,
+              "workingSetBytes": 20586496,
+              "group": "webview2"
+            },
+            {
+              "pid": 5456,
+              "cpuSeconds": 2.75,
+              "privateBytes": 71069696,
+              "workingSetBytes": 123031552,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 71425.5561,
+          "processes": [
+            {
+              "pid": 24604,
+              "cpuSeconds": 2.484375,
+              "privateBytes": 7430144,
+              "workingSetBytes": 35299328,
+              "group": "app-core"
+            },
+            {
+              "pid": 21088,
+              "cpuSeconds": 21.078125,
+              "privateBytes": 57036800,
+              "workingSetBytes": 153051136,
+              "group": "webview2"
+            },
+            {
+              "pid": 22080,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3219456,
+              "workingSetBytes": 13713408,
+              "group": "webview2"
+            },
+            {
+              "pid": 21760,
+              "cpuSeconds": 1.203125,
+              "privateBytes": 138842112,
+              "workingSetBytes": 102924288,
+              "group": "webview2"
+            },
+            {
+              "pid": 9544,
+              "cpuSeconds": 0.328125,
+              "privateBytes": 11833344,
+              "workingSetBytes": 40050688,
+              "group": "webview2"
+            },
+            {
+              "pid": 15044,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7593984,
+              "workingSetBytes": 20586496,
+              "group": "webview2"
+            },
+            {
+              "pid": 5456,
+              "cpuSeconds": 2.796875,
+              "privateBytes": 72757248,
+              "workingSetBytes": 124792832,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 72810.6002,
+          "processes": [
+            {
+              "pid": 24604,
+              "cpuSeconds": 2.5625,
+              "privateBytes": 7483392,
+              "workingSetBytes": 35307520,
+              "group": "app-core"
+            },
+            {
+              "pid": 21088,
+              "cpuSeconds": 21.390625,
+              "privateBytes": 56283136,
+              "workingSetBytes": 152248320,
+              "group": "webview2"
+            },
+            {
+              "pid": 22080,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3219456,
+              "workingSetBytes": 13713408,
+              "group": "webview2"
+            },
+            {
+              "pid": 21760,
+              "cpuSeconds": 1.203125,
+              "privateBytes": 138846208,
+              "workingSetBytes": 102928384,
+              "group": "webview2"
+            },
+            {
+              "pid": 9544,
+              "cpuSeconds": 0.34375,
+              "privateBytes": 11833344,
+              "workingSetBytes": 40050688,
+              "group": "webview2"
+            },
+            {
+              "pid": 15044,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7593984,
+              "workingSetBytes": 20586496,
+              "group": "webview2"
+            },
+            {
+              "pid": 5456,
+              "cpuSeconds": 2.8125,
+              "privateBytes": 73035776,
+              "workingSetBytes": 125063168,
+              "group": "webview2"
+            }
+          ]
+        }
+      ],
+      "repetition": 1,
+      "windowHandleReadyMs": 119.1502,
+      "startupKind": "fresh profile; OS cache unknown",
+      "operatorObservation": "Agent observed 100 Arabic paused rows; search selected fixture-0000.bin alone, clear restored 100, and ascending filename sort showed fixture-0000.bin first. No jobs resumed. First run uses recreated isolated profile with warm/unknown OS cache; table timing includes tool latency.",
+      "observedTableReadyMs": 46564.8476,
+      "rows": 100
+    },
+    {
+      "samples": [
+        {
+          "elapsedMs": 24356.3313,
+          "processes": [
+            {
+              "pid": 24952,
+              "cpuSeconds": 1.296875,
+              "privateBytes": 7720960,
+              "workingSetBytes": 35401728,
+              "group": "app-core"
+            },
+            {
+              "pid": 10608,
+              "cpuSeconds": 7.421875,
+              "privateBytes": 52846592,
+              "workingSetBytes": 142360576,
+              "group": "webview2"
+            },
+            {
+              "pid": 32620,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 2600960,
+              "workingSetBytes": 10874880,
+              "group": "webview2"
+            },
+            {
+              "pid": 15048,
+              "cpuSeconds": 0.65625,
+              "privateBytes": 136085504,
+              "workingSetBytes": 103170048,
+              "group": "webview2"
+            },
+            {
+              "pid": 34980,
+              "cpuSeconds": 0.171875,
+              "privateBytes": 12009472,
+              "workingSetBytes": 40148992,
+              "group": "webview2"
+            },
+            {
+              "pid": 844,
+              "cpuSeconds": 0.109375,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20725760,
+              "group": "webview2"
+            },
+            {
+              "pid": 36112,
+              "cpuSeconds": 0.84375,
+              "privateBytes": 81674240,
+              "workingSetBytes": 130547712,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 25669.9521,
+          "processes": [
+            {
+              "pid": 24952,
+              "cpuSeconds": 1.328125,
+              "privateBytes": 7663616,
+              "workingSetBytes": 35475456,
+              "group": "app-core"
+            },
+            {
+              "pid": 10608,
+              "cpuSeconds": 7.953125,
+              "privateBytes": 52195328,
+              "workingSetBytes": 142004224,
+              "group": "webview2"
+            },
+            {
+              "pid": 32620,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 2600960,
+              "workingSetBytes": 10874880,
+              "group": "webview2"
+            },
+            {
+              "pid": 15048,
+              "cpuSeconds": 0.671875,
+              "privateBytes": 143863808,
+              "workingSetBytes": 106221568,
+              "group": "webview2"
+            },
+            {
+              "pid": 34980,
+              "cpuSeconds": 0.171875,
+              "privateBytes": 12009472,
+              "workingSetBytes": 40148992,
+              "group": "webview2"
+            },
+            {
+              "pid": 844,
+              "cpuSeconds": 0.109375,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20725760,
+              "group": "webview2"
+            },
+            {
+              "pid": 36112,
+              "cpuSeconds": 0.9375,
+              "privateBytes": 90980352,
+              "workingSetBytes": 140894208,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 27084.2111,
+          "processes": [
+            {
+              "pid": 24952,
+              "cpuSeconds": 1.40625,
+              "privateBytes": 7733248,
+              "workingSetBytes": 35504128,
+              "group": "app-core"
+            },
+            {
+              "pid": 10608,
+              "cpuSeconds": 8.21875,
+              "privateBytes": 50778112,
+              "workingSetBytes": 140578816,
+              "group": "webview2"
+            },
+            {
+              "pid": 32620,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 2600960,
+              "workingSetBytes": 10874880,
+              "group": "webview2"
+            },
+            {
+              "pid": 15048,
+              "cpuSeconds": 0.703125,
+              "privateBytes": 142004224,
+              "workingSetBytes": 104361984,
+              "group": "webview2"
+            },
+            {
+              "pid": 34980,
+              "cpuSeconds": 0.171875,
+              "privateBytes": 12009472,
+              "workingSetBytes": 40148992,
+              "group": "webview2"
+            },
+            {
+              "pid": 844,
+              "cpuSeconds": 0.109375,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20725760,
+              "group": "webview2"
+            },
+            {
+              "pid": 36112,
+              "cpuSeconds": 0.953125,
+              "privateBytes": 92229632,
+              "workingSetBytes": 141836288,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 28465.0595,
+          "processes": [
+            {
+              "pid": 24952,
+              "cpuSeconds": 1.46875,
+              "privateBytes": 7700480,
+              "workingSetBytes": 35463168,
+              "group": "app-core"
+            },
+            {
+              "pid": 10608,
+              "cpuSeconds": 8.546875,
+              "privateBytes": 51613696,
+              "workingSetBytes": 141328384,
+              "group": "webview2"
+            },
+            {
+              "pid": 32620,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 2600960,
+              "workingSetBytes": 10874880,
+              "group": "webview2"
+            },
+            {
+              "pid": 15048,
+              "cpuSeconds": 0.71875,
+              "privateBytes": 141967360,
+              "workingSetBytes": 104275968,
+              "group": "webview2"
+            },
+            {
+              "pid": 34980,
+              "cpuSeconds": 0.171875,
+              "privateBytes": 12009472,
+              "workingSetBytes": 40148992,
+              "group": "webview2"
+            },
+            {
+              "pid": 844,
+              "cpuSeconds": 0.109375,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20725760,
+              "group": "webview2"
+            },
+            {
+              "pid": 36112,
+              "cpuSeconds": 0.984375,
+              "privateBytes": 94875648,
+              "workingSetBytes": 143699968,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 29792.2843,
+          "processes": [
+            {
+              "pid": 24952,
+              "cpuSeconds": 1.515625,
+              "privateBytes": 7688192,
+              "workingSetBytes": 35491840,
+              "group": "app-core"
+            },
+            {
+              "pid": 10608,
+              "cpuSeconds": 8.765625,
+              "privateBytes": 53764096,
+              "workingSetBytes": 142929920,
+              "group": "webview2"
+            },
+            {
+              "pid": 32620,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 2600960,
+              "workingSetBytes": 10874880,
+              "group": "webview2"
+            },
+            {
+              "pid": 15048,
+              "cpuSeconds": 0.71875,
+              "privateBytes": 141938688,
+              "workingSetBytes": 104247296,
+              "group": "webview2"
+            },
+            {
+              "pid": 34980,
+              "cpuSeconds": 0.171875,
+              "privateBytes": 12009472,
+              "workingSetBytes": 40148992,
+              "group": "webview2"
+            },
+            {
+              "pid": 844,
+              "cpuSeconds": 0.109375,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20725760,
+              "group": "webview2"
+            },
+            {
+              "pid": 36112,
+              "cpuSeconds": 1,
+              "privateBytes": 96169984,
+              "workingSetBytes": 145268736,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 31226.0211,
+          "processes": [
+            {
+              "pid": 24952,
+              "cpuSeconds": 1.578125,
+              "privateBytes": 7770112,
+              "workingSetBytes": 35495936,
+              "group": "app-core"
+            },
+            {
+              "pid": 10608,
+              "cpuSeconds": 9.046875,
+              "privateBytes": 54079488,
+              "workingSetBytes": 143532032,
+              "group": "webview2"
+            },
+            {
+              "pid": 32620,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 3526656,
+              "workingSetBytes": 19918848,
+              "group": "webview2"
+            },
+            {
+              "pid": 15048,
+              "cpuSeconds": 0.71875,
+              "privateBytes": 141889536,
+              "workingSetBytes": 104243200,
+              "group": "webview2"
+            },
+            {
+              "pid": 34980,
+              "cpuSeconds": 0.171875,
+              "privateBytes": 12009472,
+              "workingSetBytes": 40153088,
+              "group": "webview2"
+            },
+            {
+              "pid": 844,
+              "cpuSeconds": 0.109375,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20725760,
+              "group": "webview2"
+            },
+            {
+              "pid": 36112,
+              "cpuSeconds": 1.09375,
+              "privateBytes": 73596928,
+              "workingSetBytes": 124674048,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 32614.7941,
+          "processes": [
+            {
+              "pid": 24952,
+              "cpuSeconds": 1.609375,
+              "privateBytes": 7671808,
+              "workingSetBytes": 35463168,
+              "group": "app-core"
+            },
+            {
+              "pid": 10608,
+              "cpuSeconds": 9.3125,
+              "privateBytes": 53559296,
+              "workingSetBytes": 142938112,
+              "group": "webview2"
+            },
+            {
+              "pid": 32620,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 3522560,
+              "workingSetBytes": 19914752,
+              "group": "webview2"
+            },
+            {
+              "pid": 15048,
+              "cpuSeconds": 0.734375,
+              "privateBytes": 141901824,
+              "workingSetBytes": 104255488,
+              "group": "webview2"
+            },
+            {
+              "pid": 34980,
+              "cpuSeconds": 0.171875,
+              "privateBytes": 11915264,
+              "workingSetBytes": 40058880,
+              "group": "webview2"
+            },
+            {
+              "pid": 844,
+              "cpuSeconds": 0.109375,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20725760,
+              "group": "webview2"
+            },
+            {
+              "pid": 36112,
+              "cpuSeconds": 1.15625,
+              "privateBytes": 73416704,
+              "workingSetBytes": 123949056,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 33959.6652,
+          "processes": [
+            {
+              "pid": 24952,
+              "cpuSeconds": 1.65625,
+              "privateBytes": 7352320,
+              "workingSetBytes": 35303424,
+              "group": "app-core"
+            },
+            {
+              "pid": 10608,
+              "cpuSeconds": 9.4375,
+              "privateBytes": 53391360,
+              "workingSetBytes": 142868480,
+              "group": "webview2"
+            },
+            {
+              "pid": 32620,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 3522560,
+              "workingSetBytes": 19914752,
+              "group": "webview2"
+            },
+            {
+              "pid": 15048,
+              "cpuSeconds": 0.734375,
+              "privateBytes": 141885440,
+              "workingSetBytes": 104239104,
+              "group": "webview2"
+            },
+            {
+              "pid": 34980,
+              "cpuSeconds": 0.171875,
+              "privateBytes": 11915264,
+              "workingSetBytes": 40062976,
+              "group": "webview2"
+            },
+            {
+              "pid": 844,
+              "cpuSeconds": 0.109375,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20725760,
+              "group": "webview2"
+            },
+            {
+              "pid": 36112,
+              "cpuSeconds": 1.1875,
+              "privateBytes": 74735616,
+              "workingSetBytes": 124477440,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 35422.7205,
+          "processes": [
+            {
+              "pid": 24952,
+              "cpuSeconds": 1.703125,
+              "privateBytes": 7389184,
+              "workingSetBytes": 35340288,
+              "group": "app-core"
+            },
+            {
+              "pid": 10608,
+              "cpuSeconds": 9.59375,
+              "privateBytes": 51761152,
+              "workingSetBytes": 141619200,
+              "group": "webview2"
+            },
+            {
+              "pid": 32620,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 3522560,
+              "workingSetBytes": 19914752,
+              "group": "webview2"
+            },
+            {
+              "pid": 15048,
+              "cpuSeconds": 0.75,
+              "privateBytes": 141889536,
+              "workingSetBytes": 104259584,
+              "group": "webview2"
+            },
+            {
+              "pid": 34980,
+              "cpuSeconds": 0.171875,
+              "privateBytes": 11915264,
+              "workingSetBytes": 40062976,
+              "group": "webview2"
+            },
+            {
+              "pid": 844,
+              "cpuSeconds": 0.109375,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20725760,
+              "group": "webview2"
+            },
+            {
+              "pid": 36112,
+              "cpuSeconds": 1.203125,
+              "privateBytes": 75669504,
+              "workingSetBytes": 125726720,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 36731.7716,
+          "processes": [
+            {
+              "pid": 24952,
+              "cpuSeconds": 1.75,
+              "privateBytes": 7680000,
+              "workingSetBytes": 35454976,
+              "group": "app-core"
+            },
+            {
+              "pid": 10608,
+              "cpuSeconds": 9.8125,
+              "privateBytes": 53415936,
+              "workingSetBytes": 142872576,
+              "group": "webview2"
+            },
+            {
+              "pid": 32620,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 3522560,
+              "workingSetBytes": 19914752,
+              "group": "webview2"
+            },
+            {
+              "pid": 15048,
+              "cpuSeconds": 0.765625,
+              "privateBytes": 141877248,
+              "workingSetBytes": 104247296,
+              "group": "webview2"
+            },
+            {
+              "pid": 34980,
+              "cpuSeconds": 0.171875,
+              "privateBytes": 11915264,
+              "workingSetBytes": 40062976,
+              "group": "webview2"
+            },
+            {
+              "pid": 844,
+              "cpuSeconds": 0.109375,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20725760,
+              "group": "webview2"
+            },
+            {
+              "pid": 36112,
+              "cpuSeconds": 1.21875,
+              "privateBytes": 75665408,
+              "workingSetBytes": 126017536,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 38108.3497,
+          "processes": [
+            {
+              "pid": 24952,
+              "cpuSeconds": 1.8125,
+              "privateBytes": 7741440,
+              "workingSetBytes": 35471360,
+              "group": "app-core"
+            },
+            {
+              "pid": 10608,
+              "cpuSeconds": 9.9375,
+              "privateBytes": 53440512,
+              "workingSetBytes": 142905344,
+              "group": "webview2"
+            },
+            {
+              "pid": 32620,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 3522560,
+              "workingSetBytes": 19914752,
+              "group": "webview2"
+            },
+            {
+              "pid": 15048,
+              "cpuSeconds": 0.796875,
+              "privateBytes": 141881344,
+              "workingSetBytes": 104251392,
+              "group": "webview2"
+            },
+            {
+              "pid": 34980,
+              "cpuSeconds": 0.171875,
+              "privateBytes": 11915264,
+              "workingSetBytes": 40062976,
+              "group": "webview2"
+            },
+            {
+              "pid": 844,
+              "cpuSeconds": 0.109375,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20725760,
+              "group": "webview2"
+            },
+            {
+              "pid": 36112,
+              "cpuSeconds": 1.265625,
+              "privateBytes": 76165120,
+              "workingSetBytes": 126566400,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 39513.8901,
+          "processes": [
+            {
+              "pid": 24952,
+              "cpuSeconds": 1.921875,
+              "privateBytes": 7667712,
+              "workingSetBytes": 35454976,
+              "group": "app-core"
+            },
+            {
+              "pid": 10608,
+              "cpuSeconds": 10.203125,
+              "privateBytes": 53497856,
+              "workingSetBytes": 142917632,
+              "group": "webview2"
+            },
+            {
+              "pid": 32620,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 3522560,
+              "workingSetBytes": 19914752,
+              "group": "webview2"
+            },
+            {
+              "pid": 15048,
+              "cpuSeconds": 0.84375,
+              "privateBytes": 141881344,
+              "workingSetBytes": 104251392,
+              "group": "webview2"
+            },
+            {
+              "pid": 34980,
+              "cpuSeconds": 0.171875,
+              "privateBytes": 11915264,
+              "workingSetBytes": 40062976,
+              "group": "webview2"
+            },
+            {
+              "pid": 844,
+              "cpuSeconds": 0.109375,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20725760,
+              "group": "webview2"
+            },
+            {
+              "pid": 36112,
+              "cpuSeconds": 1.3125,
+              "privateBytes": 76439552,
+              "workingSetBytes": 126939136,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 40902.3181,
+          "processes": [
+            {
+              "pid": 24952,
+              "cpuSeconds": 1.96875,
+              "privateBytes": 7725056,
+              "workingSetBytes": 35479552,
+              "group": "app-core"
+            },
+            {
+              "pid": 10608,
+              "cpuSeconds": 10.34375,
+              "privateBytes": 53510144,
+              "workingSetBytes": 142827520,
+              "group": "webview2"
+            },
+            {
+              "pid": 32620,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 3522560,
+              "workingSetBytes": 19914752,
+              "group": "webview2"
+            },
+            {
+              "pid": 15048,
+              "cpuSeconds": 0.859375,
+              "privateBytes": 141885440,
+              "workingSetBytes": 104263680,
+              "group": "webview2"
+            },
+            {
+              "pid": 34980,
+              "cpuSeconds": 0.171875,
+              "privateBytes": 11915264,
+              "workingSetBytes": 40062976,
+              "group": "webview2"
+            },
+            {
+              "pid": 844,
+              "cpuSeconds": 0.109375,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20725760,
+              "group": "webview2"
+            },
+            {
+              "pid": 36112,
+              "cpuSeconds": 1.359375,
+              "privateBytes": 77578240,
+              "workingSetBytes": 127840256,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 42275.6478,
+          "processes": [
+            {
+              "pid": 24952,
+              "cpuSeconds": 1.984375,
+              "privateBytes": 7688192,
+              "workingSetBytes": 35483648,
+              "group": "app-core"
+            },
+            {
+              "pid": 10608,
+              "cpuSeconds": 10.53125,
+              "privateBytes": 53481472,
+              "workingSetBytes": 142848000,
+              "group": "webview2"
+            },
+            {
+              "pid": 32620,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 3522560,
+              "workingSetBytes": 19914752,
+              "group": "webview2"
+            },
+            {
+              "pid": 15048,
+              "cpuSeconds": 0.859375,
+              "privateBytes": 141877248,
+              "workingSetBytes": 104255488,
+              "group": "webview2"
+            },
+            {
+              "pid": 34980,
+              "cpuSeconds": 0.171875,
+              "privateBytes": 11915264,
+              "workingSetBytes": 40062976,
+              "group": "webview2"
+            },
+            {
+              "pid": 844,
+              "cpuSeconds": 0.109375,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20725760,
+              "group": "webview2"
+            },
+            {
+              "pid": 36112,
+              "cpuSeconds": 1.40625,
+              "privateBytes": 77860864,
+              "workingSetBytes": 128278528,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 43623.1265,
+          "processes": [
+            {
+              "pid": 24952,
+              "cpuSeconds": 2.0625,
+              "privateBytes": 7680000,
+              "workingSetBytes": 35500032,
+              "group": "app-core"
+            },
+            {
+              "pid": 10608,
+              "cpuSeconds": 10.90625,
+              "privateBytes": 53641216,
+              "workingSetBytes": 143122432,
+              "group": "webview2"
+            },
+            {
+              "pid": 32620,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 3522560,
+              "workingSetBytes": 19914752,
+              "group": "webview2"
+            },
+            {
+              "pid": 15048,
+              "cpuSeconds": 0.875,
+              "privateBytes": 141873152,
+              "workingSetBytes": 104251392,
+              "group": "webview2"
+            },
+            {
+              "pid": 34980,
+              "cpuSeconds": 0.171875,
+              "privateBytes": 11915264,
+              "workingSetBytes": 40062976,
+              "group": "webview2"
+            },
+            {
+              "pid": 844,
+              "cpuSeconds": 0.109375,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20725760,
+              "group": "webview2"
+            },
+            {
+              "pid": 36112,
+              "cpuSeconds": 1.5625,
+              "privateBytes": 76275712,
+              "workingSetBytes": 126996480,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 44946.1733,
+          "processes": [
+            {
+              "pid": 24952,
+              "cpuSeconds": 2.078125,
+              "privateBytes": 7667712,
+              "workingSetBytes": 35487744,
+              "group": "app-core"
+            },
+            {
+              "pid": 10608,
+              "cpuSeconds": 11.078125,
+              "privateBytes": 53493760,
+              "workingSetBytes": 142938112,
+              "group": "webview2"
+            },
+            {
+              "pid": 32620,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 3522560,
+              "workingSetBytes": 19914752,
+              "group": "webview2"
+            },
+            {
+              "pid": 15048,
+              "cpuSeconds": 0.875,
+              "privateBytes": 141881344,
+              "workingSetBytes": 104259584,
+              "group": "webview2"
+            },
+            {
+              "pid": 34980,
+              "cpuSeconds": 0.171875,
+              "privateBytes": 11915264,
+              "workingSetBytes": 40062976,
+              "group": "webview2"
+            },
+            {
+              "pid": 844,
+              "cpuSeconds": 0.109375,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20725760,
+              "group": "webview2"
+            },
+            {
+              "pid": 36112,
+              "cpuSeconds": 1.609375,
+              "privateBytes": 76517376,
+              "workingSetBytes": 127025152,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 46341.2317,
+          "processes": [
+            {
+              "pid": 24952,
+              "cpuSeconds": 2.109375,
+              "privateBytes": 7753728,
+              "workingSetBytes": 35512320,
+              "group": "app-core"
+            },
+            {
+              "pid": 10608,
+              "cpuSeconds": 11.1875,
+              "privateBytes": 50864128,
+              "workingSetBytes": 140836864,
+              "group": "webview2"
+            },
+            {
+              "pid": 32620,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 3522560,
+              "workingSetBytes": 19914752,
+              "group": "webview2"
+            },
+            {
+              "pid": 15048,
+              "cpuSeconds": 0.875,
+              "privateBytes": 141897728,
+              "workingSetBytes": 104275968,
+              "group": "webview2"
+            },
+            {
+              "pid": 34980,
+              "cpuSeconds": 0.171875,
+              "privateBytes": 11915264,
+              "workingSetBytes": 40062976,
+              "group": "webview2"
+            },
+            {
+              "pid": 844,
+              "cpuSeconds": 0.109375,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20725760,
+              "group": "webview2"
+            },
+            {
+              "pid": 36112,
+              "cpuSeconds": 1.671875,
+              "privateBytes": 76517376,
+              "workingSetBytes": 127037440,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 47686.5272,
+          "processes": [
+            {
+              "pid": 24952,
+              "cpuSeconds": 2.171875,
+              "privateBytes": 7364608,
+              "workingSetBytes": 35348480,
+              "group": "app-core"
+            },
+            {
+              "pid": 10608,
+              "cpuSeconds": 11.828125,
+              "privateBytes": 53911552,
+              "workingSetBytes": 143470592,
+              "group": "webview2"
+            },
+            {
+              "pid": 32620,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 3522560,
+              "workingSetBytes": 19914752,
+              "group": "webview2"
+            },
+            {
+              "pid": 15048,
+              "cpuSeconds": 0.921875,
+              "privateBytes": 148852736,
+              "workingSetBytes": 106647552,
+              "group": "webview2"
+            },
+            {
+              "pid": 34980,
+              "cpuSeconds": 0.171875,
+              "privateBytes": 11915264,
+              "workingSetBytes": 40062976,
+              "group": "webview2"
+            },
+            {
+              "pid": 844,
+              "cpuSeconds": 0.109375,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20725760,
+              "group": "webview2"
+            },
+            {
+              "pid": 36112,
+              "cpuSeconds": 1.765625,
+              "privateBytes": 76709888,
+              "workingSetBytes": 127598592,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 49088.9903,
+          "processes": [
+            {
+              "pid": 24952,
+              "cpuSeconds": 2.203125,
+              "privateBytes": 7663616,
+              "workingSetBytes": 35500032,
+              "group": "app-core"
+            },
+            {
+              "pid": 10608,
+              "cpuSeconds": 11.96875,
+              "privateBytes": 53678080,
+              "workingSetBytes": 143093760,
+              "group": "webview2"
+            },
+            {
+              "pid": 32620,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 3522560,
+              "workingSetBytes": 19914752,
+              "group": "webview2"
+            },
+            {
+              "pid": 15048,
+              "cpuSeconds": 0.9375,
+              "privateBytes": 148647936,
+              "workingSetBytes": 106594304,
+              "group": "webview2"
+            },
+            {
+              "pid": 34980,
+              "cpuSeconds": 0.171875,
+              "privateBytes": 11915264,
+              "workingSetBytes": 40062976,
+              "group": "webview2"
+            },
+            {
+              "pid": 844,
+              "cpuSeconds": 0.109375,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20725760,
+              "group": "webview2"
+            },
+            {
+              "pid": 36112,
+              "cpuSeconds": 1.796875,
+              "privateBytes": 76984320,
+              "workingSetBytes": 127832064,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 50422.6596,
+          "processes": [
+            {
+              "pid": 24952,
+              "cpuSeconds": 2.25,
+              "privateBytes": 7716864,
+              "workingSetBytes": 35516416,
+              "group": "app-core"
+            },
+            {
+              "pid": 10608,
+              "cpuSeconds": 12.203125,
+              "privateBytes": 51920896,
+              "workingSetBytes": 141967360,
+              "group": "webview2"
+            },
+            {
+              "pid": 32620,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 3522560,
+              "workingSetBytes": 19914752,
+              "group": "webview2"
+            },
+            {
+              "pid": 15048,
+              "cpuSeconds": 0.96875,
+              "privateBytes": 145928192,
+              "workingSetBytes": 106569728,
+              "group": "webview2"
+            },
+            {
+              "pid": 34980,
+              "cpuSeconds": 0.171875,
+              "privateBytes": 11915264,
+              "workingSetBytes": 40062976,
+              "group": "webview2"
+            },
+            {
+              "pid": 844,
+              "cpuSeconds": 0.109375,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20725760,
+              "group": "webview2"
+            },
+            {
+              "pid": 36112,
+              "cpuSeconds": 1.8125,
+              "privateBytes": 77406208,
+              "workingSetBytes": 128176128,
+              "group": "webview2"
+            }
+          ]
+        }
+      ],
+      "repetition": 2,
+      "windowHandleReadyMs": 54.6473,
+      "startupKind": "warm reopen",
+      "operatorObservation": "Agent observed 100 rows and saved ascending order; switched Arabic to English and verified English labels. Scrolled through rows fixture-0000 through fixture-0007. No job was started; only isolated UI language changed.",
+      "observedTableReadyMs": 23971.1804,
+      "rows": 100
+    },
+    {
+      "samples": [
+        {
+          "elapsedMs": 9604.3596,
+          "processes": [
+            {
+              "pid": 33712,
+              "cpuSeconds": 0.796875,
+              "privateBytes": 7397376,
+              "workingSetBytes": 35024896,
+              "group": "app-core"
+            },
+            {
+              "pid": 27060,
+              "cpuSeconds": 3.0625,
+              "privateBytes": 54747136,
+              "workingSetBytes": 137486336,
+              "group": "webview2"
+            },
+            {
+              "pid": 34516,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 2600960,
+              "workingSetBytes": 10866688,
+              "group": "webview2"
+            },
+            {
+              "pid": 12000,
+              "cpuSeconds": 0.5,
+              "privateBytes": 124370944,
+              "workingSetBytes": 94711808,
+              "group": "webview2"
+            },
+            {
+              "pid": 11644,
+              "cpuSeconds": 0.125,
+              "privateBytes": 11722752,
+              "workingSetBytes": 36700160,
+              "group": "webview2"
+            },
+            {
+              "pid": 34328,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20754432,
+              "group": "webview2"
+            },
+            {
+              "pid": 36412,
+              "cpuSeconds": 0.484375,
+              "privateBytes": 63336448,
+              "workingSetBytes": 112447488,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 10910.7948,
+          "processes": [
+            {
+              "pid": 33712,
+              "cpuSeconds": 0.84375,
+              "privateBytes": 7729152,
+              "workingSetBytes": 35205120,
+              "group": "app-core"
+            },
+            {
+              "pid": 27060,
+              "cpuSeconds": 3.59375,
+              "privateBytes": 55095296,
+              "workingSetBytes": 137859072,
+              "group": "webview2"
+            },
+            {
+              "pid": 34516,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 2600960,
+              "workingSetBytes": 10866688,
+              "group": "webview2"
+            },
+            {
+              "pid": 12000,
+              "cpuSeconds": 0.515625,
+              "privateBytes": 124370944,
+              "workingSetBytes": 94711808,
+              "group": "webview2"
+            },
+            {
+              "pid": 11644,
+              "cpuSeconds": 0.125,
+              "privateBytes": 11735040,
+              "workingSetBytes": 36741120,
+              "group": "webview2"
+            },
+            {
+              "pid": 34328,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20754432,
+              "group": "webview2"
+            },
+            {
+              "pid": 36412,
+              "cpuSeconds": 0.515625,
+              "privateBytes": 64724992,
+              "workingSetBytes": 113766400,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 12229.4479,
+          "processes": [
+            {
+              "pid": 33712,
+              "cpuSeconds": 0.90625,
+              "privateBytes": 7565312,
+              "workingSetBytes": 35201024,
+              "group": "app-core"
+            },
+            {
+              "pid": 27060,
+              "cpuSeconds": 4.09375,
+              "privateBytes": 54218752,
+              "workingSetBytes": 136978432,
+              "group": "webview2"
+            },
+            {
+              "pid": 34516,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 2600960,
+              "workingSetBytes": 10866688,
+              "group": "webview2"
+            },
+            {
+              "pid": 12000,
+              "cpuSeconds": 0.515625,
+              "privateBytes": 124370944,
+              "workingSetBytes": 94711808,
+              "group": "webview2"
+            },
+            {
+              "pid": 11644,
+              "cpuSeconds": 0.125,
+              "privateBytes": 11726848,
+              "workingSetBytes": 36732928,
+              "group": "webview2"
+            },
+            {
+              "pid": 34328,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20754432,
+              "group": "webview2"
+            },
+            {
+              "pid": 36412,
+              "cpuSeconds": 0.5625,
+              "privateBytes": 65982464,
+              "workingSetBytes": 114937856,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 13711.3552,
+          "processes": [
+            {
+              "pid": 33712,
+              "cpuSeconds": 0.9375,
+              "privateBytes": 7503872,
+              "workingSetBytes": 35201024,
+              "group": "app-core"
+            },
+            {
+              "pid": 27060,
+              "cpuSeconds": 4.390625,
+              "privateBytes": 54579200,
+              "workingSetBytes": 137183232,
+              "group": "webview2"
+            },
+            {
+              "pid": 34516,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 2600960,
+              "workingSetBytes": 10866688,
+              "group": "webview2"
+            },
+            {
+              "pid": 12000,
+              "cpuSeconds": 0.53125,
+              "privateBytes": 124375040,
+              "workingSetBytes": 94715904,
+              "group": "webview2"
+            },
+            {
+              "pid": 11644,
+              "cpuSeconds": 0.125,
+              "privateBytes": 11730944,
+              "workingSetBytes": 36745216,
+              "group": "webview2"
+            },
+            {
+              "pid": 34328,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20754432,
+              "group": "webview2"
+            },
+            {
+              "pid": 36412,
+              "cpuSeconds": 0.609375,
+              "privateBytes": 67080192,
+              "workingSetBytes": 115929088,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 15108.9787,
+          "processes": [
+            {
+              "pid": 33712,
+              "cpuSeconds": 0.984375,
+              "privateBytes": 7569408,
+              "workingSetBytes": 35217408,
+              "group": "app-core"
+            },
+            {
+              "pid": 27060,
+              "cpuSeconds": 4.703125,
+              "privateBytes": 54407168,
+              "workingSetBytes": 137175040,
+              "group": "webview2"
+            },
+            {
+              "pid": 34516,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 2600960,
+              "workingSetBytes": 10866688,
+              "group": "webview2"
+            },
+            {
+              "pid": 12000,
+              "cpuSeconds": 0.53125,
+              "privateBytes": 124375040,
+              "workingSetBytes": 94720000,
+              "group": "webview2"
+            },
+            {
+              "pid": 11644,
+              "cpuSeconds": 0.125,
+              "privateBytes": 11730944,
+              "workingSetBytes": 36749312,
+              "group": "webview2"
+            },
+            {
+              "pid": 34328,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20754432,
+              "group": "webview2"
+            },
+            {
+              "pid": 36412,
+              "cpuSeconds": 0.640625,
+              "privateBytes": 68444160,
+              "workingSetBytes": 117133312,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 16426.0587,
+          "processes": [
+            {
+              "pid": 33712,
+              "cpuSeconds": 0.984375,
+              "privateBytes": 7680000,
+              "workingSetBytes": 35172352,
+              "group": "app-core"
+            },
+            {
+              "pid": 27060,
+              "cpuSeconds": 5.109375,
+              "privateBytes": 53858304,
+              "workingSetBytes": 136654848,
+              "group": "webview2"
+            },
+            {
+              "pid": 34516,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 2600960,
+              "workingSetBytes": 10866688,
+              "group": "webview2"
+            },
+            {
+              "pid": 12000,
+              "cpuSeconds": 0.53125,
+              "privateBytes": 124375040,
+              "workingSetBytes": 94720000,
+              "group": "webview2"
+            },
+            {
+              "pid": 11644,
+              "cpuSeconds": 0.125,
+              "privateBytes": 11730944,
+              "workingSetBytes": 36749312,
+              "group": "webview2"
+            },
+            {
+              "pid": 34328,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20754432,
+              "group": "webview2"
+            },
+            {
+              "pid": 36412,
+              "cpuSeconds": 0.640625,
+              "privateBytes": 69001216,
+              "workingSetBytes": 117624832,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 17803.838,
+          "processes": [
+            {
+              "pid": 33712,
+              "cpuSeconds": 1.046875,
+              "privateBytes": 7655424,
+              "workingSetBytes": 35217408,
+              "group": "app-core"
+            },
+            {
+              "pid": 27060,
+              "cpuSeconds": 5.453125,
+              "privateBytes": 54693888,
+              "workingSetBytes": 137490432,
+              "group": "webview2"
+            },
+            {
+              "pid": 34516,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 2600960,
+              "workingSetBytes": 10866688,
+              "group": "webview2"
+            },
+            {
+              "pid": 12000,
+              "cpuSeconds": 0.546875,
+              "privateBytes": 124375040,
+              "workingSetBytes": 94720000,
+              "group": "webview2"
+            },
+            {
+              "pid": 11644,
+              "cpuSeconds": 0.125,
+              "privateBytes": 11730944,
+              "workingSetBytes": 36749312,
+              "group": "webview2"
+            },
+            {
+              "pid": 34328,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20754432,
+              "group": "webview2"
+            },
+            {
+              "pid": 36412,
+              "cpuSeconds": 0.671875,
+              "privateBytes": 70627328,
+              "workingSetBytes": 118915072,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 19212.2073,
+          "processes": [
+            {
+              "pid": 33712,
+              "cpuSeconds": 1.109375,
+              "privateBytes": 7602176,
+              "workingSetBytes": 35090432,
+              "group": "app-core"
+            },
+            {
+              "pid": 27060,
+              "cpuSeconds": 5.9375,
+              "privateBytes": 55549952,
+              "workingSetBytes": 138346496,
+              "group": "webview2"
+            },
+            {
+              "pid": 34516,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 2600960,
+              "workingSetBytes": 10866688,
+              "group": "webview2"
+            },
+            {
+              "pid": 12000,
+              "cpuSeconds": 0.5625,
+              "privateBytes": 124375040,
+              "workingSetBytes": 94720000,
+              "group": "webview2"
+            },
+            {
+              "pid": 11644,
+              "cpuSeconds": 0.125,
+              "privateBytes": 11730944,
+              "workingSetBytes": 36749312,
+              "group": "webview2"
+            },
+            {
+              "pid": 34328,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20754432,
+              "group": "webview2"
+            },
+            {
+              "pid": 36412,
+              "cpuSeconds": 0.734375,
+              "privateBytes": 71864320,
+              "workingSetBytes": 120004608,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 20596.3481,
+          "processes": [
+            {
+              "pid": 33712,
+              "cpuSeconds": 1.15625,
+              "privateBytes": 7143424,
+              "workingSetBytes": 34930688,
+              "group": "app-core"
+            },
+            {
+              "pid": 27060,
+              "cpuSeconds": 6.34375,
+              "privateBytes": 54513664,
+              "workingSetBytes": 137453568,
+              "group": "webview2"
+            },
+            {
+              "pid": 34516,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 2600960,
+              "workingSetBytes": 10866688,
+              "group": "webview2"
+            },
+            {
+              "pid": 12000,
+              "cpuSeconds": 0.5625,
+              "privateBytes": 124375040,
+              "workingSetBytes": 94720000,
+              "group": "webview2"
+            },
+            {
+              "pid": 11644,
+              "cpuSeconds": 0.125,
+              "privateBytes": 11730944,
+              "workingSetBytes": 36749312,
+              "group": "webview2"
+            },
+            {
+              "pid": 34328,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20754432,
+              "group": "webview2"
+            },
+            {
+              "pid": 36412,
+              "cpuSeconds": 0.765625,
+              "privateBytes": 73007104,
+              "workingSetBytes": 121364480,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 21975.4538,
+          "processes": [
+            {
+              "pid": 33712,
+              "cpuSeconds": 1.15625,
+              "privateBytes": 7262208,
+              "workingSetBytes": 34996224,
+              "group": "app-core"
+            },
+            {
+              "pid": 27060,
+              "cpuSeconds": 6.703125,
+              "privateBytes": 54755328,
+              "workingSetBytes": 137711616,
+              "group": "webview2"
+            },
+            {
+              "pid": 34516,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 2600960,
+              "workingSetBytes": 10866688,
+              "group": "webview2"
+            },
+            {
+              "pid": 12000,
+              "cpuSeconds": 0.59375,
+              "privateBytes": 124375040,
+              "workingSetBytes": 94728192,
+              "group": "webview2"
+            },
+            {
+              "pid": 11644,
+              "cpuSeconds": 0.125,
+              "privateBytes": 11730944,
+              "workingSetBytes": 36749312,
+              "group": "webview2"
+            },
+            {
+              "pid": 34328,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20754432,
+              "group": "webview2"
+            },
+            {
+              "pid": 36412,
+              "cpuSeconds": 0.796875,
+              "privateBytes": 74178560,
+              "workingSetBytes": 122593280,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 23291.3157,
+          "processes": [
+            {
+              "pid": 33712,
+              "cpuSeconds": 1.1875,
+              "privateBytes": 7737344,
+              "workingSetBytes": 35336192,
+              "group": "app-core"
+            },
+            {
+              "pid": 27060,
+              "cpuSeconds": 7.234375,
+              "privateBytes": 54845440,
+              "workingSetBytes": 138051584,
+              "group": "webview2"
+            },
+            {
+              "pid": 34516,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 2600960,
+              "workingSetBytes": 10866688,
+              "group": "webview2"
+            },
+            {
+              "pid": 12000,
+              "cpuSeconds": 0.625,
+              "privateBytes": 124366848,
+              "workingSetBytes": 94720000,
+              "group": "webview2"
+            },
+            {
+              "pid": 11644,
+              "cpuSeconds": 0.125,
+              "privateBytes": 11730944,
+              "workingSetBytes": 36749312,
+              "group": "webview2"
+            },
+            {
+              "pid": 34328,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20754432,
+              "group": "webview2"
+            },
+            {
+              "pid": 36412,
+              "cpuSeconds": 0.875,
+              "privateBytes": 75272192,
+              "workingSetBytes": 123826176,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 24714.5658,
+          "processes": [
+            {
+              "pid": 33712,
+              "cpuSeconds": 1.21875,
+              "privateBytes": 7483392,
+              "workingSetBytes": 35266560,
+              "group": "app-core"
+            },
+            {
+              "pid": 27060,
+              "cpuSeconds": 7.546875,
+              "privateBytes": 51073024,
+              "workingSetBytes": 134787072,
+              "group": "webview2"
+            },
+            {
+              "pid": 34516,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 2600960,
+              "workingSetBytes": 10866688,
+              "group": "webview2"
+            },
+            {
+              "pid": 12000,
+              "cpuSeconds": 0.625,
+              "privateBytes": 124370944,
+              "workingSetBytes": 94724096,
+              "group": "webview2"
+            },
+            {
+              "pid": 11644,
+              "cpuSeconds": 0.125,
+              "privateBytes": 11730944,
+              "workingSetBytes": 36749312,
+              "group": "webview2"
+            },
+            {
+              "pid": 34328,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20754432,
+              "group": "webview2"
+            },
+            {
+              "pid": 36412,
+              "cpuSeconds": 0.90625,
+              "privateBytes": 76390400,
+              "workingSetBytes": 125001728,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 26073.5332,
+          "processes": [
+            {
+              "pid": 33712,
+              "cpuSeconds": 1.25,
+              "privateBytes": 7680000,
+              "workingSetBytes": 35278848,
+              "group": "app-core"
+            },
+            {
+              "pid": 27060,
+              "cpuSeconds": 7.859375,
+              "privateBytes": 50999296,
+              "workingSetBytes": 134643712,
+              "group": "webview2"
+            },
+            {
+              "pid": 34516,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 2600960,
+              "workingSetBytes": 10866688,
+              "group": "webview2"
+            },
+            {
+              "pid": 12000,
+              "cpuSeconds": 0.640625,
+              "privateBytes": 124375040,
+              "workingSetBytes": 94728192,
+              "group": "webview2"
+            },
+            {
+              "pid": 11644,
+              "cpuSeconds": 0.125,
+              "privateBytes": 11730944,
+              "workingSetBytes": 36749312,
+              "group": "webview2"
+            },
+            {
+              "pid": 34328,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20754432,
+              "group": "webview2"
+            },
+            {
+              "pid": 36412,
+              "cpuSeconds": 0.921875,
+              "privateBytes": 77737984,
+              "workingSetBytes": 126111744,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 27420.9465,
+          "processes": [
+            {
+              "pid": 33712,
+              "cpuSeconds": 1.25,
+              "privateBytes": 7671808,
+              "workingSetBytes": 35385344,
+              "group": "app-core"
+            },
+            {
+              "pid": 27060,
+              "cpuSeconds": 8.234375,
+              "privateBytes": 54775808,
+              "workingSetBytes": 137986048,
+              "group": "webview2"
+            },
+            {
+              "pid": 34516,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 2600960,
+              "workingSetBytes": 10866688,
+              "group": "webview2"
+            },
+            {
+              "pid": 12000,
+              "cpuSeconds": 0.640625,
+              "privateBytes": 124370944,
+              "workingSetBytes": 94724096,
+              "group": "webview2"
+            },
+            {
+              "pid": 11644,
+              "cpuSeconds": 0.125,
+              "privateBytes": 11730944,
+              "workingSetBytes": 36749312,
+              "group": "webview2"
+            },
+            {
+              "pid": 34328,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20754432,
+              "group": "webview2"
+            },
+            {
+              "pid": 36412,
+              "cpuSeconds": 0.96875,
+              "privateBytes": 78594048,
+              "workingSetBytes": 127447040,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 28743.5995,
+          "processes": [
+            {
+              "pid": 33712,
+              "cpuSeconds": 1.28125,
+              "privateBytes": 7671808,
+              "workingSetBytes": 35328000,
+              "group": "app-core"
+            },
+            {
+              "pid": 27060,
+              "cpuSeconds": 8.625,
+              "privateBytes": 54239232,
+              "workingSetBytes": 138027008,
+              "group": "webview2"
+            },
+            {
+              "pid": 34516,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 2600960,
+              "workingSetBytes": 10866688,
+              "group": "webview2"
+            },
+            {
+              "pid": 12000,
+              "cpuSeconds": 0.65625,
+              "privateBytes": 133574656,
+              "workingSetBytes": 99774464,
+              "group": "webview2"
+            },
+            {
+              "pid": 11644,
+              "cpuSeconds": 0.125,
+              "privateBytes": 11730944,
+              "workingSetBytes": 36749312,
+              "group": "webview2"
+            },
+            {
+              "pid": 34328,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20754432,
+              "group": "webview2"
+            },
+            {
+              "pid": 36412,
+              "cpuSeconds": 1.078125,
+              "privateBytes": 80318464,
+              "workingSetBytes": 130527232,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 30030.3226,
+          "processes": [
+            {
+              "pid": 33712,
+              "cpuSeconds": 1.3125,
+              "privateBytes": 7663616,
+              "workingSetBytes": 35360768,
+              "group": "app-core"
+            },
+            {
+              "pid": 27060,
+              "cpuSeconds": 8.875,
+              "privateBytes": 54046720,
+              "workingSetBytes": 137830400,
+              "group": "webview2"
+            },
+            {
+              "pid": 34516,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 2600960,
+              "workingSetBytes": 10866688,
+              "group": "webview2"
+            },
+            {
+              "pid": 12000,
+              "cpuSeconds": 0.671875,
+              "privateBytes": 133566464,
+              "workingSetBytes": 99868672,
+              "group": "webview2"
+            },
+            {
+              "pid": 11644,
+              "cpuSeconds": 0.125,
+              "privateBytes": 11730944,
+              "workingSetBytes": 36749312,
+              "group": "webview2"
+            },
+            {
+              "pid": 34328,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20754432,
+              "group": "webview2"
+            },
+            {
+              "pid": 36412,
+              "cpuSeconds": 1.109375,
+              "privateBytes": 81764352,
+              "workingSetBytes": 131649536,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 31477.1089,
+          "processes": [
+            {
+              "pid": 33712,
+              "cpuSeconds": 1.40625,
+              "privateBytes": 7225344,
+              "workingSetBytes": 35106816,
+              "group": "app-core"
+            },
+            {
+              "pid": 27060,
+              "cpuSeconds": 9.3125,
+              "privateBytes": 53207040,
+              "workingSetBytes": 137080832,
+              "group": "webview2"
+            },
+            {
+              "pid": 34516,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 3518464,
+              "workingSetBytes": 19894272,
+              "group": "webview2"
+            },
+            {
+              "pid": 12000,
+              "cpuSeconds": 0.703125,
+              "privateBytes": 133455872,
+              "workingSetBytes": 99803136,
+              "group": "webview2"
+            },
+            {
+              "pid": 11644,
+              "cpuSeconds": 0.125,
+              "privateBytes": 11751424,
+              "workingSetBytes": 36773888,
+              "group": "webview2"
+            },
+            {
+              "pid": 34328,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20754432,
+              "group": "webview2"
+            },
+            {
+              "pid": 36412,
+              "cpuSeconds": 1.265625,
+              "privateBytes": 64290816,
+              "workingSetBytes": 114679808,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 32821.5767,
+          "processes": [
+            {
+              "pid": 33712,
+              "cpuSeconds": 1.40625,
+              "privateBytes": 7585792,
+              "workingSetBytes": 35397632,
+              "group": "app-core"
+            },
+            {
+              "pid": 27060,
+              "cpuSeconds": 9.484375,
+              "privateBytes": 53063680,
+              "workingSetBytes": 136003584,
+              "group": "webview2"
+            },
+            {
+              "pid": 34516,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 3518464,
+              "workingSetBytes": 19894272,
+              "group": "webview2"
+            },
+            {
+              "pid": 12000,
+              "cpuSeconds": 0.703125,
+              "privateBytes": 133447680,
+              "workingSetBytes": 99794944,
+              "group": "webview2"
+            },
+            {
+              "pid": 11644,
+              "cpuSeconds": 0.125,
+              "privateBytes": 11665408,
+              "workingSetBytes": 36687872,
+              "group": "webview2"
+            },
+            {
+              "pid": 34328,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20754432,
+              "group": "webview2"
+            },
+            {
+              "pid": 36412,
+              "cpuSeconds": 1.28125,
+              "privateBytes": 65585152,
+              "workingSetBytes": 116068352,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 34188.5037,
+          "processes": [
+            {
+              "pid": 33712,
+              "cpuSeconds": 1.46875,
+              "privateBytes": 7524352,
+              "workingSetBytes": 35332096,
+              "group": "app-core"
+            },
+            {
+              "pid": 27060,
+              "cpuSeconds": 9.828125,
+              "privateBytes": 51449856,
+              "workingSetBytes": 134877184,
+              "group": "webview2"
+            },
+            {
+              "pid": 34516,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 3518464,
+              "workingSetBytes": 19894272,
+              "group": "webview2"
+            },
+            {
+              "pid": 12000,
+              "cpuSeconds": 0.703125,
+              "privateBytes": 133443584,
+              "workingSetBytes": 99807232,
+              "group": "webview2"
+            },
+            {
+              "pid": 11644,
+              "cpuSeconds": 0.125,
+              "privateBytes": 11665408,
+              "workingSetBytes": 36687872,
+              "group": "webview2"
+            },
+            {
+              "pid": 34328,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20754432,
+              "group": "webview2"
+            },
+            {
+              "pid": 36412,
+              "cpuSeconds": 1.34375,
+              "privateBytes": 65814528,
+              "workingSetBytes": 115888128,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 35481.7531,
+          "processes": [
+            {
+              "pid": 33712,
+              "cpuSeconds": 1.515625,
+              "privateBytes": 7643136,
+              "workingSetBytes": 35274752,
+              "group": "app-core"
+            },
+            {
+              "pid": 27060,
+              "cpuSeconds": 9.96875,
+              "privateBytes": 53387264,
+              "workingSetBytes": 136310784,
+              "group": "webview2"
+            },
+            {
+              "pid": 34516,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 3518464,
+              "workingSetBytes": 19894272,
+              "group": "webview2"
+            },
+            {
+              "pid": 12000,
+              "cpuSeconds": 0.703125,
+              "privateBytes": 133447680,
+              "workingSetBytes": 99811328,
+              "group": "webview2"
+            },
+            {
+              "pid": 11644,
+              "cpuSeconds": 0.125,
+              "privateBytes": 11665408,
+              "workingSetBytes": 36687872,
+              "group": "webview2"
+            },
+            {
+              "pid": 34328,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20754432,
+              "group": "webview2"
+            },
+            {
+              "pid": 36412,
+              "cpuSeconds": 1.390625,
+              "privateBytes": 66830336,
+              "workingSetBytes": 117313536,
+              "group": "webview2"
+            }
+          ]
+        }
+      ],
+      "repetition": 3,
+      "windowHandleReadyMs": 88.5496,
+      "startupKind": "warm reopen",
+      "operatorObservation": "Agent observed 100 English rows, persisted ascending order and language after reopen. Clicking fixture-0000.bin selected one row, shown by selected count 1 and checked row; no job was resumed. This run samples idle/polling and selection.",
+      "observedTableReadyMs": 9132.5695,
+      "rows": 100
+    },
+    {
+      "samples": [
+        {
+          "elapsedMs": 26208.9283,
+          "processes": [
+            {
+              "pid": 33748,
+              "cpuSeconds": 0.984375,
+              "privateBytes": 9232384,
+              "workingSetBytes": 37031936,
+              "group": "app-core"
+            },
+            {
+              "pid": 18284,
+              "cpuSeconds": 22.6875,
+              "privateBytes": 168247296,
+              "workingSetBytes": 249409536,
+              "group": "webview2"
+            },
+            {
+              "pid": 35720,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 2588672,
+              "workingSetBytes": 10506240,
+              "group": "webview2"
+            },
+            {
+              "pid": 37836,
+              "cpuSeconds": 0.59375,
+              "privateBytes": 124833792,
+              "workingSetBytes": 94871552,
+              "group": "webview2"
+            },
+            {
+              "pid": 20204,
+              "cpuSeconds": 0.234375,
+              "privateBytes": 11747328,
+              "workingSetBytes": 36548608,
+              "group": "webview2"
+            },
+            {
+              "pid": 33084,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20590592,
+              "group": "webview2"
+            },
+            {
+              "pid": 23716,
+              "cpuSeconds": 3.9375,
+              "privateBytes": 289292288,
+              "workingSetBytes": 338296832,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 27478.0434,
+          "processes": [
+            {
+              "pid": 33748,
+              "cpuSeconds": 1,
+              "privateBytes": 9216000,
+              "workingSetBytes": 37117952,
+              "group": "app-core"
+            },
+            {
+              "pid": 18284,
+              "cpuSeconds": 23.828125,
+              "privateBytes": 161837056,
+              "workingSetBytes": 243724288,
+              "group": "webview2"
+            },
+            {
+              "pid": 35720,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 2588672,
+              "workingSetBytes": 10506240,
+              "group": "webview2"
+            },
+            {
+              "pid": 37836,
+              "cpuSeconds": 0.59375,
+              "privateBytes": 124833792,
+              "workingSetBytes": 94871552,
+              "group": "webview2"
+            },
+            {
+              "pid": 20204,
+              "cpuSeconds": 0.25,
+              "privateBytes": 11747328,
+              "workingSetBytes": 36548608,
+              "group": "webview2"
+            },
+            {
+              "pid": 33084,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20590592,
+              "group": "webview2"
+            },
+            {
+              "pid": 23716,
+              "cpuSeconds": 4.046875,
+              "privateBytes": 296144896,
+              "workingSetBytes": 345419776,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 28842.115,
+          "processes": [
+            {
+              "pid": 33748,
+              "cpuSeconds": 1.015625,
+              "privateBytes": 8634368,
+              "workingSetBytes": 36626432,
+              "group": "app-core"
+            },
+            {
+              "pid": 18284,
+              "cpuSeconds": 25,
+              "privateBytes": 147603456,
+              "workingSetBytes": 229322752,
+              "group": "webview2"
+            },
+            {
+              "pid": 35720,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 2588672,
+              "workingSetBytes": 10506240,
+              "group": "webview2"
+            },
+            {
+              "pid": 37836,
+              "cpuSeconds": 0.59375,
+              "privateBytes": 124833792,
+              "workingSetBytes": 94871552,
+              "group": "webview2"
+            },
+            {
+              "pid": 20204,
+              "cpuSeconds": 0.25,
+              "privateBytes": 11747328,
+              "workingSetBytes": 36548608,
+              "group": "webview2"
+            },
+            {
+              "pid": 33084,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20590592,
+              "group": "webview2"
+            },
+            {
+              "pid": 23716,
+              "cpuSeconds": 4.15625,
+              "privateBytes": 299655168,
+              "workingSetBytes": 349003776,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 30187.1255,
+          "processes": [
+            {
+              "pid": 33748,
+              "cpuSeconds": 1.09375,
+              "privateBytes": 9191424,
+              "workingSetBytes": 36986880,
+              "group": "app-core"
+            },
+            {
+              "pid": 18284,
+              "cpuSeconds": 26.140625,
+              "privateBytes": 167976960,
+              "workingSetBytes": 246177792,
+              "group": "webview2"
+            },
+            {
+              "pid": 35720,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 2588672,
+              "workingSetBytes": 10506240,
+              "group": "webview2"
+            },
+            {
+              "pid": 37836,
+              "cpuSeconds": 0.609375,
+              "privateBytes": 124833792,
+              "workingSetBytes": 94871552,
+              "group": "webview2"
+            },
+            {
+              "pid": 20204,
+              "cpuSeconds": 0.25,
+              "privateBytes": 11747328,
+              "workingSetBytes": 36548608,
+              "group": "webview2"
+            },
+            {
+              "pid": 33084,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20590592,
+              "group": "webview2"
+            },
+            {
+              "pid": 23716,
+              "cpuSeconds": 4.234375,
+              "privateBytes": 305049600,
+              "workingSetBytes": 353804288,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 31487.8497,
+          "processes": [
+            {
+              "pid": 33748,
+              "cpuSeconds": 1.125,
+              "privateBytes": 9162752,
+              "workingSetBytes": 36888576,
+              "group": "app-core"
+            },
+            {
+              "pid": 18284,
+              "cpuSeconds": 27.3125,
+              "privateBytes": 164700160,
+              "workingSetBytes": 243462144,
+              "group": "webview2"
+            },
+            {
+              "pid": 35720,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 3502080,
+              "workingSetBytes": 19644416,
+              "group": "webview2"
+            },
+            {
+              "pid": 37836,
+              "cpuSeconds": 0.609375,
+              "privateBytes": 124776448,
+              "workingSetBytes": 94859264,
+              "group": "webview2"
+            },
+            {
+              "pid": 20204,
+              "cpuSeconds": 0.25,
+              "privateBytes": 11653120,
+              "workingSetBytes": 36458496,
+              "group": "webview2"
+            },
+            {
+              "pid": 33084,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20590592,
+              "group": "webview2"
+            },
+            {
+              "pid": 23716,
+              "cpuSeconds": 4.375,
+              "privateBytes": 311992320,
+              "workingSetBytes": 361046016,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 32862.8211,
+          "processes": [
+            {
+              "pid": 33748,
+              "cpuSeconds": 1.140625,
+              "privateBytes": 9175040,
+              "workingSetBytes": 36900864,
+              "group": "app-core"
+            },
+            {
+              "pid": 18284,
+              "cpuSeconds": 28.46875,
+              "privateBytes": 157802496,
+              "workingSetBytes": 239800320,
+              "group": "webview2"
+            },
+            {
+              "pid": 35720,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 3502080,
+              "workingSetBytes": 19644416,
+              "group": "webview2"
+            },
+            {
+              "pid": 37836,
+              "cpuSeconds": 0.609375,
+              "privateBytes": 124776448,
+              "workingSetBytes": 94859264,
+              "group": "webview2"
+            },
+            {
+              "pid": 20204,
+              "cpuSeconds": 0.25,
+              "privateBytes": 11653120,
+              "workingSetBytes": 36458496,
+              "group": "webview2"
+            },
+            {
+              "pid": 33084,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20590592,
+              "group": "webview2"
+            },
+            {
+              "pid": 23716,
+              "cpuSeconds": 4.765625,
+              "privateBytes": 290947072,
+              "workingSetBytes": 339951616,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 34271.5361,
+          "processes": [
+            {
+              "pid": 33748,
+              "cpuSeconds": 1.15625,
+              "privateBytes": 8671232,
+              "workingSetBytes": 36687872,
+              "group": "app-core"
+            },
+            {
+              "pid": 18284,
+              "cpuSeconds": 29.765625,
+              "privateBytes": 134864896,
+              "workingSetBytes": 219127808,
+              "group": "webview2"
+            },
+            {
+              "pid": 35720,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 3502080,
+              "workingSetBytes": 19644416,
+              "group": "webview2"
+            },
+            {
+              "pid": 37836,
+              "cpuSeconds": 0.609375,
+              "privateBytes": 133959680,
+              "workingSetBytes": 96337920,
+              "group": "webview2"
+            },
+            {
+              "pid": 20204,
+              "cpuSeconds": 0.25,
+              "privateBytes": 11673600,
+              "workingSetBytes": 36478976,
+              "group": "webview2"
+            },
+            {
+              "pid": 33084,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20590592,
+              "group": "webview2"
+            },
+            {
+              "pid": 23716,
+              "cpuSeconds": 5.09375,
+              "privateBytes": 283254784,
+              "workingSetBytes": 331812864,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 35642.6747,
+          "processes": [
+            {
+              "pid": 33748,
+              "cpuSeconds": 1.3125,
+              "privateBytes": 9195520,
+              "workingSetBytes": 36950016,
+              "group": "app-core"
+            },
+            {
+              "pid": 18284,
+              "cpuSeconds": 30.125,
+              "privateBytes": 81215488,
+              "workingSetBytes": 165519360,
+              "group": "webview2"
+            },
+            {
+              "pid": 35720,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 3502080,
+              "workingSetBytes": 19644416,
+              "group": "webview2"
+            },
+            {
+              "pid": 37836,
+              "cpuSeconds": 0.625,
+              "privateBytes": 133984256,
+              "workingSetBytes": 96288768,
+              "group": "webview2"
+            },
+            {
+              "pid": 20204,
+              "cpuSeconds": 0.25,
+              "privateBytes": 11673600,
+              "workingSetBytes": 36478976,
+              "group": "webview2"
+            },
+            {
+              "pid": 33084,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20590592,
+              "group": "webview2"
+            },
+            {
+              "pid": 23716,
+              "cpuSeconds": 5.109375,
+              "privateBytes": 284758016,
+              "workingSetBytes": 333152256,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 37058.3947,
+          "processes": [
+            {
+              "pid": 33748,
+              "cpuSeconds": 1.40625,
+              "privateBytes": 9261056,
+              "workingSetBytes": 37076992,
+              "group": "app-core"
+            },
+            {
+              "pid": 18284,
+              "cpuSeconds": 30.21875,
+              "privateBytes": 80048128,
+              "workingSetBytes": 164335616,
+              "group": "webview2"
+            },
+            {
+              "pid": 35720,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 3502080,
+              "workingSetBytes": 19644416,
+              "group": "webview2"
+            },
+            {
+              "pid": 37836,
+              "cpuSeconds": 0.625,
+              "privateBytes": 133984256,
+              "workingSetBytes": 96288768,
+              "group": "webview2"
+            },
+            {
+              "pid": 20204,
+              "cpuSeconds": 0.25,
+              "privateBytes": 11673600,
+              "workingSetBytes": 36478976,
+              "group": "webview2"
+            },
+            {
+              "pid": 33084,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20590592,
+              "group": "webview2"
+            },
+            {
+              "pid": 23716,
+              "cpuSeconds": 5.140625,
+              "privateBytes": 285728768,
+              "workingSetBytes": 334090240,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 38392.2952,
+          "processes": [
+            {
+              "pid": 33748,
+              "cpuSeconds": 1.46875,
+              "privateBytes": 9199616,
+              "workingSetBytes": 37019648,
+              "group": "app-core"
+            },
+            {
+              "pid": 18284,
+              "cpuSeconds": 30.28125,
+              "privateBytes": 79917056,
+              "workingSetBytes": 164225024,
+              "group": "webview2"
+            },
+            {
+              "pid": 35720,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 3502080,
+              "workingSetBytes": 19644416,
+              "group": "webview2"
+            },
+            {
+              "pid": 37836,
+              "cpuSeconds": 0.640625,
+              "privateBytes": 133017600,
+              "workingSetBytes": 96292864,
+              "group": "webview2"
+            },
+            {
+              "pid": 20204,
+              "cpuSeconds": 0.25,
+              "privateBytes": 11673600,
+              "workingSetBytes": 36478976,
+              "group": "webview2"
+            },
+            {
+              "pid": 33084,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20590592,
+              "group": "webview2"
+            },
+            {
+              "pid": 23716,
+              "cpuSeconds": 5.171875,
+              "privateBytes": 286760960,
+              "workingSetBytes": 335126528,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 39807.8265,
+          "processes": [
+            {
+              "pid": 33748,
+              "cpuSeconds": 1.53125,
+              "privateBytes": 9211904,
+              "workingSetBytes": 37052416,
+              "group": "app-core"
+            },
+            {
+              "pid": 18284,
+              "cpuSeconds": 30.375,
+              "privateBytes": 80109568,
+              "workingSetBytes": 164401152,
+              "group": "webview2"
+            },
+            {
+              "pid": 35720,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 3502080,
+              "workingSetBytes": 19644416,
+              "group": "webview2"
+            },
+            {
+              "pid": 37836,
+              "cpuSeconds": 0.6875,
+              "privateBytes": 132509696,
+              "workingSetBytes": 96329728,
+              "group": "webview2"
+            },
+            {
+              "pid": 20204,
+              "cpuSeconds": 0.25,
+              "privateBytes": 11673600,
+              "workingSetBytes": 36478976,
+              "group": "webview2"
+            },
+            {
+              "pid": 33084,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20590592,
+              "group": "webview2"
+            },
+            {
+              "pid": 23716,
+              "cpuSeconds": 5.34375,
+              "privateBytes": 92475392,
+              "workingSetBytes": 143626240,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 41155.5769,
+          "processes": [
+            {
+              "pid": 33748,
+              "cpuSeconds": 1.609375,
+              "privateBytes": 9224192,
+              "workingSetBytes": 37068800,
+              "group": "app-core"
+            },
+            {
+              "pid": 18284,
+              "cpuSeconds": 30.46875,
+              "privateBytes": 79757312,
+              "workingSetBytes": 164065280,
+              "group": "webview2"
+            },
+            {
+              "pid": 35720,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 3502080,
+              "workingSetBytes": 19644416,
+              "group": "webview2"
+            },
+            {
+              "pid": 37836,
+              "cpuSeconds": 0.6875,
+              "privateBytes": 130772992,
+              "workingSetBytes": 96157696,
+              "group": "webview2"
+            },
+            {
+              "pid": 20204,
+              "cpuSeconds": 0.25,
+              "privateBytes": 11673600,
+              "workingSetBytes": 36483072,
+              "group": "webview2"
+            },
+            {
+              "pid": 33084,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20590592,
+              "group": "webview2"
+            },
+            {
+              "pid": 23716,
+              "cpuSeconds": 5.421875,
+              "privateBytes": 84529152,
+              "workingSetBytes": 134684672,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 42533.3678,
+          "processes": [
+            {
+              "pid": 33748,
+              "cpuSeconds": 1.65625,
+              "privateBytes": 9183232,
+              "workingSetBytes": 37040128,
+              "group": "app-core"
+            },
+            {
+              "pid": 18284,
+              "cpuSeconds": 30.515625,
+              "privateBytes": 79601664,
+              "workingSetBytes": 163909632,
+              "group": "webview2"
+            },
+            {
+              "pid": 35720,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 3502080,
+              "workingSetBytes": 19644416,
+              "group": "webview2"
+            },
+            {
+              "pid": 37836,
+              "cpuSeconds": 0.734375,
+              "privateBytes": 130031616,
+              "workingSetBytes": 95834112,
+              "group": "webview2"
+            },
+            {
+              "pid": 20204,
+              "cpuSeconds": 0.25,
+              "privateBytes": 11673600,
+              "workingSetBytes": 36483072,
+              "group": "webview2"
+            },
+            {
+              "pid": 33084,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20590592,
+              "group": "webview2"
+            },
+            {
+              "pid": 23716,
+              "cpuSeconds": 5.46875,
+              "privateBytes": 85774336,
+              "workingSetBytes": 136339456,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 43911.1154,
+          "processes": [
+            {
+              "pid": 33748,
+              "cpuSeconds": 1.78125,
+              "privateBytes": 9302016,
+              "workingSetBytes": 37158912,
+              "group": "app-core"
+            },
+            {
+              "pid": 18284,
+              "cpuSeconds": 30.671875,
+              "privateBytes": 80080896,
+              "workingSetBytes": 164372480,
+              "group": "webview2"
+            },
+            {
+              "pid": 35720,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 3502080,
+              "workingSetBytes": 19644416,
+              "group": "webview2"
+            },
+            {
+              "pid": 37836,
+              "cpuSeconds": 0.734375,
+              "privateBytes": 118636544,
+              "workingSetBytes": 95682560,
+              "group": "webview2"
+            },
+            {
+              "pid": 20204,
+              "cpuSeconds": 0.25,
+              "privateBytes": 11673600,
+              "workingSetBytes": 36483072,
+              "group": "webview2"
+            },
+            {
+              "pid": 33084,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20590592,
+              "group": "webview2"
+            },
+            {
+              "pid": 23716,
+              "cpuSeconds": 5.515625,
+              "privateBytes": 88535040,
+              "workingSetBytes": 139059200,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 45277.3502,
+          "processes": [
+            {
+              "pid": 33748,
+              "cpuSeconds": 1.84375,
+              "privateBytes": 9265152,
+              "workingSetBytes": 37109760,
+              "group": "app-core"
+            },
+            {
+              "pid": 18284,
+              "cpuSeconds": 30.734375,
+              "privateBytes": 80076800,
+              "workingSetBytes": 164368384,
+              "group": "webview2"
+            },
+            {
+              "pid": 35720,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 3502080,
+              "workingSetBytes": 19644416,
+              "group": "webview2"
+            },
+            {
+              "pid": 37836,
+              "cpuSeconds": 0.75,
+              "privateBytes": 118636544,
+              "workingSetBytes": 95682560,
+              "group": "webview2"
+            },
+            {
+              "pid": 20204,
+              "cpuSeconds": 0.25,
+              "privateBytes": 11673600,
+              "workingSetBytes": 36483072,
+              "group": "webview2"
+            },
+            {
+              "pid": 33084,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20590592,
+              "group": "webview2"
+            },
+            {
+              "pid": 23716,
+              "cpuSeconds": 5.5625,
+              "privateBytes": 90238976,
+              "workingSetBytes": 140681216,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 46678.3879,
+          "processes": [
+            {
+              "pid": 33748,
+              "cpuSeconds": 1.9375,
+              "privateBytes": 9248768,
+              "workingSetBytes": 37105664,
+              "group": "app-core"
+            },
+            {
+              "pid": 18284,
+              "cpuSeconds": 30.828125,
+              "privateBytes": 80060416,
+              "workingSetBytes": 164352000,
+              "group": "webview2"
+            },
+            {
+              "pid": 35720,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 3502080,
+              "workingSetBytes": 19644416,
+              "group": "webview2"
+            },
+            {
+              "pid": 37836,
+              "cpuSeconds": 0.765625,
+              "privateBytes": 118636544,
+              "workingSetBytes": 95686656,
+              "group": "webview2"
+            },
+            {
+              "pid": 20204,
+              "cpuSeconds": 0.25,
+              "privateBytes": 11673600,
+              "workingSetBytes": 36483072,
+              "group": "webview2"
+            },
+            {
+              "pid": 33084,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20590592,
+              "group": "webview2"
+            },
+            {
+              "pid": 23716,
+              "cpuSeconds": 5.59375,
+              "privateBytes": 92737536,
+              "workingSetBytes": 143097856,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 48054.3088,
+          "processes": [
+            {
+              "pid": 33748,
+              "cpuSeconds": 2.0625,
+              "privateBytes": 9244672,
+              "workingSetBytes": 37101568,
+              "group": "app-core"
+            },
+            {
+              "pid": 18284,
+              "cpuSeconds": 30.921875,
+              "privateBytes": 79880192,
+              "workingSetBytes": 164188160,
+              "group": "webview2"
+            },
+            {
+              "pid": 35720,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 3502080,
+              "workingSetBytes": 19644416,
+              "group": "webview2"
+            },
+            {
+              "pid": 37836,
+              "cpuSeconds": 0.796875,
+              "privateBytes": 118636544,
+              "workingSetBytes": 95690752,
+              "group": "webview2"
+            },
+            {
+              "pid": 20204,
+              "cpuSeconds": 0.25,
+              "privateBytes": 11673600,
+              "workingSetBytes": 36483072,
+              "group": "webview2"
+            },
+            {
+              "pid": 33084,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20590592,
+              "group": "webview2"
+            },
+            {
+              "pid": 23716,
+              "cpuSeconds": 5.6875,
+              "privateBytes": 89968640,
+              "workingSetBytes": 140361728,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 49465.3905,
+          "processes": [
+            {
+              "pid": 33748,
+              "cpuSeconds": 2.109375,
+              "privateBytes": 9256960,
+              "workingSetBytes": 37113856,
+              "group": "app-core"
+            },
+            {
+              "pid": 18284,
+              "cpuSeconds": 31.046875,
+              "privateBytes": 79908864,
+              "workingSetBytes": 164216832,
+              "group": "webview2"
+            },
+            {
+              "pid": 35720,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 3502080,
+              "workingSetBytes": 19644416,
+              "group": "webview2"
+            },
+            {
+              "pid": 37836,
+              "cpuSeconds": 0.796875,
+              "privateBytes": 118640640,
+              "workingSetBytes": 95694848,
+              "group": "webview2"
+            },
+            {
+              "pid": 20204,
+              "cpuSeconds": 0.25,
+              "privateBytes": 11673600,
+              "workingSetBytes": 36483072,
+              "group": "webview2"
+            },
+            {
+              "pid": 33084,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20590592,
+              "group": "webview2"
+            },
+            {
+              "pid": 23716,
+              "cpuSeconds": 5.734375,
+              "privateBytes": 90939392,
+              "workingSetBytes": 141299712,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 50901.8899,
+          "processes": [
+            {
+              "pid": 33748,
+              "cpuSeconds": 2.1875,
+              "privateBytes": 9240576,
+              "workingSetBytes": 37031936,
+              "group": "app-core"
+            },
+            {
+              "pid": 18284,
+              "cpuSeconds": 31.703125,
+              "privateBytes": 123297792,
+              "workingSetBytes": 205156352,
+              "group": "webview2"
+            },
+            {
+              "pid": 35720,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 3502080,
+              "workingSetBytes": 19644416,
+              "group": "webview2"
+            },
+            {
+              "pid": 37836,
+              "cpuSeconds": 1.046875,
+              "privateBytes": 137289728,
+              "workingSetBytes": 96927744,
+              "group": "webview2"
+            },
+            {
+              "pid": 20204,
+              "cpuSeconds": 0.265625,
+              "privateBytes": 11673600,
+              "workingSetBytes": 36483072,
+              "group": "webview2"
+            },
+            {
+              "pid": 33084,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20590592,
+              "group": "webview2"
+            },
+            {
+              "pid": 23716,
+              "cpuSeconds": 6.8125,
+              "privateBytes": 199438336,
+              "workingSetBytes": 248713216,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 52252.8979,
+          "processes": [
+            {
+              "pid": 33748,
+              "cpuSeconds": 2.25,
+              "privateBytes": 9277440,
+              "workingSetBytes": 37068800,
+              "group": "app-core"
+            },
+            {
+              "pid": 18284,
+              "cpuSeconds": 32.875,
+              "privateBytes": 145985536,
+              "workingSetBytes": 230072320,
+              "group": "webview2"
+            },
+            {
+              "pid": 35720,
+              "cpuSeconds": 0.015625,
+              "privateBytes": 3502080,
+              "workingSetBytes": 19644416,
+              "group": "webview2"
+            },
+            {
+              "pid": 37836,
+              "cpuSeconds": 1.0625,
+              "privateBytes": 136998912,
+              "workingSetBytes": 96624640,
+              "group": "webview2"
+            },
+            {
+              "pid": 20204,
+              "cpuSeconds": 0.265625,
+              "privateBytes": 11673600,
+              "workingSetBytes": 36483072,
+              "group": "webview2"
+            },
+            {
+              "pid": 33084,
+              "cpuSeconds": 0.0625,
+              "privateBytes": 7696384,
+              "workingSetBytes": 20590592,
+              "group": "webview2"
+            },
+            {
+              "pid": 23716,
+              "cpuSeconds": 6.96875,
+              "privateBytes": 215633920,
+              "workingSetBytes": 265052160,
+              "group": "webview2"
+            }
+          ]
+        }
+      ],
+      "repetition": 1,
+      "windowHandleReadyMs": 52.8902,
+      "startupKind": "warm reopen",
+      "operatorObservation": "Agent observed 1000 Arabic paused rows after checkpointed dataset replacement. Search showed exactly fixture-0000.bin and count 1; clear returned 1000. Ascending filename sort showed 0000 first after async completion. UIA search/action capture incurred multi-second tool latency, not a measured app paint duration. No jobs started.",
+      "observedTableReadyMs": 25802.1498,
+      "rows": 1000
+    },
+    {
+      "samples": [
+        {
+          "elapsedMs": 74188.2277,
+          "processes": [
+            {
+              "pid": 34644,
+              "cpuSeconds": 2.640625,
+              "privateBytes": 8912896,
+              "workingSetBytes": 34738176,
+              "group": "app-core"
+            },
+            {
+              "pid": 30644,
+              "cpuSeconds": 23.953125,
+              "privateBytes": 136843264,
+              "workingSetBytes": 221614080,
+              "group": "webview2"
+            },
+            {
+              "pid": 12572,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3182592,
+              "workingSetBytes": 14000128,
+              "group": "webview2"
+            },
+            {
+              "pid": 7544,
+              "cpuSeconds": 0.734375,
+              "privateBytes": 123535360,
+              "workingSetBytes": 94851072,
+              "group": "webview2"
+            },
+            {
+              "pid": 28500,
+              "cpuSeconds": 0.21875,
+              "privateBytes": 11476992,
+              "workingSetBytes": 39694336,
+              "group": "webview2"
+            },
+            {
+              "pid": 17176,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7602176,
+              "workingSetBytes": 20791296,
+              "group": "webview2"
+            },
+            {
+              "pid": 17320,
+              "cpuSeconds": 9.71875,
+              "privateBytes": 386408448,
+              "workingSetBytes": 436879360,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 75541.1885,
+          "processes": [
+            {
+              "pid": 34644,
+              "cpuSeconds": 2.703125,
+              "privateBytes": 8945664,
+              "workingSetBytes": 34775040,
+              "group": "app-core"
+            },
+            {
+              "pid": 30644,
+              "cpuSeconds": 25.078125,
+              "privateBytes": 143355904,
+              "workingSetBytes": 227422208,
+              "group": "webview2"
+            },
+            {
+              "pid": 12572,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3182592,
+              "workingSetBytes": 14000128,
+              "group": "webview2"
+            },
+            {
+              "pid": 7544,
+              "cpuSeconds": 0.75,
+              "privateBytes": 134791168,
+              "workingSetBytes": 96952320,
+              "group": "webview2"
+            },
+            {
+              "pid": 28500,
+              "cpuSeconds": 0.21875,
+              "privateBytes": 11517952,
+              "workingSetBytes": 39735296,
+              "group": "webview2"
+            },
+            {
+              "pid": 17176,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7602176,
+              "workingSetBytes": 20791296,
+              "group": "webview2"
+            },
+            {
+              "pid": 17320,
+              "cpuSeconds": 10.40625,
+              "privateBytes": 412372992,
+              "workingSetBytes": 459046912,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 76887.468,
+          "processes": [
+            {
+              "pid": 34644,
+              "cpuSeconds": 2.71875,
+              "privateBytes": 8933376,
+              "workingSetBytes": 34820096,
+              "group": "app-core"
+            },
+            {
+              "pid": 30644,
+              "cpuSeconds": 26.328125,
+              "privateBytes": 156991488,
+              "workingSetBytes": 242601984,
+              "group": "webview2"
+            },
+            {
+              "pid": 12572,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3182592,
+              "workingSetBytes": 14000128,
+              "group": "webview2"
+            },
+            {
+              "pid": 7544,
+              "cpuSeconds": 0.765625,
+              "privateBytes": 135606272,
+              "workingSetBytes": 97923072,
+              "group": "webview2"
+            },
+            {
+              "pid": 28500,
+              "cpuSeconds": 0.21875,
+              "privateBytes": 11579392,
+              "workingSetBytes": 39796736,
+              "group": "webview2"
+            },
+            {
+              "pid": 17176,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7593984,
+              "workingSetBytes": 20783104,
+              "group": "webview2"
+            },
+            {
+              "pid": 17320,
+              "cpuSeconds": 10.84375,
+              "privateBytes": 382451712,
+              "workingSetBytes": 433713152,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 78218.1192,
+          "processes": [
+            {
+              "pid": 34644,
+              "cpuSeconds": 2.75,
+              "privateBytes": 8904704,
+              "workingSetBytes": 34738176,
+              "group": "app-core"
+            },
+            {
+              "pid": 30644,
+              "cpuSeconds": 27.5,
+              "privateBytes": 165548032,
+              "workingSetBytes": 251179008,
+              "group": "webview2"
+            },
+            {
+              "pid": 12572,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3182592,
+              "workingSetBytes": 14000128,
+              "group": "webview2"
+            },
+            {
+              "pid": 7544,
+              "cpuSeconds": 0.765625,
+              "privateBytes": 134860800,
+              "workingSetBytes": 97447936,
+              "group": "webview2"
+            },
+            {
+              "pid": 28500,
+              "cpuSeconds": 0.21875,
+              "privateBytes": 11505664,
+              "workingSetBytes": 39723008,
+              "group": "webview2"
+            },
+            {
+              "pid": 17176,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7593984,
+              "workingSetBytes": 20783104,
+              "group": "webview2"
+            },
+            {
+              "pid": 17320,
+              "cpuSeconds": 10.90625,
+              "privateBytes": 383623168,
+              "workingSetBytes": 434761728,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 79534.7844,
+          "processes": [
+            {
+              "pid": 34644,
+              "cpuSeconds": 2.78125,
+              "privateBytes": 9830400,
+              "workingSetBytes": 35278848,
+              "group": "app-core"
+            },
+            {
+              "pid": 30644,
+              "cpuSeconds": 28.6875,
+              "privateBytes": 144285696,
+              "workingSetBytes": 229736448,
+              "group": "webview2"
+            },
+            {
+              "pid": 12572,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3182592,
+              "workingSetBytes": 14000128,
+              "group": "webview2"
+            },
+            {
+              "pid": 7544,
+              "cpuSeconds": 0.765625,
+              "privateBytes": 134828032,
+              "workingSetBytes": 97415168,
+              "group": "webview2"
+            },
+            {
+              "pid": 28500,
+              "cpuSeconds": 0.21875,
+              "privateBytes": 11505664,
+              "workingSetBytes": 39723008,
+              "group": "webview2"
+            },
+            {
+              "pid": 17176,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7593984,
+              "workingSetBytes": 20783104,
+              "group": "webview2"
+            },
+            {
+              "pid": 17320,
+              "cpuSeconds": 10.96875,
+              "privateBytes": 378593280,
+              "workingSetBytes": 429932544,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 80831.0959,
+          "processes": [
+            {
+              "pid": 34644,
+              "cpuSeconds": 2.828125,
+              "privateBytes": 8871936,
+              "workingSetBytes": 34770944,
+              "group": "app-core"
+            },
+            {
+              "pid": 30644,
+              "cpuSeconds": 29.84375,
+              "privateBytes": 147148800,
+              "workingSetBytes": 232349696,
+              "group": "webview2"
+            },
+            {
+              "pid": 12572,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3182592,
+              "workingSetBytes": 14000128,
+              "group": "webview2"
+            },
+            {
+              "pid": 7544,
+              "cpuSeconds": 0.796875,
+              "privateBytes": 134832128,
+              "workingSetBytes": 97419264,
+              "group": "webview2"
+            },
+            {
+              "pid": 28500,
+              "cpuSeconds": 0.21875,
+              "privateBytes": 11505664,
+              "workingSetBytes": 39723008,
+              "group": "webview2"
+            },
+            {
+              "pid": 17176,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7593984,
+              "workingSetBytes": 20783104,
+              "group": "webview2"
+            },
+            {
+              "pid": 17320,
+              "cpuSeconds": 11.125,
+              "privateBytes": 382070784,
+              "workingSetBytes": 433340416,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 82165.5526,
+          "processes": [
+            {
+              "pid": 34644,
+              "cpuSeconds": 2.90625,
+              "privateBytes": 9543680,
+              "workingSetBytes": 35258368,
+              "group": "app-core"
+            },
+            {
+              "pid": 30644,
+              "cpuSeconds": 30.953125,
+              "privateBytes": 158437376,
+              "workingSetBytes": 240242688,
+              "group": "webview2"
+            },
+            {
+              "pid": 12572,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3182592,
+              "workingSetBytes": 14000128,
+              "group": "webview2"
+            },
+            {
+              "pid": 7544,
+              "cpuSeconds": 0.84375,
+              "privateBytes": 134832128,
+              "workingSetBytes": 97419264,
+              "group": "webview2"
+            },
+            {
+              "pid": 28500,
+              "cpuSeconds": 0.21875,
+              "privateBytes": 11505664,
+              "workingSetBytes": 39723008,
+              "group": "webview2"
+            },
+            {
+              "pid": 17176,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7593984,
+              "workingSetBytes": 20783104,
+              "group": "webview2"
+            },
+            {
+              "pid": 17320,
+              "cpuSeconds": 11.21875,
+              "privateBytes": 383447040,
+              "workingSetBytes": 434700288,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 83512.1921,
+          "processes": [
+            {
+              "pid": 34644,
+              "cpuSeconds": 2.984375,
+              "privateBytes": 9523200,
+              "workingSetBytes": 35250176,
+              "group": "app-core"
+            },
+            {
+              "pid": 30644,
+              "cpuSeconds": 32.1875,
+              "privateBytes": 159186944,
+              "workingSetBytes": 241651712,
+              "group": "webview2"
+            },
+            {
+              "pid": 12572,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3182592,
+              "workingSetBytes": 14000128,
+              "group": "webview2"
+            },
+            {
+              "pid": 7544,
+              "cpuSeconds": 0.859375,
+              "privateBytes": 134832128,
+              "workingSetBytes": 97419264,
+              "group": "webview2"
+            },
+            {
+              "pid": 28500,
+              "cpuSeconds": 0.21875,
+              "privateBytes": 11505664,
+              "workingSetBytes": 39723008,
+              "group": "webview2"
+            },
+            {
+              "pid": 17176,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7593984,
+              "workingSetBytes": 20783104,
+              "group": "webview2"
+            },
+            {
+              "pid": 17320,
+              "cpuSeconds": 11.359375,
+              "privateBytes": 387072000,
+              "workingSetBytes": 438247424,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 84884.8359,
+          "processes": [
+            {
+              "pid": 34644,
+              "cpuSeconds": 3.078125,
+              "privateBytes": 8843264,
+              "workingSetBytes": 34742272,
+              "group": "app-core"
+            },
+            {
+              "pid": 30644,
+              "cpuSeconds": 33.359375,
+              "privateBytes": 157118464,
+              "workingSetBytes": 242593792,
+              "group": "webview2"
+            },
+            {
+              "pid": 12572,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3182592,
+              "workingSetBytes": 14000128,
+              "group": "webview2"
+            },
+            {
+              "pid": 7544,
+              "cpuSeconds": 0.859375,
+              "privateBytes": 134823936,
+              "workingSetBytes": 97411072,
+              "group": "webview2"
+            },
+            {
+              "pid": 28500,
+              "cpuSeconds": 0.21875,
+              "privateBytes": 11505664,
+              "workingSetBytes": 39723008,
+              "group": "webview2"
+            },
+            {
+              "pid": 17176,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7593984,
+              "workingSetBytes": 20783104,
+              "group": "webview2"
+            },
+            {
+              "pid": 17320,
+              "cpuSeconds": 11.515625,
+              "privateBytes": 389324800,
+              "workingSetBytes": 440512512,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 86205.9735,
+          "processes": [
+            {
+              "pid": 34644,
+              "cpuSeconds": 3.125,
+              "privateBytes": 8847360,
+              "workingSetBytes": 34746368,
+              "group": "app-core"
+            },
+            {
+              "pid": 30644,
+              "cpuSeconds": 34.46875,
+              "privateBytes": 143355904,
+              "workingSetBytes": 228995072,
+              "group": "webview2"
+            },
+            {
+              "pid": 12572,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3182592,
+              "workingSetBytes": 14000128,
+              "group": "webview2"
+            },
+            {
+              "pid": 7544,
+              "cpuSeconds": 0.859375,
+              "privateBytes": 134832128,
+              "workingSetBytes": 97419264,
+              "group": "webview2"
+            },
+            {
+              "pid": 28500,
+              "cpuSeconds": 0.21875,
+              "privateBytes": 11505664,
+              "workingSetBytes": 39723008,
+              "group": "webview2"
+            },
+            {
+              "pid": 17176,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7593984,
+              "workingSetBytes": 20783104,
+              "group": "webview2"
+            },
+            {
+              "pid": 17320,
+              "cpuSeconds": 11.578125,
+              "privateBytes": 393453568,
+              "workingSetBytes": 443686912,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 87553.2148,
+          "processes": [
+            {
+              "pid": 34644,
+              "cpuSeconds": 3.15625,
+              "privateBytes": 9449472,
+              "workingSetBytes": 35258368,
+              "group": "app-core"
+            },
+            {
+              "pid": 30644,
+              "cpuSeconds": 35.609375,
+              "privateBytes": 151298048,
+              "workingSetBytes": 236847104,
+              "group": "webview2"
+            },
+            {
+              "pid": 12572,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3182592,
+              "workingSetBytes": 14000128,
+              "group": "webview2"
+            },
+            {
+              "pid": 7544,
+              "cpuSeconds": 0.875,
+              "privateBytes": 134836224,
+              "workingSetBytes": 97423360,
+              "group": "webview2"
+            },
+            {
+              "pid": 28500,
+              "cpuSeconds": 0.21875,
+              "privateBytes": 11505664,
+              "workingSetBytes": 39723008,
+              "group": "webview2"
+            },
+            {
+              "pid": 17176,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7593984,
+              "workingSetBytes": 20783104,
+              "group": "webview2"
+            },
+            {
+              "pid": 17320,
+              "cpuSeconds": 11.734375,
+              "privateBytes": 396374016,
+              "workingSetBytes": 447041536,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 88879.028,
+          "processes": [
+            {
+              "pid": 34644,
+              "cpuSeconds": 3.203125,
+              "privateBytes": 9334784,
+              "workingSetBytes": 34770944,
+              "group": "app-core"
+            },
+            {
+              "pid": 30644,
+              "cpuSeconds": 36.734375,
+              "privateBytes": 153358336,
+              "workingSetBytes": 238112768,
+              "group": "webview2"
+            },
+            {
+              "pid": 12572,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3182592,
+              "workingSetBytes": 14000128,
+              "group": "webview2"
+            },
+            {
+              "pid": 7544,
+              "cpuSeconds": 0.875,
+              "privateBytes": 134483968,
+              "workingSetBytes": 97144832,
+              "group": "webview2"
+            },
+            {
+              "pid": 28500,
+              "cpuSeconds": 0.21875,
+              "privateBytes": 11505664,
+              "workingSetBytes": 39723008,
+              "group": "webview2"
+            },
+            {
+              "pid": 17176,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7593984,
+              "workingSetBytes": 20783104,
+              "group": "webview2"
+            },
+            {
+              "pid": 17320,
+              "cpuSeconds": 11.875,
+              "privateBytes": 400154624,
+              "workingSetBytes": 450723840,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 90257.3147,
+          "processes": [
+            {
+              "pid": 34644,
+              "cpuSeconds": 3.203125,
+              "privateBytes": 8859648,
+              "workingSetBytes": 34693120,
+              "group": "app-core"
+            },
+            {
+              "pid": 30644,
+              "cpuSeconds": 37.953125,
+              "privateBytes": 158248960,
+              "workingSetBytes": 243871744,
+              "group": "webview2"
+            },
+            {
+              "pid": 12572,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3182592,
+              "workingSetBytes": 14000128,
+              "group": "webview2"
+            },
+            {
+              "pid": 7544,
+              "cpuSeconds": 0.875,
+              "privateBytes": 134483968,
+              "workingSetBytes": 97144832,
+              "group": "webview2"
+            },
+            {
+              "pid": 28500,
+              "cpuSeconds": 0.21875,
+              "privateBytes": 11505664,
+              "workingSetBytes": 39723008,
+              "group": "webview2"
+            },
+            {
+              "pid": 17176,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7593984,
+              "workingSetBytes": 20783104,
+              "group": "webview2"
+            },
+            {
+              "pid": 17320,
+              "cpuSeconds": 12.109375,
+              "privateBytes": 385732608,
+              "workingSetBytes": 437133312,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 91631.3817,
+          "processes": [
+            {
+              "pid": 34644,
+              "cpuSeconds": 3.234375,
+              "privateBytes": 8904704,
+              "workingSetBytes": 34803712,
+              "group": "app-core"
+            },
+            {
+              "pid": 30644,
+              "cpuSeconds": 39.21875,
+              "privateBytes": 144609280,
+              "workingSetBytes": 230244352,
+              "group": "webview2"
+            },
+            {
+              "pid": 12572,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3182592,
+              "workingSetBytes": 14000128,
+              "group": "webview2"
+            },
+            {
+              "pid": 7544,
+              "cpuSeconds": 0.890625,
+              "privateBytes": 134483968,
+              "workingSetBytes": 97144832,
+              "group": "webview2"
+            },
+            {
+              "pid": 28500,
+              "cpuSeconds": 0.21875,
+              "privateBytes": 11505664,
+              "workingSetBytes": 39723008,
+              "group": "webview2"
+            },
+            {
+              "pid": 17176,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7593984,
+              "workingSetBytes": 20783104,
+              "group": "webview2"
+            },
+            {
+              "pid": 17320,
+              "cpuSeconds": 12.1875,
+              "privateBytes": 386174976,
+              "workingSetBytes": 436142080,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 92886.4481,
+          "processes": [
+            {
+              "pid": 34644,
+              "cpuSeconds": 3.296875,
+              "privateBytes": 8900608,
+              "workingSetBytes": 34799616,
+              "group": "app-core"
+            },
+            {
+              "pid": 30644,
+              "cpuSeconds": 40.203125,
+              "privateBytes": 148217856,
+              "workingSetBytes": 233549824,
+              "group": "webview2"
+            },
+            {
+              "pid": 12572,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3182592,
+              "workingSetBytes": 14000128,
+              "group": "webview2"
+            },
+            {
+              "pid": 7544,
+              "cpuSeconds": 0.921875,
+              "privateBytes": 134483968,
+              "workingSetBytes": 97144832,
+              "group": "webview2"
+            },
+            {
+              "pid": 28500,
+              "cpuSeconds": 0.21875,
+              "privateBytes": 11448320,
+              "workingSetBytes": 39665664,
+              "group": "webview2"
+            },
+            {
+              "pid": 17176,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7593984,
+              "workingSetBytes": 20783104,
+              "group": "webview2"
+            },
+            {
+              "pid": 17320,
+              "cpuSeconds": 12.34375,
+              "privateBytes": 386617344,
+              "workingSetBytes": 436563968,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 94226.3211,
+          "processes": [
+            {
+              "pid": 34644,
+              "cpuSeconds": 3.296875,
+              "privateBytes": 10121216,
+              "workingSetBytes": 35209216,
+              "group": "app-core"
+            },
+            {
+              "pid": 30644,
+              "cpuSeconds": 41.34375,
+              "privateBytes": 164093952,
+              "workingSetBytes": 246419456,
+              "group": "webview2"
+            },
+            {
+              "pid": 12572,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3182592,
+              "workingSetBytes": 14000128,
+              "group": "webview2"
+            },
+            {
+              "pid": 7544,
+              "cpuSeconds": 0.9375,
+              "privateBytes": 134479872,
+              "workingSetBytes": 97140736,
+              "group": "webview2"
+            },
+            {
+              "pid": 28500,
+              "cpuSeconds": 0.21875,
+              "privateBytes": 11456512,
+              "workingSetBytes": 39673856,
+              "group": "webview2"
+            },
+            {
+              "pid": 17176,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7593984,
+              "workingSetBytes": 20783104,
+              "group": "webview2"
+            },
+            {
+              "pid": 17320,
+              "cpuSeconds": 12.46875,
+              "privateBytes": 384913408,
+              "workingSetBytes": 434724864,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 95622.097,
+          "processes": [
+            {
+              "pid": 34644,
+              "cpuSeconds": 3.34375,
+              "privateBytes": 9650176,
+              "workingSetBytes": 35311616,
+              "group": "app-core"
+            },
+            {
+              "pid": 30644,
+              "cpuSeconds": 42.390625,
+              "privateBytes": 141303808,
+              "workingSetBytes": 226975744,
+              "group": "webview2"
+            },
+            {
+              "pid": 12572,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3182592,
+              "workingSetBytes": 14000128,
+              "group": "webview2"
+            },
+            {
+              "pid": 7544,
+              "cpuSeconds": 0.953125,
+              "privateBytes": 134479872,
+              "workingSetBytes": 97140736,
+              "group": "webview2"
+            },
+            {
+              "pid": 28500,
+              "cpuSeconds": 0.234375,
+              "privateBytes": 11456512,
+              "workingSetBytes": 39673856,
+              "group": "webview2"
+            },
+            {
+              "pid": 17176,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7593984,
+              "workingSetBytes": 20783104,
+              "group": "webview2"
+            },
+            {
+              "pid": 17320,
+              "cpuSeconds": 12.71875,
+              "privateBytes": 389210112,
+              "workingSetBytes": 438984704,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 96939.9728,
+          "processes": [
+            {
+              "pid": 34644,
+              "cpuSeconds": 3.375,
+              "privateBytes": 8970240,
+              "workingSetBytes": 34869248,
+              "group": "app-core"
+            },
+            {
+              "pid": 30644,
+              "cpuSeconds": 43.53125,
+              "privateBytes": 142970880,
+              "workingSetBytes": 228458496,
+              "group": "webview2"
+            },
+            {
+              "pid": 12572,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3182592,
+              "workingSetBytes": 14000128,
+              "group": "webview2"
+            },
+            {
+              "pid": 7544,
+              "cpuSeconds": 0.96875,
+              "privateBytes": 134475776,
+              "workingSetBytes": 97136640,
+              "group": "webview2"
+            },
+            {
+              "pid": 28500,
+              "cpuSeconds": 0.234375,
+              "privateBytes": 11456512,
+              "workingSetBytes": 39673856,
+              "group": "webview2"
+            },
+            {
+              "pid": 17176,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7593984,
+              "workingSetBytes": 20783104,
+              "group": "webview2"
+            },
+            {
+              "pid": 17320,
+              "cpuSeconds": 12.875,
+              "privateBytes": 386048000,
+              "workingSetBytes": 436035584,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 98237.9024,
+          "processes": [
+            {
+              "pid": 34644,
+              "cpuSeconds": 3.421875,
+              "privateBytes": 9027584,
+              "workingSetBytes": 34840576,
+              "group": "app-core"
+            },
+            {
+              "pid": 30644,
+              "cpuSeconds": 44.5625,
+              "privateBytes": 152555520,
+              "workingSetBytes": 238055424,
+              "group": "webview2"
+            },
+            {
+              "pid": 12572,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3182592,
+              "workingSetBytes": 14000128,
+              "group": "webview2"
+            },
+            {
+              "pid": 7544,
+              "cpuSeconds": 0.96875,
+              "privateBytes": 134475776,
+              "workingSetBytes": 97136640,
+              "group": "webview2"
+            },
+            {
+              "pid": 28500,
+              "cpuSeconds": 0.234375,
+              "privateBytes": 11456512,
+              "workingSetBytes": 39673856,
+              "group": "webview2"
+            },
+            {
+              "pid": 17176,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7593984,
+              "workingSetBytes": 20783104,
+              "group": "webview2"
+            },
+            {
+              "pid": 17320,
+              "cpuSeconds": 12.984375,
+              "privateBytes": 383143936,
+              "workingSetBytes": 433287168,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 99527.943,
+          "processes": [
+            {
+              "pid": 34644,
+              "cpuSeconds": 3.453125,
+              "privateBytes": 9011200,
+              "workingSetBytes": 34910208,
+              "group": "app-core"
+            },
+            {
+              "pid": 30644,
+              "cpuSeconds": 45.671875,
+              "privateBytes": 153530368,
+              "workingSetBytes": 238399488,
+              "group": "webview2"
+            },
+            {
+              "pid": 12572,
+              "cpuSeconds": 0.03125,
+              "privateBytes": 3182592,
+              "workingSetBytes": 14000128,
+              "group": "webview2"
+            },
+            {
+              "pid": 7544,
+              "cpuSeconds": 0.96875,
+              "privateBytes": 134475776,
+              "workingSetBytes": 97136640,
+              "group": "webview2"
+            },
+            {
+              "pid": 28500,
+              "cpuSeconds": 0.25,
+              "privateBytes": 11456512,
+              "workingSetBytes": 39673856,
+              "group": "webview2"
+            },
+            {
+              "pid": 17176,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7593984,
+              "workingSetBytes": 20783104,
+              "group": "webview2"
+            },
+            {
+              "pid": 17320,
+              "cpuSeconds": 13.0625,
+              "privateBytes": 385089536,
+              "workingSetBytes": 435183616,
+              "group": "webview2"
+            }
+          ]
+        }
+      ],
+      "repetition": 2,
+      "windowHandleReadyMs": 77.5502,
+      "startupKind": "warm reopen",
+      "operatorObservation": "Agent verified saved Arabic/ascending state with 1000 rows after reopen. Initial capture was unusable; reselected and activated the unique ZipZap window before any input. Switched to English successfully and scrolled through later paused rows. No jobs resumed; no app error visible.",
+      "observedTableReadyMs": 73723.6332,
+      "rows": 1000
+    },
+    {
+      "samples": [
+        {
+          "elapsedMs": 33816.9851,
+          "processes": [
+            {
+              "pid": 11932,
+              "cpuSeconds": 1.171875,
+              "privateBytes": 9064448,
+              "workingSetBytes": 36827136,
+              "group": "app-core"
+            },
+            {
+              "pid": 9156,
+              "cpuSeconds": 29.921875,
+              "privateBytes": 168185856,
+              "workingSetBytes": 250798080,
+              "group": "webview2"
+            },
+            {
+              "pid": 27924,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 3518464,
+              "workingSetBytes": 20045824,
+              "group": "webview2"
+            },
+            {
+              "pid": 8244,
+              "cpuSeconds": 0.484375,
+              "privateBytes": 128933888,
+              "workingSetBytes": 95092736,
+              "group": "webview2"
+            },
+            {
+              "pid": 21948,
+              "cpuSeconds": 0.1875,
+              "privateBytes": 11558912,
+              "workingSetBytes": 36696064,
+              "group": "webview2"
+            },
+            {
+              "pid": 30516,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20770816,
+              "group": "webview2"
+            },
+            {
+              "pid": 8544,
+              "cpuSeconds": 4.453125,
+              "privateBytes": 173932544,
+              "workingSetBytes": 223956992,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 35162.7409,
+          "processes": [
+            {
+              "pid": 11932,
+              "cpuSeconds": 1.21875,
+              "privateBytes": 8785920,
+              "workingSetBytes": 36577280,
+              "group": "app-core"
+            },
+            {
+              "pid": 9156,
+              "cpuSeconds": 31.203125,
+              "privateBytes": 148996096,
+              "workingSetBytes": 231985152,
+              "group": "webview2"
+            },
+            {
+              "pid": 27924,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 3518464,
+              "workingSetBytes": 20045824,
+              "group": "webview2"
+            },
+            {
+              "pid": 8244,
+              "cpuSeconds": 0.484375,
+              "privateBytes": 130289664,
+              "workingSetBytes": 95391744,
+              "group": "webview2"
+            },
+            {
+              "pid": 21948,
+              "cpuSeconds": 0.1875,
+              "privateBytes": 11558912,
+              "workingSetBytes": 36704256,
+              "group": "webview2"
+            },
+            {
+              "pid": 30516,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20770816,
+              "group": "webview2"
+            },
+            {
+              "pid": 8544,
+              "cpuSeconds": 4.578125,
+              "privateBytes": 181018624,
+              "workingSetBytes": 231063552,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 36524.767,
+          "processes": [
+            {
+              "pid": 11932,
+              "cpuSeconds": 1.25,
+              "privateBytes": 8536064,
+              "workingSetBytes": 36507648,
+              "group": "app-core"
+            },
+            {
+              "pid": 9156,
+              "cpuSeconds": 32.34375,
+              "privateBytes": 148938752,
+              "workingSetBytes": 233267200,
+              "group": "webview2"
+            },
+            {
+              "pid": 27924,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 3518464,
+              "workingSetBytes": 20045824,
+              "group": "webview2"
+            },
+            {
+              "pid": 8244,
+              "cpuSeconds": 0.546875,
+              "privateBytes": 136380416,
+              "workingSetBytes": 98156544,
+              "group": "webview2"
+            },
+            {
+              "pid": 21948,
+              "cpuSeconds": 0.1875,
+              "privateBytes": 11558912,
+              "workingSetBytes": 36704256,
+              "group": "webview2"
+            },
+            {
+              "pid": 30516,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20770816,
+              "group": "webview2"
+            },
+            {
+              "pid": 8544,
+              "cpuSeconds": 4.875,
+              "privateBytes": 186109952,
+              "workingSetBytes": 235585536,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 37839.9321,
+          "processes": [
+            {
+              "pid": 11932,
+              "cpuSeconds": 1.28125,
+              "privateBytes": 9109504,
+              "workingSetBytes": 36880384,
+              "group": "app-core"
+            },
+            {
+              "pid": 9156,
+              "cpuSeconds": 33.421875,
+              "privateBytes": 153714688,
+              "workingSetBytes": 238088192,
+              "group": "webview2"
+            },
+            {
+              "pid": 27924,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 3518464,
+              "workingSetBytes": 20045824,
+              "group": "webview2"
+            },
+            {
+              "pid": 8244,
+              "cpuSeconds": 0.546875,
+              "privateBytes": 136302592,
+              "workingSetBytes": 98414592,
+              "group": "webview2"
+            },
+            {
+              "pid": 21948,
+              "cpuSeconds": 0.1875,
+              "privateBytes": 11558912,
+              "workingSetBytes": 36704256,
+              "group": "webview2"
+            },
+            {
+              "pid": 30516,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20770816,
+              "group": "webview2"
+            },
+            {
+              "pid": 8544,
+              "cpuSeconds": 4.984375,
+              "privateBytes": 191873024,
+              "workingSetBytes": 241213440,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 39153.7438,
+          "processes": [
+            {
+              "pid": 11932,
+              "cpuSeconds": 1.390625,
+              "privateBytes": 9768960,
+              "workingSetBytes": 37048320,
+              "group": "app-core"
+            },
+            {
+              "pid": 9156,
+              "cpuSeconds": 34.515625,
+              "privateBytes": 154845184,
+              "workingSetBytes": 239124480,
+              "group": "webview2"
+            },
+            {
+              "pid": 27924,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 3518464,
+              "workingSetBytes": 20045824,
+              "group": "webview2"
+            },
+            {
+              "pid": 8244,
+              "cpuSeconds": 0.546875,
+              "privateBytes": 136273920,
+              "workingSetBytes": 98385920,
+              "group": "webview2"
+            },
+            {
+              "pid": 21948,
+              "cpuSeconds": 0.1875,
+              "privateBytes": 11579392,
+              "workingSetBytes": 36724736,
+              "group": "webview2"
+            },
+            {
+              "pid": 30516,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20770816,
+              "group": "webview2"
+            },
+            {
+              "pid": 8544,
+              "cpuSeconds": 5.15625,
+              "privateBytes": 205901824,
+              "workingSetBytes": 255033344,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 40478.2052,
+          "processes": [
+            {
+              "pid": 11932,
+              "cpuSeconds": 1.40625,
+              "privateBytes": 8548352,
+              "workingSetBytes": 36519936,
+              "group": "app-core"
+            },
+            {
+              "pid": 9156,
+              "cpuSeconds": 35.703125,
+              "privateBytes": 137093120,
+              "workingSetBytes": 221208576,
+              "group": "webview2"
+            },
+            {
+              "pid": 27924,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 3518464,
+              "workingSetBytes": 20045824,
+              "group": "webview2"
+            },
+            {
+              "pid": 8244,
+              "cpuSeconds": 0.5625,
+              "privateBytes": 136273920,
+              "workingSetBytes": 98385920,
+              "group": "webview2"
+            },
+            {
+              "pid": 21948,
+              "cpuSeconds": 0.1875,
+              "privateBytes": 11579392,
+              "workingSetBytes": 36724736,
+              "group": "webview2"
+            },
+            {
+              "pid": 30516,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20770816,
+              "group": "webview2"
+            },
+            {
+              "pid": 8544,
+              "cpuSeconds": 5.21875,
+              "privateBytes": 209813504,
+              "workingSetBytes": 259059712,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 41798.6212,
+          "processes": [
+            {
+              "pid": 11932,
+              "cpuSeconds": 1.4375,
+              "privateBytes": 9170944,
+              "workingSetBytes": 36601856,
+              "group": "app-core"
+            },
+            {
+              "pid": 9156,
+              "cpuSeconds": 36.890625,
+              "privateBytes": 144064512,
+              "workingSetBytes": 226553856,
+              "group": "webview2"
+            },
+            {
+              "pid": 27924,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 3518464,
+              "workingSetBytes": 20045824,
+              "group": "webview2"
+            },
+            {
+              "pid": 8244,
+              "cpuSeconds": 0.59375,
+              "privateBytes": 136273920,
+              "workingSetBytes": 98385920,
+              "group": "webview2"
+            },
+            {
+              "pid": 21948,
+              "cpuSeconds": 0.1875,
+              "privateBytes": 11579392,
+              "workingSetBytes": 36724736,
+              "group": "webview2"
+            },
+            {
+              "pid": 30516,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20770816,
+              "group": "webview2"
+            },
+            {
+              "pid": 8544,
+              "cpuSeconds": 5.375,
+              "privateBytes": 217190400,
+              "workingSetBytes": 266858496,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 43107.5574,
+          "processes": [
+            {
+              "pid": 11932,
+              "cpuSeconds": 1.453125,
+              "privateBytes": 9080832,
+              "workingSetBytes": 36855808,
+              "group": "app-core"
+            },
+            {
+              "pid": 9156,
+              "cpuSeconds": 38.03125,
+              "privateBytes": 146182144,
+              "workingSetBytes": 229732352,
+              "group": "webview2"
+            },
+            {
+              "pid": 27924,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 3518464,
+              "workingSetBytes": 20045824,
+              "group": "webview2"
+            },
+            {
+              "pid": 8244,
+              "cpuSeconds": 0.59375,
+              "privateBytes": 136273920,
+              "workingSetBytes": 98385920,
+              "group": "webview2"
+            },
+            {
+              "pid": 21948,
+              "cpuSeconds": 0.1875,
+              "privateBytes": 11579392,
+              "workingSetBytes": 36724736,
+              "group": "webview2"
+            },
+            {
+              "pid": 30516,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20770816,
+              "group": "webview2"
+            },
+            {
+              "pid": 8544,
+              "cpuSeconds": 5.4375,
+              "privateBytes": 221192192,
+              "workingSetBytes": 270753792,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 44395.3776,
+          "processes": [
+            {
+              "pid": 11932,
+              "cpuSeconds": 1.484375,
+              "privateBytes": 9093120,
+              "workingSetBytes": 36868096,
+              "group": "app-core"
+            },
+            {
+              "pid": 9156,
+              "cpuSeconds": 39.140625,
+              "privateBytes": 159186944,
+              "workingSetBytes": 239185920,
+              "group": "webview2"
+            },
+            {
+              "pid": 27924,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 3518464,
+              "workingSetBytes": 20045824,
+              "group": "webview2"
+            },
+            {
+              "pid": 8244,
+              "cpuSeconds": 0.609375,
+              "privateBytes": 136273920,
+              "workingSetBytes": 98385920,
+              "group": "webview2"
+            },
+            {
+              "pid": 21948,
+              "cpuSeconds": 0.1875,
+              "privateBytes": 11579392,
+              "workingSetBytes": 36724736,
+              "group": "webview2"
+            },
+            {
+              "pid": 30516,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20770816,
+              "group": "webview2"
+            },
+            {
+              "pid": 8544,
+              "cpuSeconds": 5.546875,
+              "privateBytes": 229462016,
+              "workingSetBytes": 278536192,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 45661.3342,
+          "processes": [
+            {
+              "pid": 11932,
+              "cpuSeconds": 1.515625,
+              "privateBytes": 8548352,
+              "workingSetBytes": 36519936,
+              "group": "app-core"
+            },
+            {
+              "pid": 9156,
+              "cpuSeconds": 40.265625,
+              "privateBytes": 163614720,
+              "workingSetBytes": 244334592,
+              "group": "webview2"
+            },
+            {
+              "pid": 27924,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 3518464,
+              "workingSetBytes": 20045824,
+              "group": "webview2"
+            },
+            {
+              "pid": 8244,
+              "cpuSeconds": 0.625,
+              "privateBytes": 136273920,
+              "workingSetBytes": 98385920,
+              "group": "webview2"
+            },
+            {
+              "pid": 21948,
+              "cpuSeconds": 0.1875,
+              "privateBytes": 11579392,
+              "workingSetBytes": 36724736,
+              "group": "webview2"
+            },
+            {
+              "pid": 30516,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20770816,
+              "group": "webview2"
+            },
+            {
+              "pid": 8544,
+              "cpuSeconds": 5.625,
+              "privateBytes": 232689664,
+              "workingSetBytes": 282324992,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 46954.6588,
+          "processes": [
+            {
+              "pid": 11932,
+              "cpuSeconds": 1.578125,
+              "privateBytes": 9084928,
+              "workingSetBytes": 36859904,
+              "group": "app-core"
+            },
+            {
+              "pid": 9156,
+              "cpuSeconds": 41.453125,
+              "privateBytes": 152707072,
+              "workingSetBytes": 232992768,
+              "group": "webview2"
+            },
+            {
+              "pid": 27924,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 3518464,
+              "workingSetBytes": 20045824,
+              "group": "webview2"
+            },
+            {
+              "pid": 8244,
+              "cpuSeconds": 0.640625,
+              "privateBytes": 136269824,
+              "workingSetBytes": 98381824,
+              "group": "webview2"
+            },
+            {
+              "pid": 21948,
+              "cpuSeconds": 0.1875,
+              "privateBytes": 11579392,
+              "workingSetBytes": 36724736,
+              "group": "webview2"
+            },
+            {
+              "pid": 30516,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20770816,
+              "group": "webview2"
+            },
+            {
+              "pid": 8544,
+              "cpuSeconds": 5.703125,
+              "privateBytes": 236527616,
+              "workingSetBytes": 286195712,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 48357.0198,
+          "processes": [
+            {
+              "pid": 11932,
+              "cpuSeconds": 1.59375,
+              "privateBytes": 9084928,
+              "workingSetBytes": 36872192,
+              "group": "app-core"
+            },
+            {
+              "pid": 9156,
+              "cpuSeconds": 42.671875,
+              "privateBytes": 159879168,
+              "workingSetBytes": 241029120,
+              "group": "webview2"
+            },
+            {
+              "pid": 27924,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 3518464,
+              "workingSetBytes": 20045824,
+              "group": "webview2"
+            },
+            {
+              "pid": 8244,
+              "cpuSeconds": 0.640625,
+              "privateBytes": 136269824,
+              "workingSetBytes": 98381824,
+              "group": "webview2"
+            },
+            {
+              "pid": 21948,
+              "cpuSeconds": 0.1875,
+              "privateBytes": 11579392,
+              "workingSetBytes": 36724736,
+              "group": "webview2"
+            },
+            {
+              "pid": 30516,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20770816,
+              "group": "webview2"
+            },
+            {
+              "pid": 8544,
+              "cpuSeconds": 5.8125,
+              "privateBytes": 245383168,
+              "workingSetBytes": 294363136,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 49711.3413,
+          "processes": [
+            {
+              "pid": 11932,
+              "cpuSeconds": 1.640625,
+              "privateBytes": 9101312,
+              "workingSetBytes": 36872192,
+              "group": "app-core"
+            },
+            {
+              "pid": 9156,
+              "cpuSeconds": 43.796875,
+              "privateBytes": 153706496,
+              "workingSetBytes": 238026752,
+              "group": "webview2"
+            },
+            {
+              "pid": 27924,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 3518464,
+              "workingSetBytes": 20045824,
+              "group": "webview2"
+            },
+            {
+              "pid": 8244,
+              "cpuSeconds": 0.640625,
+              "privateBytes": 136273920,
+              "workingSetBytes": 98385920,
+              "group": "webview2"
+            },
+            {
+              "pid": 21948,
+              "cpuSeconds": 0.1875,
+              "privateBytes": 11579392,
+              "workingSetBytes": 36724736,
+              "group": "webview2"
+            },
+            {
+              "pid": 30516,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20770816,
+              "group": "webview2"
+            },
+            {
+              "pid": 8544,
+              "cpuSeconds": 5.9375,
+              "privateBytes": 260161536,
+              "workingSetBytes": 309542912,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 51119.2766,
+          "processes": [
+            {
+              "pid": 11932,
+              "cpuSeconds": 1.6875,
+              "privateBytes": 9117696,
+              "workingSetBytes": 36941824,
+              "group": "app-core"
+            },
+            {
+              "pid": 9156,
+              "cpuSeconds": 44.984375,
+              "privateBytes": 153837568,
+              "workingSetBytes": 238067712,
+              "group": "webview2"
+            },
+            {
+              "pid": 27924,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 3518464,
+              "workingSetBytes": 20045824,
+              "group": "webview2"
+            },
+            {
+              "pid": 8244,
+              "cpuSeconds": 0.640625,
+              "privateBytes": 136273920,
+              "workingSetBytes": 98385920,
+              "group": "webview2"
+            },
+            {
+              "pid": 21948,
+              "cpuSeconds": 0.1875,
+              "privateBytes": 11579392,
+              "workingSetBytes": 36728832,
+              "group": "webview2"
+            },
+            {
+              "pid": 30516,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20770816,
+              "group": "webview2"
+            },
+            {
+              "pid": 8544,
+              "cpuSeconds": 6.0625,
+              "privateBytes": 278233088,
+              "workingSetBytes": 326893568,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 52445.744,
+          "processes": [
+            {
+              "pid": 11932,
+              "cpuSeconds": 1.734375,
+              "privateBytes": 8876032,
+              "workingSetBytes": 36544512,
+              "group": "app-core"
+            },
+            {
+              "pid": 9156,
+              "cpuSeconds": 46.1875,
+              "privateBytes": 155987968,
+              "workingSetBytes": 240369664,
+              "group": "webview2"
+            },
+            {
+              "pid": 27924,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 3518464,
+              "workingSetBytes": 20045824,
+              "group": "webview2"
+            },
+            {
+              "pid": 8244,
+              "cpuSeconds": 0.640625,
+              "privateBytes": 136278016,
+              "workingSetBytes": 98390016,
+              "group": "webview2"
+            },
+            {
+              "pid": 21948,
+              "cpuSeconds": 0.1875,
+              "privateBytes": 11579392,
+              "workingSetBytes": 36728832,
+              "group": "webview2"
+            },
+            {
+              "pid": 30516,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20770816,
+              "group": "webview2"
+            },
+            {
+              "pid": 8544,
+              "cpuSeconds": 6.140625,
+              "privateBytes": 285016064,
+              "workingSetBytes": 334147584,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 53763.3585,
+          "processes": [
+            {
+              "pid": 11932,
+              "cpuSeconds": 1.78125,
+              "privateBytes": 9117696,
+              "workingSetBytes": 36892672,
+              "group": "app-core"
+            },
+            {
+              "pid": 9156,
+              "cpuSeconds": 47.328125,
+              "privateBytes": 141803520,
+              "workingSetBytes": 225959936,
+              "group": "webview2"
+            },
+            {
+              "pid": 27924,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 3518464,
+              "workingSetBytes": 20045824,
+              "group": "webview2"
+            },
+            {
+              "pid": 8244,
+              "cpuSeconds": 0.640625,
+              "privateBytes": 136278016,
+              "workingSetBytes": 98390016,
+              "group": "webview2"
+            },
+            {
+              "pid": 21948,
+              "cpuSeconds": 0.1875,
+              "privateBytes": 11579392,
+              "workingSetBytes": 36728832,
+              "group": "webview2"
+            },
+            {
+              "pid": 30516,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20770816,
+              "group": "webview2"
+            },
+            {
+              "pid": 8544,
+              "cpuSeconds": 6.203125,
+              "privateBytes": 289329152,
+              "workingSetBytes": 338636800,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 55116.9899,
+          "processes": [
+            {
+              "pid": 11932,
+              "cpuSeconds": 1.84375,
+              "privateBytes": 9105408,
+              "workingSetBytes": 36880384,
+              "group": "app-core"
+            },
+            {
+              "pid": 9156,
+              "cpuSeconds": 48.515625,
+              "privateBytes": 150130688,
+              "workingSetBytes": 234520576,
+              "group": "webview2"
+            },
+            {
+              "pid": 27924,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 3518464,
+              "workingSetBytes": 20045824,
+              "group": "webview2"
+            },
+            {
+              "pid": 8244,
+              "cpuSeconds": 0.671875,
+              "privateBytes": 136278016,
+              "workingSetBytes": 98390016,
+              "group": "webview2"
+            },
+            {
+              "pid": 21948,
+              "cpuSeconds": 0.1875,
+              "privateBytes": 11579392,
+              "workingSetBytes": 36728832,
+              "group": "webview2"
+            },
+            {
+              "pid": 30516,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20770816,
+              "group": "webview2"
+            },
+            {
+              "pid": 8544,
+              "cpuSeconds": 6.359375,
+              "privateBytes": 299544576,
+              "workingSetBytes": 348532736,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 56442.3875,
+          "processes": [
+            {
+              "pid": 11932,
+              "cpuSeconds": 1.859375,
+              "privateBytes": 9162752,
+              "workingSetBytes": 37089280,
+              "group": "app-core"
+            },
+            {
+              "pid": 9156,
+              "cpuSeconds": 49.6875,
+              "privateBytes": 154759168,
+              "workingSetBytes": 239140864,
+              "group": "webview2"
+            },
+            {
+              "pid": 27924,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 3518464,
+              "workingSetBytes": 20045824,
+              "group": "webview2"
+            },
+            {
+              "pid": 8244,
+              "cpuSeconds": 0.6875,
+              "privateBytes": 136278016,
+              "workingSetBytes": 98390016,
+              "group": "webview2"
+            },
+            {
+              "pid": 21948,
+              "cpuSeconds": 0.1875,
+              "privateBytes": 11579392,
+              "workingSetBytes": 36728832,
+              "group": "webview2"
+            },
+            {
+              "pid": 30516,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20770816,
+              "group": "webview2"
+            },
+            {
+              "pid": 8544,
+              "cpuSeconds": 6.5,
+              "privateBytes": 309940224,
+              "workingSetBytes": 358445056,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 57842.4391,
+          "processes": [
+            {
+              "pid": 11932,
+              "cpuSeconds": 1.90625,
+              "privateBytes": 8605696,
+              "workingSetBytes": 36601856,
+              "group": "app-core"
+            },
+            {
+              "pid": 9156,
+              "cpuSeconds": 50.890625,
+              "privateBytes": 137207808,
+              "workingSetBytes": 221503488,
+              "group": "webview2"
+            },
+            {
+              "pid": 27924,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 3518464,
+              "workingSetBytes": 20045824,
+              "group": "webview2"
+            },
+            {
+              "pid": 8244,
+              "cpuSeconds": 0.75,
+              "privateBytes": 136278016,
+              "workingSetBytes": 98390016,
+              "group": "webview2"
+            },
+            {
+              "pid": 21948,
+              "cpuSeconds": 0.1875,
+              "privateBytes": 11579392,
+              "workingSetBytes": 36728832,
+              "group": "webview2"
+            },
+            {
+              "pid": 30516,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20770816,
+              "group": "webview2"
+            },
+            {
+              "pid": 8544,
+              "cpuSeconds": 6.578125,
+              "privateBytes": 314667008,
+              "workingSetBytes": 363900928,
+              "group": "webview2"
+            }
+          ]
+        },
+        {
+          "elapsedMs": 59140.7143,
+          "processes": [
+            {
+              "pid": 11932,
+              "cpuSeconds": 1.96875,
+              "privateBytes": 8949760,
+              "workingSetBytes": 36634624,
+              "group": "app-core"
+            },
+            {
+              "pid": 9156,
+              "cpuSeconds": 52.109375,
+              "privateBytes": 143720448,
+              "workingSetBytes": 226902016,
+              "group": "webview2"
+            },
+            {
+              "pid": 27924,
+              "cpuSeconds": 0.046875,
+              "privateBytes": 3518464,
+              "workingSetBytes": 20045824,
+              "group": "webview2"
+            },
+            {
+              "pid": 8244,
+              "cpuSeconds": 0.75,
+              "privateBytes": 136278016,
+              "workingSetBytes": 98390016,
+              "group": "webview2"
+            },
+            {
+              "pid": 21948,
+              "cpuSeconds": 0.1875,
+              "privateBytes": 11579392,
+              "workingSetBytes": 36728832,
+              "group": "webview2"
+            },
+            {
+              "pid": 30516,
+              "cpuSeconds": 0.078125,
+              "privateBytes": 7688192,
+              "workingSetBytes": 20770816,
+              "group": "webview2"
+            },
+            {
+              "pid": 8544,
+              "cpuSeconds": 6.671875,
+              "privateBytes": 325058560,
+              "workingSetBytes": 373846016,
+              "group": "webview2"
+            }
+          ]
+        }
+      ],
+      "repetition": 3,
+      "windowHandleReadyMs": 82.6601,
+      "startupKind": "warm reopen",
+      "operatorObservation": "Agent verified 1000 English paused rows and ascending order after reopen; selecting fixture-0000.bin showed selected count 1 and checked row. No download started. All interactions used the unique isolated window through @oai/sky; normal browser history/registration was not changed.",
+      "observedTableReadyMs": 33288.3149,
+      "rows": 1000
+    }
+  ],
+  "date": "2026-10-20T16:13:11.0449539Z",
+  "webview2": "155.0.4283.62",
+  "environment": {
+    "logicalCpus": 16,
+    "powershell": "7.6.5",
+    "ramBytes": 16873545728,
+    "os": "Microsoft Windows NT 10.0.26200.0",
+    "cpu": ["13th Gen Intel(R) Core(TM) i5-13450HX"]
+  },
+  "observer": "agent",
+  "profile": "release",
+  "sourceCommit": "bd983e3125065fa2b6175c8eccb42af035efb483"
+}

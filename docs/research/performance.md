@@ -3,7 +3,8 @@
 This work measures the current production core and bundled frontend before any
 optimization. It does not change the engine, connection caps, polling, UI or
 published beta. The [historical benchmark](benchmark.md) remains a different,
-32 MiB engine-only workload. Full native acceptance is pending.
+32 MiB engine-only workload. Native resource/interaction samples are now recorded;
+repeated cold-boot startup acceptance remains pending.
 
 ## Observed baseline: 2026-10-20
 
@@ -86,8 +87,91 @@ The 1000-row refresh cost is material compared with the 750 ms polling interval;
 sort exceeded one second once. The bridge portion is much smaller than the
 end-to-end frame timing. This motivates native corroboration/profiling, not a
 claim that serialization, a particular source loop or rendering caused all the
-cost. Total native app/WebView memory, CPU and cold/warm startup budgets remain
-unset until actual native repetitions are recorded.
+cost. Native resource and window-handle budgets are recorded below. Cold-boot
+startup and precise painted-readiness budgets remain unset.
+
+## Observed native Windows baseline: 2026-10-20
+
+The maintainer explicitly asked the agent to perform the prepared collector,
+superseding the previous active-desktop restriction for this isolated #46 test.
+Six completed runs used the same release executable from clean `bd983e3`, SHA-256
+`f33df3170a23a48e8dc3716075e429369fb18e91f5865151876e816f18a75af9`,
+Windows build 26200 and actual WebView2 **155.0.4283.62**. The native window was
+780×560. The [raw native results](performance-native-windows.json) identify the
+binary, collector hash, observer, exact host and each operation. The collector
+was amended to label agent observation accurately; the app source was unchanged.
+
+The agent used `@oai/sky` to observe/operate only the returned isolated window.
+Both dataset sizes showed correct counts, one-result search followed by full
+restoration, persisted filename sort, language change, scroll and single-row
+selection. Jobs stayed paused. No browser connection or file execution occurred.
+Some UIA geometry actions were unavailable and were retried from fresh screenshot
+observations; asynchronous saves needed a later observation. One initial capture
+was unusable and window selection/activation was refreshed before any input.
+UI-tool calls sometimes took several seconds; that overhead is not an app paint
+measurement. No screenshots or unrelated desktop contents are committed.
+
+Each run contains 20 process samples. The configured sleep is one second **plus**
+collection time: actual sample spacing was 1.26–1.48 s, and first-to-last sample
+windows were 25.32–26.07 s. Each run retained the same seven process IDs (one
+app/core and six WebView2 processes), making the reported CPU deltas valid without
+process-churn correction. Actions/polling and accessibility observation are mixed;
+this is not an idle-only or transfer workload. Helper/server CPU is excluded,
+but the app's cost of servicing accessibility requests is included.
+
+Memory cells below are medians and min–max of the 60 samples per row count.
+CPU cells are median and min–max of three per-run, first-to-last cumulative CPU
+deltas. App/core combines Tauri and the engine; it is not the headless core alone.
+WebView2 values sum the owned processes. Shared working-set pages can occur in
+several processes, so this sum is not unique physical RAM. Samples can miss peaks.
+
+| Native metric                                               | 100 rows               | 1000 rows              |
+| ----------------------------------------------------------- | ---------------------- | ---------------------- |
+| App/core working set, MiB                                   | 33.69 (33.31–33.87)    | 35.05 (33.09–35.44)    |
+| App/core private bytes, MiB                                 | 7.24 (6.81–7.41)       | 8.69 (8.14–9.65)       |
+| Summed WebView2 working sets, MiB                           | 431.49 (393.84–444.77) | 711.02 (449.78–820.63) |
+| Summed WebView2 private bytes, MiB                          | 277.04 (252.22–299.62) | 567.68 (295.76–679.80) |
+| App/core CPU seconds per sampled run                        | 0.95 (0.72–0.97)       | 0.81 (0.80–1.27)       |
+| WebView2 CPU seconds per sampled run                        | 7.33 (6.09–8.03)       | 24.67 (13.72–25.33)    |
+| Window-handle readiness, ms                                 | 89 (55–119)            | 78 (53–83)             |
+| Observed table readiness, ms, including tool/operator delay | 23,971 (9,133–46,565)  | 33,288 (25,802–73,724) |
+
+The first run used a recreated WebView profile with unknown/warm OS caches; the
+remaining five were warm reopens. Neither window-handle readiness nor the
+observer's delayed table check establishes precise painted startup. The latter
+is only an upper bound and must not become a product latency budget. No boot,
+sign-out or system cache flush was performed; repeated true cold starts remain
+missing, so #46 and PR #76 stay open/draft.
+
+Before any optimization, use these **investigation ceilings** for this same
+native observation workload: app/core working set 48 MiB, private bytes 16 MiB,
+CPU 1.5/2 s per 100/1000-row sampled run; summed WebView2 working sets 512/1024 MiB,
+private bytes 384/768 MiB, CPU 10/30 s per corresponding sampled run; window-handle
+readiness 200 ms. CPU comparisons require the same 25–26 s sample span, stable
+process ownership and comparable actions/accessibility calls. These rounded
+ceilings detect regressions against this baseline, not acceptable idle costs or
+release targets. The high 1000-row WebView2 cost warrants profiling before #47;
+it is not proof that virtualization, a particular loop or connection tuning is
+the right fix. Cold/painted startup budgets remain pending.
+
+### Collector failure and repair
+
+The first attempt completed three 100-row samples, then failed at the transition
+to 1000 rows. Replacing the SQLite main file while its previous WAL remained
+allowed old pages to replay onto the new dataset, producing a malformed isolated
+database. A separate abrupt-exit fixture reproduced that exact failure. This was
+the benchmark's dataset replacement, not a product migration/download defect.
+The failed state and partial data were preserved privately; they are excluded
+from the six completed samples above.
+
+`prepare-performance-history.mjs` now verifies the expected synthetic paused
+source, requires a checkpointed source, checkpoints/truncates the previous
+destination WAL, closes SQLite, rejects remaining owners/sidecars, then copies
+and checks integrity/count. Its regression simulates abrupt process exit with a
+retained WAL, verifies the replacement, and rejects active/non-fixture data or an
+uncheckpointed source without changing the previous destination. The full six-run
+collection succeeded after this repair. `npm run check` includes the regression;
+no product Rust source was changed.
 
 ## Repeat the controlled measurements
 
@@ -150,10 +234,10 @@ cold system boot. Three runs describe this host, not a population, and no IDM
 comparison or universal speed claim is made. Keep builds and other heavy work
 outside timed runs.
 
-## Native Windows collection still required
+## Repeat native Windows collection
 
-The current prohibition on agent control of the maintainer's active desktop is
-preserved. A human can run the collector in an appropriate Windows test session:
+The maintainer authorized agent operation of this isolated #46 build on
+2026-10-20. A human can also run the collector in an appropriate Windows session:
 
 ```powershell
 ./scripts/prepare-desktop-smoke.ps1 -Release
@@ -163,7 +247,7 @@ preserved. A human can run the collector in an appropriate Windows test session:
 Prepare a new identity after collecting the matching engine/UI baseline, at the
 same source commit. The collector rejects normal/debug identities, unexpected
 executable/state paths, changed hashes, sidecars, existing state and mismatched
-commits before launching. It copies only the generated synthetic history into
+commits before launching. It prepares only the generated synthetic history in
 that fresh isolated state. The profile has no browser sidecar, so it cannot
 replace normal browser registration. Never connect a browser or start/resume
 the synthetic example.invalid jobs. This seeded performance dataset is separate
@@ -173,14 +257,14 @@ from the genuine native download acceptance in
 For each row count, manually inspect three launches: press Enter when the table
 is visible, then search fixture-0000.bin, clear, sort and scroll, including both
 languages. The collector samples the owned app/core and descendant WebView2
-processes once per second for 20 seconds, then requests observations and a manual
+processes 20 times with a one-second sleep plus query time, then requests observations and a manual
 close. It records process CPU totals, private bytes and working sets, actual
 WebView2/host versions, window-handle readiness and human table-readiness timing.
 Ownership includes the unique profile if a warm WebView browser outlives its
 original parent. A missing WebView process makes the measurement fail instead
 of silently reporting zero memory. Command lines are used only for that local
 ownership check and are not written to the results.
-The human timing includes reaction time; handle readiness is not painted readiness.
+The observed timing includes reaction or tool latency; handle readiness is not painted readiness.
 Shared working-set pages may be counted more than once. Sampling may miss peaks
 and process churn; do not treat it as unique physical RAM or compare it with the
 engine-only sample as if they had the same scope.
@@ -191,9 +275,10 @@ Three independent cold runs need three separate boot sessions/new identities;
 all other runs are warm reopens or fresh-profile/unknown-cache observations.
 Do not reboot the active work host to obtain evidence. Local native-results.json
 is written after each run; inspect its free-text observations for private details
-before sharing. The collector has parser/guard checks but no agent-run positive
-native trial. Native startup/resource distributions and budgets remain pending
-until those results exist. Do not close #46 or qualify #47 from headless data.
+before sharing. Agent-run collection uses `-Observer agent` and records
+`observedTableReadyMs`; the default observer is human. Native resource samples
+are recorded above, but repeated cold/painted startup evidence remains missing.
+Do not close #46 or qualify #47 without that remaining evidence.
 
 Run `./scripts/test-native-performance.ps1` to exercise the eight collector
 refusal paths with non-executable fixture files. It never launches a window.
@@ -211,8 +296,9 @@ cancellation. No engine code is changed here.
 
 **Large-list virtualization/polling rewrite: no-go for implementation now.**
 Search p95 stayed below 65 ms at the 1000-job limit, while sort/refresh cost
-increased substantially. Native corroboration and a profile must identify the
-cause before selecting a smaller refresh change or virtualization. Do not
+increased substantially. Native WebView2 measurements corroborate substantial
+resource cost, including accessibility work, but do not identify its cause.
+A profile must guide a smaller refresh change or virtualization. Do not
 increase the history limit or stop ordinary refreshes to conceal the workload.
-No list optimization is implemented or claimed. Revisit this decision after the
-pending native measurements; #46 remains open until its full-app gate is met.
+No list optimization is implemented or claimed. Revisit this decision if profiling
+establishes a measured benefit; #46 remains open for its startup evidence.

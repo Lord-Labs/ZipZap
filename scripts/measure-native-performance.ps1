@@ -1,8 +1,9 @@
-# Human-run collector for #46. No window/input automation, registry changes or cache flush.
+# Operator-driven collector for #46. No registry changes or cache flush.
 param(
     [Parameter(Mandatory)][string]$RunFile,
     [Parameter(Mandatory)][string]$HistoryDirectory,
-    [switch]$ColdBoot
+    [switch]$ColdBoot,
+    [ValidateSet('human', 'agent')][string]$Observer = 'human'
 )
 $ErrorActionPreference = 'Stop'
 $zipzapMetadata = Get-Content -LiteralPath $RunFile -Raw | ConvertFrom-Json
@@ -36,7 +37,8 @@ $zipzapNativeHost = @{
 }
 foreach ($zipzapCount in @(100, 1000)) {
     # Generated through normal core add-for-later calls, never personal history.
-    Copy-Item -LiteralPath (Join-Path $zipzapHistory "history-$zipzapCount.sqlite") -Destination (Join-Path $zipzapExpectedState 'zipzap.sqlite')
+    & node (Join-Path $PSScriptRoot 'prepare-performance-history.mjs') (Join-Path $zipzapHistory "history-$zipzapCount.sqlite") (Join-Path $zipzapExpectedState 'zipzap.sqlite')
+    if ($LASTEXITCODE -ne 0) { throw 'Isolated history preparation failed; state retained for diagnosis' }
     foreach ($zipzapRepeat in 1..3) {
         Write-Host "Rows=$zipzapCount run=$zipzapRepeat. Wait for all rows, press Enter, then search fixture-0000.bin, clear, sort and scroll in English/Arabic. Close the app after sampling."
         $zipzapWatch = [Diagnostics.Stopwatch]::StartNew()
@@ -49,7 +51,7 @@ foreach ($zipzapCount in @(100, 1000)) {
         }
         $zipzapHandleMs = $zipzapWatch.Elapsed.TotalMilliseconds
         Read-Host 'Press Enter only when the table is visible' | Out-Null
-        $zipzapHumanReadyMs = $zipzapWatch.Elapsed.TotalMilliseconds
+        $zipzapObservedReadyMs = $zipzapWatch.Elapsed.TotalMilliseconds
         $zipzapRunSamples = @()
         foreach ($zipzapSecond in 1..20) {
             $zipzapProcesses = @(Get-CimInstance Win32_Process | Select-Object ProcessId, ParentProcessId, Name, CommandLine)
@@ -86,7 +88,7 @@ foreach ($zipzapCount in @(100, 1000)) {
         $zipzapSamples += @{
             rows = $zipzapCount; repetition = $zipzapRepeat
             startupKind = $(if ($ColdBoot -and $zipzapCount -eq 100 -and $zipzapRepeat -eq 1) { 'operator-reported first app launch after boot; fresh profile' } elseif ($zipzapCount -eq 100 -and $zipzapRepeat -eq 1) { 'fresh profile; OS cache unknown' } else { 'warm reopen' })
-            windowHandleReadyMs = $zipzapHandleMs; humanTableReadyMs = $zipzapHumanReadyMs
+            windowHandleReadyMs = $zipzapHandleMs; observedTableReadyMs = $zipzapObservedReadyMs
             samples = $zipzapRunSamples; operatorObservation = $zipzapObservation
         }
         # Save incrementally so a failed later run does not discard earlier evidence.
@@ -94,8 +96,9 @@ foreach ($zipzapCount in @(100, 1000)) {
             date = [DateTime]::UtcNow.ToString('o'); sourceCommit = $zipzapMetadata.sourceCommit
             executableSha256 = $zipzapMetadata.sha256; profile = $zipzapMetadata.profile
             collectorSha256 = (Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToLowerInvariant()
+            observer = $Observer
             webview2 = $zipzapWebViewVersion; environment = $zipzapNativeHost
-            limits = 'Human timing includes reaction time. Handle-ready is not painted-ready. 1s sampling can miss peaks; working sets share pages and must not be called unique physical RAM. Collector overhead is excluded. No UI automation or OS cache flush.'
+            limits = 'Observed table timing includes operator reaction or tool latency. Handle-ready is not painted-ready. 1s sampling can miss peaks; working sets share pages and must not be called unique physical RAM. Collector overhead is excluded. No OS cache flush. Observer and interaction details are recorded separately.'
             runs = $zipzapSamples
         } | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath (Join-Path $zipzapHistory 'native-results.json') -Encoding utf8
     }
