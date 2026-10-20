@@ -100,8 +100,8 @@ omitted. Nothing uploads automatically. **Export preview…** saves those exact
 preview bytes, up to 8 KiB, through the native save dialog. Choose a new filename:
 existing files are kept. Cancellation creates no summary file; a failed write
 keeps the preview available for retry. Close and reopen the preview to refresh
-the counts. Native Windows save/cancel/error acceptance is still pending in #45;
-automated filesystem and mocked UI tests are separate evidence.
+the counts. Native Windows save/cancel/existing-file acceptance was reported by
+the maintainer for #45; release-candidate qualification remains separate.
 
 For a paused/failed download, choose **Replace link** and paste a new direct
 HTTP/HTTPS link. Wait for its worker to stop first. ZipZap checks whether saved

@@ -292,7 +292,8 @@ URLs, paths, timestamps or database contents are serialized. Maximum size is
 The native exporter accepts no client content/path, uses the save dialog and
 syncs/persists a temporary file without clobbering. See
 [ADR 0009](../architecture/0009-support-summary.md) for the privacy boundary and
-[native acceptance procedure](NATIVE_SMOKE.md) for pending Windows observations.
+[native acceptance record](NATIVE_SMOKE.md) for maintainer-reported Windows results
+and the separate release-candidate procedure.
 
 ## Retry policy (development version)
 
