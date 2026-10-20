@@ -298,6 +298,20 @@ prefixes after reopen, validated range reuse and exact final bytes after repair.
 The HTTP integration fixture separately removes/restores an isolated destination.
 UI tests verify localized errors, known/unknown estimates and accessible dialogs.
 
+The [#72 investigation](https://github.com/Lord-shaban/ZipZap/issues/72) on
+2026-10-20 reproduced the intermittent storage-repair test failure on Windows
+11 x64, from main `97dbefd` with assertion diagnostics. The first repeated
+workspace failure left the repaired job Failed with a Network reason after three
+attempts. A second instrumented failure captured the fixture reading an accepted
+socket before request bytes arrived: Winsock `10035` (`WouldBlock`), followed by
+the client seeing `10053` (`ConnectionAborted`). The accepted socket inherited
+the nonblocking listener mode, but the fixture used blocking reads/writes and
+treated a read error as EOF. It now explicitly restores blocking mode while
+retaining the two-second read/write timeouts. A delayed-header regression failed
+before that fix and passed afterward. The phase/job/range assertion diagnostics,
+exact-byte comparison and validated-prefix reuse checks remain. This corrects
+the test server; it does not change production retry or storage behavior.
+
 On the 2026-10-18 Windows verification host, the process token is not elevated and
 `New-VHD` is unavailable. An isolated NTFS volume full-disk check and actual
 read-only-volume behavior were **not exercised**, not passed. Injected StorageFull

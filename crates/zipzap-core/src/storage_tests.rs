@@ -50,6 +50,8 @@ impl Server {
                     }
                     Err(error) => panic!("fixture accept: {error}"),
                 };
+                // On Windows, accepted sockets inherit the listener's nonblocking mode.
+                stream.set_nonblocking(false).unwrap();
                 stream
                     .set_read_timeout(Some(Duration::from_secs(2)))
                     .unwrap();
@@ -106,6 +108,34 @@ impl Drop for Server {
     }
 }
 
+#[test]
+fn fixture_waits_for_delayed_request_headers() {
+    let server = Server::new();
+    let address = Url::parse(&server.url)
+        .unwrap()
+        .socket_addrs(|| None)
+        .unwrap()[0];
+    let mut client = std::net::TcpStream::connect(address).unwrap();
+    client
+        .set_read_timeout(Some(Duration::from_secs(2)))
+        .unwrap();
+    client.write_all(b"GET /file.bin HTTP/1.1\r\n").unwrap();
+    // Let the fixture accept/read before the rest of the headers arrive.
+    std::thread::sleep(Duration::from_millis(50));
+    client
+        .write_all(b"Host: localhost\r\nRange: bytes=0-0\r\nConnection: close\r\n\r\n")
+        .unwrap();
+    let mut response = Vec::new();
+    client.read_to_end(&mut response).unwrap();
+    assert!(response.starts_with(b"HTTP/1.1 206 Partial Content\r\n"));
+    let header_end = response
+        .windows(4)
+        .position(|bytes| bytes == b"\r\n\r\n")
+        .unwrap()
+        + 4;
+    assert_eq!(&response[header_end..], &server.bytes[..1]);
+}
+
 #[tokio::test]
 async fn file_failures_stop_and_reuse_validated_checkpoints_after_repair() {
     use std::io::ErrorKind;
@@ -138,12 +168,14 @@ async fn file_failures_stop_and_reuse_validated_checkpoints_after_repair() {
         *manager.file_fault.lock().unwrap() = Some((phase, threshold, kind));
         manager.worker(&job.id, CancellationToken::new()).await;
         let failed = manager.job(&job.id).unwrap();
-        assert_eq!(failed.status, Status::Failed, "{phase}");
+        assert_eq!(failed.status, Status::Failed, "{phase}: {failed:?}");
         assert!(
             failed
                 .error
+                .as_ref()
                 .unwrap()
-                .starts_with(&format!("Storage error: {reason}."))
+                .starts_with(&format!("Storage error: {reason}.")),
+            "{phase}: {failed:?}"
         );
         assert!(!job.destination.exists());
         let saved = failed.segments[0].done;
@@ -152,10 +184,11 @@ async fn file_failures_stop_and_reuse_validated_checkpoints_after_repair() {
             &std::fs::read(transfer::part(&job, 0)).unwrap()[..saved as usize],
             &server.bytes[..saved as usize]
         );
+        let recorded = server.ranges.lock().unwrap().clone();
         assert_eq!(
-            server.ranges.lock().unwrap().len(),
+            recorded.len(),
             2,
-            "storage error retried automatically"
+            "{phase}: storage error retried automatically; ranges={recorded:?}; job={failed:?}"
         );
         drop(manager);
         if phase == "write" {
@@ -186,7 +219,13 @@ async fn file_failures_stop_and_reuse_validated_checkpoints_after_repair() {
             .update(&job.id, |j| j.status = Status::Downloading)
             .unwrap();
         manager.worker(&job.id, CancellationToken::new()).await;
-        assert_eq!(manager.job(&job.id).unwrap().status, Status::Completed);
+        let repaired = manager.job(&job.id).unwrap();
+        assert_eq!(
+            repaired.status,
+            Status::Completed,
+            "{phase}: {repaired:?}; ranges={:?}",
+            server.ranges.lock().unwrap()
+        );
         assert_eq!(std::fs::read(&job.destination).unwrap(), *server.bytes);
         let ranges = server.ranges.lock().unwrap();
         if saved < server.bytes.len() as u64 {
