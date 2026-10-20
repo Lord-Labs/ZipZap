@@ -16,11 +16,52 @@ pub(crate) struct AppState {
     pub(crate) lifecycle: lifecycle::Lifecycle,
     probe: Mutex<Option<(String, CancellationToken)>>,
     browser_review: Mutex<Option<serde_json::Value>>,
+    support_preview: Mutex<Option<String>>,
 }
 
 #[tauri::command]
 fn snapshot(state: State<AppState>) -> serde_json::Value {
     serde_json::json!({"jobs":state.manager.jobs(),"queue":state.manager.queue(),"settings":state.manager.settings(),"tray_available":state.lifecycle.available(),"folder":folder(&state),"version":env!("CARGO_PKG_VERSION"),"native_error":*state.native.lock().expect("native lock"),"notice":state.notice.lock().expect("notice lock").take(),"browser_review":state.browser_review.lock().expect("review lock").take()})
+}
+#[tauri::command]
+fn preview_support(state: State<AppState>) -> Result<String, String> {
+    let mut preview = state.support_preview.lock().expect("support lock");
+    *preview = None;
+    let available = state.native.lock().expect("native lock").is_none();
+    let summary = state.manager.support_summary(Some(available))?;
+    *preview = Some(summary.clone());
+    Ok(summary)
+}
+
+#[tauri::command]
+async fn export_support(
+    app: tauri::AppHandle,
+    state: State<'_, AppState>,
+) -> Result<&'static str, String> {
+    let preview = state
+        .support_preview
+        .lock()
+        .expect("support lock")
+        .clone()
+        .ok_or("Preview a support summary first")?;
+    tokio::task::spawn_blocking(move || {
+        let Some(file) = app
+            .dialog()
+            .file()
+            .set_file_name("zipzap-support.json")
+            .add_filter("JSON", &["json"])
+            .blocking_save_file()
+        else {
+            return Ok("cancelled");
+        };
+        let path = file
+            .into_path()
+            .map_err(|_| "Choose a local support export file")?;
+        crate::support::save(&path, &preview)?;
+        Ok("saved")
+    })
+    .await
+    .map_err(|_| "Support export dialog failed".to_owned())?
 }
 #[tauri::command]
 fn set_queue_running(
@@ -316,6 +357,7 @@ pub fn run() {
                 notice: Mutex::new(None),
                 probe: Mutex::new(None),
                 browser_review: Mutex::new(None),
+                support_preview: Mutex::new(None),
                 lifecycle: lifecycle::Lifecycle::default(),
             });
             if lifecycle::init(app.handle()).is_err() {
@@ -420,6 +462,8 @@ pub fn run() {
             set_queue_running,
             move_waiting,
             set_schedule,
+            preview_support,
+            export_support,
             suggest_download,
             replace_link,
             cancel_probe,

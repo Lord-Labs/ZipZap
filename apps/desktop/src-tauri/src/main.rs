@@ -5,6 +5,8 @@ mod app;
 #[cfg(windows)]
 mod lifecycle;
 #[cfg(windows)]
+mod support;
+#[cfg(windows)]
 fn main() {
     if std::env::args().nth(1).as_deref() == Some("--register-native") {
         let result = (|| -> Result<(), String> {

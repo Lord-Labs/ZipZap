@@ -306,7 +306,7 @@ try {
   assert.equal(settings.language, "ar");
   assert.equal(settings.download_folder, null);
   await action(resumed, "resume");
-  await complete(resumed);
+  assert.equal((await complete(resumed)).recovery_mode, "validated_resume");
   assert.ok(
     requests.some(
       (r) => r.range === `bytes=${prefix.length}-${bytes.length - 1}` && r.ifRange === '"v1"',
@@ -473,7 +473,7 @@ try {
   refreshExpired = false;
   refreshRevision = 1;
   refreshWeak = false;
-  await complete(await add("/range", "range.bin"));
+  assert.equal((await complete(await add("/range", "range.bin"))).recovery_mode, "fresh");
   passed.push("segmented transfer matches full digest");
   assert.ok(requests.some((r) => r.range?.startsWith("bytes=2097152-") && r.ifRange));
   for (const route of ["/ignore", "/bad-range", "/unknown", "/redirect", "/retry"]) {
@@ -614,7 +614,7 @@ try {
     db.exec("DROP TRIGGER reject_completion;");
     const beforeRecovery = requests.length;
     await action(job, "resume");
-    await complete(job);
+    assert.equal((await complete(job)).recovery_mode, "publication_recovery");
     assert.equal(requests.length, beforeRecovery, "publication recovery downloaded again");
     await stop();
     start();
@@ -658,7 +658,7 @@ try {
   await delay(200);
   revision = 2;
   await action(job, "resume");
-  await complete(job, changed);
+  assert.equal((await complete(job, changed)).recovery_mode, "safe_restart");
   passed.push("changed ETag restarts every segment safely");
 
   job = await add("/slow", "corrupt.bin");
@@ -852,6 +852,14 @@ try {
   assert.ok(!tlsFailure.error.includes("DO_NOT_LEAK"));
   await assert.rejects(readFile(untrusted.destination), { code: "ENOENT" });
   passed.push("untrusted TLS certificate rejected");
+  const summary = await ask({ command: "support_summary" });
+  assert.ok(Buffer.byteLength(summary) <= 8192);
+  assert.equal(JSON.parse(summary).counts.jobs, (await ask({ command: "jobs" })).length);
+  for (const privateValue of ["DO_NOT_LEAK", "token=", "http://", "https://", directory, "cookie"])
+    assert.ok(!summary.includes(privateValue));
+  assert.ok(JSON.parse(summary).failure_counts.tls > 0);
+  assert.equal(JSON.parse(summary).browser_host_registered, null);
+  passed.push("support summary exports only bounded counts and safe codes without URLs or paths");
   await stop();
   assert.equal(errors, "");
   console.log(

@@ -78,6 +78,9 @@ impl Manager {
         job.attempt = 0;
         job.next_retry = None;
         if !retain {
+            if saved_bytes > 0 {
+                job.recovery_mode = Some(RecoveryMode::SafeRestart);
+            }
             job.segments.clear();
             job.downloaded = 0;
             job.total = None;

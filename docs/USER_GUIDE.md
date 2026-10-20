@@ -84,6 +84,25 @@ the localized reason, attempt and next retry time. A valid Retry-After from a
 interrupt the wait; reopening leaves interrupted work paused, and Retry starts
 a new bounded sequence. Certificate and file-validation checks remain enabled.
 
+The development version shows the **Last recovery decision** from a saved core
+fact: new transfer, validated saved-prefix resume, safe restart after saved data
+was discarded, or recovered publication after digest/file-identity checks. Old or
+not-yet-started entries show that no decision is recorded; byte counts alone do
+not establish resume safety. The next attempt can record a different decision.
+For expired access, obtain a new direct link and use Replace link. For a duplicate
+output, keep the existing file and use a free filename or restore the original
+publication evidence. For storage errors, repair space/access before retrying.
+
+Choose **Support summary** in the header to preview a local JSON summary of
+app/platform versions, aggregate counts and typed error/recovery codes. URLs,
+filenames, usernames, local paths, raw errors, settings, cookies and databases are
+omitted. Nothing uploads automatically. **Export preview…** saves those exact
+preview bytes, up to 8 KiB, through the native save dialog. Choose a new filename:
+existing files are kept. Cancellation creates no summary file; a failed write
+keeps the preview available for retry. Close and reopen the preview to refresh
+the counts. Native Windows save/cancel/existing-file acceptance was reported by
+the maintainer for #45; release-candidate qualification remains separate.
+
 For a paused/failed download, choose **Replace link** and paste a new direct
 HTTP/HTTPS link. Wait for its worker to stop first. ZipZap checks whether saved
 parts belong to the same validated final resource. If it cannot prove this,

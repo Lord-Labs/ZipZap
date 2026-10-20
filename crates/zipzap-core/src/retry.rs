@@ -1,7 +1,7 @@
 use super::*;
 use std::{error::Error, time::SystemTime};
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord)]
 #[serde(rename_all = "snake_case")]
 pub enum FailureReason {
     Network,

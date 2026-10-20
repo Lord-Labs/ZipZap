@@ -15,21 +15,22 @@ Windows graph are not a claim of distributed platform support. See the
 
 ## Direct components
 
-| Component                                                        | Use                                    | License metadata                        |
-| ---------------------------------------------------------------- | -------------------------------------- | --------------------------------------- |
-| Tokio, reqwest                                                   | HTTP/HTTPS engine                      | MIT; MIT OR Apache-2.0                  |
-| rusqlite / bundled SQLite                                        | Local state                            | MIT; SQLite public domain               |
-| serde, serde_json, uuid, tokio-util                              | Validation, state and cancellation     | MIT OR Apache-2.0 (see package notices) |
-| sha2                                                             | Checkpoint integrity                   | MIT OR Apache-2.0                       |
-| Tauri and its dialog/opener/single-instance/notification plugins | Desktop shell, tray and notifications  | MIT OR Apache-2.0                       |
-| winreg                                                           | Per-user browser host registration     | MIT                                     |
-| windows-sys                                                      | Windows publication file identity      | MIT OR Apache-2.0                       |
-| native-tls, httpdate                                             | TLS failure classification, HTTP dates | MIT OR Apache-2.0                       |
-| Jiff                                                             | Local queue schedule and DST rules     | Unlicense OR MIT                        |
-| Svelte, Vite, TypeScript                                         | UI and build tools                     | MIT; Apache-2.0 for TypeScript          |
-| Prettier and Svelte plugin                                       | Formatting                             | MIT                                     |
-| Playwright / Axe                                                 | UI behavior and accessibility checks   | Apache-2.0; MPL-2.0 for Axe             |
-| tempfile                                                         | Isolated test storage                  | MIT OR Apache-2.0                       |
+| Component                                                        | Use                                     | License metadata                        |
+| ---------------------------------------------------------------- | --------------------------------------- | --------------------------------------- |
+| Tokio, reqwest                                                   | HTTP/HTTPS engine                       | MIT; MIT OR Apache-2.0                  |
+| rusqlite / bundled SQLite                                        | Local state                             | MIT; SQLite public domain               |
+| serde, serde_json, uuid, tokio-util                              | Validation, state and cancellation      | MIT OR Apache-2.0 (see package notices) |
+| sha2                                                             | Checkpoint integrity                    | MIT OR Apache-2.0                       |
+| Tauri and its dialog/opener/single-instance/notification plugins | Desktop shell, tray and notifications   | MIT OR Apache-2.0                       |
+| winreg                                                           | Per-user browser host registration      | MIT                                     |
+| windows-sys                                                      | Windows publication file identity       | MIT OR Apache-2.0                       |
+| windows-version                                                  | Numeric Windows version in support data | MIT OR Apache-2.0                       |
+| native-tls, httpdate                                             | TLS failure classification, HTTP dates  | MIT OR Apache-2.0                       |
+| Jiff                                                             | Local queue schedule and DST rules      | Unlicense OR MIT                        |
+| Svelte, Vite, TypeScript                                         | UI and build tools                      | MIT; Apache-2.0 for TypeScript          |
+| Prettier and Svelte plugin                                       | Formatting                              | MIT                                     |
+| Playwright / Axe                                                 | UI behavior and accessibility checks    | Apache-2.0; MPL-2.0 for Axe             |
+| tempfile                                                         | Atomic support export and test storage  | MIT OR Apache-2.0                       |
 
 The generated notices are authoritative for exact package versions and copyright
 texts. Windows system APIs/TLS and WebView2 are system/runtime dependencies with

@@ -63,6 +63,9 @@ async fn main() {
 
 async fn dispatch(manager: &Manager, value: &Value) -> Result<Value, String> {
     match value["command"].as_str().unwrap_or("") {
+        "support_summary" => manager
+            .support_summary(None)
+            .map(|text| serde_json::json!(text)),
         "schedule" => {
             if let Some(config) = value.get("value") {
                 manager.set_schedule(

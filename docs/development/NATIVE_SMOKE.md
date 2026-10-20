@@ -207,3 +207,31 @@ Repeat the following in a disposable Windows session/VM for release #47:
 Clock/zone mutation and physical sleep are not performed on the maintainer's
 session by the automated fixtures. The release candidate must record its own
 native acceptance; implementation acceptance does not qualify an installer.
+
+## Support export qualification: issue #45
+
+On 2026-10-20, after agreeing to test the isolated build from clean `ef2aa6f`,
+the maintainer reported success and explicitly requested merging PR #75.
+Executable SHA-256:
+`ab23073b0d7f954350c9b6786ae240353090c7253bc26232587844e84a83b278`.
+The requested checks were native save to a new filename, cancellation and
+rejection of an existing file with its contents preserved. This is
+maintainer-reported acceptance, not agent-observed Computer Use. No per-scenario
+outputs or exported-file hashes were supplied; none are inferred here.
+Release #47 must repeat the checks below on its candidate.
+
+Core privacy tests, Windows filesystem save/error tests and mocked IPC UI tests
+do not establish native dialog behavior. Prepare the isolated build above and
+manually check, without Computer Use of the active desktop:
+
+1. Open Support summary. Verify counts/codes and app/platform versions, with no
+   URLs, filenames, usernames, local paths or raw errors. Close/reopen to refresh.
+2. Export to a fresh JSON filename in the isolated downloads folder. Compare its
+   contents with the displayed preview. Cancel a second native save dialog and
+   verify no new summary file and a distinct cancellation message.
+3. Select the existing export or an unwritable disposable destination. Verify a
+   clear failure, unchanged original bytes and a retained preview for retry.
+   Do not change personal-folder permissions. Export successfully to a new name.
+4. Repeat dialog keyboard/focus/scroll checks in English and Arabic at 780×560.
+   Record source commit, actual outcomes and any defects. Keep private paths and
+   state outside Git. Implementation acceptance does not qualify an installer.

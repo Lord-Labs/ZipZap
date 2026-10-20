@@ -68,6 +68,15 @@ in the notice collection; they are not all runtime dependencies.
 
 ## Tested failure paths and limits
 
+Development issue #45 adds an explicit support preview/export. Its schema is an
+allowlist of app/platform versions (including numeric Windows build), aggregate
+counts and typed codes/flags. It never serializes job identities, URLs, paths,
+settings or raw errors and performs no automatic upload. Export uses the exact
+cached preview and a native-selected new filename, with atomic no-clobber
+persistence. Adversarial private strings and 1000-job output bounds have automated
+coverage. The maintainer reported native save/cancel/existing-file acceptance on
+2026-10-20; this is separate from agent-observed tests and release qualification.
+
 Fixtures cover unsafe input, origin/frame/schema failures, invalid TLS, truncated
 responses, output races, damaged partial files, changed resources, forced process
 termination, shared limits and an unavailable destination followed by repair.

@@ -160,6 +160,7 @@ pub(super) fn recover(job: &mut Job) -> Result<Option<(File, File)>> {
         return Ok(None);
     };
     let assembly = marker(job)?;
+    job.recovery_mode = Some(RecoveryMode::PublicationRecovery);
     provenance::mark(job);
     completed(job);
     Ok(Some((assembly, destination)))
@@ -184,7 +185,9 @@ pub(super) fn cleanup(job: &Job) {
 pub(super) fn publish(manager: &Manager, id: &str, token: &CancellationToken) -> Result<()> {
     let mut job = manager.job(id)?;
     let assembly = if job.publication.is_some() {
-        marker(&job)?
+        let file = marker(&job)?;
+        job.recovery_mode = Some(RecoveryMode::PublicationRecovery);
+        file
     } else {
         let (file, proof) = evidence(&transfer::part(&job, 4))?;
         if proof.bytes != job.downloaded || job.total.is_some_and(|total| total != proof.bytes) {
