@@ -2,7 +2,16 @@ import assert from "node:assert/strict";
 import { spawn, execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { once } from "node:events";
-import { mkdtemp, readFile, writeFile, rm, readdir, mkdir, rename } from "node:fs/promises";
+import {
+  mkdtemp,
+  readFile,
+  writeFile,
+  rm,
+  readdir,
+  mkdir,
+  rename,
+  realpath,
+} from "node:fs/promises";
 import http from "node:http";
 import https from "node:https";
 import os from "node:os";
@@ -18,7 +27,8 @@ const binary = path.join(
   "target/debug",
   `zipzap${process.platform === "win32" ? ".exe" : ""}`,
 );
-const directory = await mkdtemp(path.join(os.tmpdir(), "zipzap-core-test-"));
+// Windows TEMP may use an 8.3 alias; the engine returns canonical folder names.
+const directory = await realpath(await mkdtemp(path.join(os.tmpdir(), "zipzap-core-test-")));
 const bytes = Buffer.alloc(4 * 1024 * 1024);
 for (let i = 0; i < bytes.length; i++) bytes[i] = (i * 31 + (i >>> 11)) & 255;
 const changed = Buffer.from(bytes.map((b) => b ^ 255));
@@ -878,7 +888,7 @@ try {
   await new Promise((resolve) => server.close(resolve));
   secure.closeAllConnections();
   await new Promise((resolve) => secure.close(resolve));
-  assert.equal(path.dirname(directory), path.resolve(os.tmpdir()));
+  assert.equal(path.dirname(directory), await realpath(os.tmpdir()));
   assert.ok(path.basename(directory).startsWith("zipzap-core-test-"));
   await rm(directory, { recursive: true, force: true });
 }
