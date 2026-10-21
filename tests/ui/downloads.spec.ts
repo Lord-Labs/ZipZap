@@ -28,7 +28,7 @@ test.beforeEach(async ({ page }) => {
         notifications: false,
       },
       folder: "C:\\Downloads",
-      version: "0.1.0-beta.1",
+      version: "0.2.0-beta.1",
       native_error: null,
       tray_available: true,
       notice: null,

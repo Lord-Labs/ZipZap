@@ -2,6 +2,7 @@
   import { onMount, tick } from "svelte";
 
   import { invoke } from "@tauri-apps/api/core";
+  import { version as appVersion } from "../package.json";
 
   import Icon from "./Icon.svelte";
   import BatchDialog from "./BatchDialog.svelte";
@@ -106,7 +107,7 @@
 
   let folder = "";
 
-  let version = "0.1.0-beta.1";
+  let version = appVersion;
 
   let filter = "all";
 

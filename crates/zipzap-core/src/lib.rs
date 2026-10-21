@@ -360,7 +360,7 @@ impl Manager {
             .validate()
             .map_err(|_| "Invalid saved settings; database retained for recovery")?;
         let client = Client::builder()
-            .user_agent("ZipZap/0.1.0-beta.1")
+            .user_agent(concat!("ZipZap/", env!("CARGO_PKG_VERSION")))
             .connect_timeout(Duration::from_secs(10))
             .read_timeout(Duration::from_secs(30))
             .referer(false)

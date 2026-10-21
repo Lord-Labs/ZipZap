@@ -5364,7 +5364,7 @@ dependencies = [
 
 [[package]]
 name = "zipzap-core"
-version = "0.1.0-beta.1"
+version = "0.2.0-beta.1"
 dependencies = [
  "httpdate",
  "jiff",
@@ -5384,7 +5384,7 @@ dependencies = [
 
 [[package]]
 name = "zipzap-desktop"
-version = "0.1.0-beta.1"
+version = "0.2.0-beta.1"
 dependencies = [
  "serde_json",
  "tauri",
@@ -5409,7 +5409,7 @@ dependencies = [
 
 [[package]]
 name = "zipzap-native"
-version = "0.1.0-beta.1"
+version = "0.2.0-beta.1"
 dependencies = [
  "serde",
  "serde_json",

@@ -13,6 +13,11 @@ successful-check prerequisite. A future release needs a separate maintainer
 decision on hosted qualification before that workflow can proceed; never treat
 skipped checks as a release pass.
 
+For `0.2.0-beta.1`, the maintainer's 2026-10-20 instruction explicitly authorizes
+publication and the required manual validation/release runs. The
+[qualification record](DAILY_USE_QUALIFICATION.md) records the remaining cold-start
+measurement gap and the distinction between release delivery and the full M6 gate.
+
 The [daily-use beta qualification record](DAILY_USE_QUALIFICATION.md) separates
 current-main preparation from the remaining #46 startup evidence and #47
 candidate/installer gates. A merged implementation or passing preflight does
@@ -36,13 +41,13 @@ gates for each later release.
 ## Publish through a reviewed release PR
 
 1. Open a release issue/PR identifying the version, commit, acceptance evidence,
-   outstanding limitations, and installer verification. Use `0.1.0-beta.1` for the
-   first beta only after the gates above pass.
+   outstanding limitations, and installer verification. The prepared daily-use
+   candidate is `0.2.0-beta.1`; it is not published or qualified by a version bump.
 2. The maintainer reviews and merges the PR with required checks passing. Release
    tooling must accept only a reviewed commit on protected `main`, use a protected
    release environment, and give write permissions only to the publishing job.
 3. Dispatch **Windows beta** from `main` with the reviewed version. The publishing
-   job creates the matching `v0.1.0-beta.1` tag at the exact checked build commit.
+   job creates the matching version tag at the exact checked build commit.
    A pre-existing release/tag is not overwritten. Corrections require another version.
 4. Publish a GitHub **prerelease** with the installer, checksum manifest, release
    notes, tested Windows versions, and known limitations. Verify downloaded
