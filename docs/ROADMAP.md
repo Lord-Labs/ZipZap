@@ -8,8 +8,8 @@ was published on 2026-10-17 with the M0–M5 gates verified; see the
 [acceptance checklist and publication evidence](development/VERIFICATION.md).
 [0.2.0-beta.1](https://github.com/Lord-shaban/ZipZap/releases/tag/v0.2.0-beta.1)
 delivers the implemented daily-use features. The maintainer authorized this beta
-with #46 cold-start/painted-readiness measurements outstanding; full M6 remains
-open. See the [qualification record](development/DAILY_USE_QUALIFICATION.md).
+with #46 cold-start/painted-readiness and #47/#82 native/browser qualification
+outstanding; full M6 remains open. See the [qualification record](development/DAILY_USE_QUALIFICATION.md).
 GitHub issues own live acceptance criteria;
 this document owns scope and sequencing.
 

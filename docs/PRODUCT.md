@@ -31,7 +31,8 @@ batch/category/desktop workflows, explicit tray behavior, browser enqueue
 feedback, Windows provenance, diagnostics and release qualification. These capabilities are shipped in 0.2.0-beta.1. See the
 [release notes](releases/0.2.0-beta.1.md) and
 [qualification record](development/DAILY_USE_QUALIFICATION.md). The quantitative
-cold-start gap in #46 remains open; publication does not complete the full M6 gate.
+cold-start gap in #46 and native/browser qualification in #47/#82 remain open;
+publication does not complete the full M6 gate.
 
 Scheduling is in-process only while the app is running, including explicit tray
 mode. The plan does not introduce a daemon, OS wake/shutdown or several queues.

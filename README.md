@@ -18,8 +18,8 @@ The daily-use beta adds recovery, durable queue controls and scheduling, batch
 links, customizable categories, appearance, tray mode and browser enqueue feedback.
 See the [release notes](docs/releases/0.2.0-beta.1.md),
 [download page](https://zipzap-website.vercel.app) and
-[qualification record](docs/development/DAILY_USE_QUALIFICATION.md). The remaining
-cold-start measurement work in #46 keeps the full M6 gate open.
+[qualification record](docs/development/DAILY_USE_QUALIFICATION.md). Remaining
+startup/native/browser qualification in #46/#47/#82 keeps the full M6 gate open.
 [الخطة بالعربية](docs/planning/NEXT_PHASE.ar.md).
 
 ## Current beta capabilities
@@ -80,7 +80,7 @@ from the production application.
 | [Next phase](docs/planning/NEXT_PHASE.md)                   | Daily-use beta scope, dependencies, research and release gates |
 | [Architecture](docs/architecture/0001-project-direction.md) | Stack, component ownership, and data flow                      |
 | [Development workflow](docs/development/WORKFLOW.md)        | Issue → branch → PR → checks → merge                           |
-| [Verification](docs/development/VERIFICATION.md)            | Current checks and future application test requirements        |
+| [Verification](docs/development/VERIFICATION.md)            | Automated checks, native evidence, and release boundaries      |
 | [Release process](docs/development/RELEASING.md)            | Evidence required before a public release                      |
 | [Research protocol](docs/research/README.md)                | Evidence-based investigation with REA                          |
 
