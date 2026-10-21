@@ -13,6 +13,11 @@ successful-check prerequisite. A future release needs a separate maintainer
 decision on hosted qualification before that workflow can proceed; never treat
 skipped checks as a release pass.
 
+For `0.2.0-beta.1`, the maintainer's 2026-10-20 instruction explicitly authorizes
+publication and the required manual validation/release runs. The
+[qualification record](DAILY_USE_QUALIFICATION.md) records the remaining cold-start
+measurement gap and the distinction between release delivery and the full M6 gate.
+
 The [daily-use beta qualification record](DAILY_USE_QUALIFICATION.md) separates
 current-main preparation from the remaining #46 startup evidence and #47
 candidate/installer gates. A merged implementation or passing preflight does

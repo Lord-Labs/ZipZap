@@ -73,7 +73,10 @@ jobs:
       - run: npm run build:extension
       - name: Verify installer lifecycle
         shell: pwsh
-        run: ./scripts/test-installer.ps1 -Installer "target/release/bundle/nsis/ZipZap_${{ inputs.version }}_x64-setup.exe"
+        run: |
+          npx playwright install chromium
+          if($LASTEXITCODE -ne 0) { throw 'Cannot install browser test runtime' }
+          ./scripts/test-installer.ps1 -Installer "target/release/bundle/nsis/ZipZap_${{ inputs.version }}_x64-setup.exe" -UpgradeFromFirstBeta -BrowserChecks
       - name: Package immutable artifacts and checksums
         shell: pwsh
         env:

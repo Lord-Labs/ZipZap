@@ -211,3 +211,27 @@ was driven and no normal state/registration changed. The same-candidate
 upgrade/repair/uninstall/reinstall, native/browser/OS-session matrix and raw #46
 cold-start evidence remain release gates. Hosted checks were skipped under #54,
 not passed; no workflow, tag or release was created.
+
+## Publication authorization and remaining scope
+
+On 2026-10-20, after the candidate results and missing cold-start/installer
+evidence were disclosed, the maintainer explicitly instructed publication,
+repository/website updates and new screenshots. This authorizes the necessary
+manual Repository and Windows beta release runs for this release only; automatic
+hosted checks remain disabled under #54. No skipped check becomes a pass.
+
+The release uses the protected workflow and its exact-commit Repository check
+prerequisite. Installer verification now refuses existing user state/registration,
+installs the published first beta after verifying its immutable SHA-256, upgrades
+to the candidate, checks a synthetic schema-1 migration plus completed/partial
+bytes and settings, verifies installed Chrome/Edge downloads, and exercises
+repair and uninstall/reinstall retention. The synthetic records are not claimed
+to have been created by the old GUI. Node seed/migration assertions and PowerShell
+parsing passed locally without installing anything; actual installed outcomes
+must come from the disposable Windows runner before publication.
+
+Publication is an explicitly requested beta delivery with the quantitative cold-
+boot/painted-readiness gap disclosed, not a claim that #46 or the full M6 exit
+gate is complete. No active-host reboot, sleep, privacy/security setting change,
+warning bypass or invented timing is authorized or needed. Retain #46 as a
+follow-up, and update #47/tracker with actual hosted/release results separately.

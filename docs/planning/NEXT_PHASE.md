@@ -8,6 +8,12 @@ Prepared 2026-10-17 in [#27](https://github.com/Lord-shaban/ZipZap/issues/27).
 
 ## Outcome and current truth
 
+Release decision, 2026-10-20: the maintainer authorized publication of
+`0.2.0-beta.1` with the quantitative cold-start/painted-readiness gap retained in
+#46. Required local and protected release checks still apply. This narrow beta
+delivery exception does not close #46 or declare the complete M6 exit gate met;
+see the [qualification record](../development/DAILY_USE_QUALIFICATION.md).
+
 Prepare ZipZap for everyday direct HTTP(S) downloads on Windows 11 x64, with
 strong recovery, useful queue/schedule controls and a complete classic desktop.
 The proposed candidate version is **0.2.0-beta.1**; this is a planning target,

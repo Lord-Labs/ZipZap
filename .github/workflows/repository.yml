@@ -76,7 +76,11 @@ jobs:
       - name: Verify Windows installer lifecycle
         if: runner.os == 'Windows'
         shell: pwsh
-        run: ./scripts/test-installer.ps1 -Installer target/release/bundle/nsis/ZipZap_0.1.0-beta.1_x64-setup.exe
+        run: |
+          $zipzapVersion = (Get-Content apps/desktop/src-tauri/tauri.conf.json -Raw | ConvertFrom-Json).version
+          npx playwright install chromium
+          if($LASTEXITCODE -ne 0) { throw 'Cannot install browser test runtime' }
+          ./scripts/test-installer.ps1 -Installer "target/release/bundle/nsis/ZipZap_${zipzapVersion}_x64-setup.exe" -UpgradeFromFirstBeta -BrowserChecks
 
   required:
     name: Repository checks
