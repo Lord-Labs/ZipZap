@@ -1,5 +1,10 @@
 # Verification
 
+The [daily-use beta qualification record](DAILY_USE_QUALIFICATION.md) covers
+0.2.0-beta.1, including local and hosted results, the explicit publication
+decision and the remaining #46 measurement gap. The dated sections below retain
+their original source/version boundaries.
+
 ## Native current-source baseline (2026-10-18)
 
 [Issue #29 evidence and repeatable procedure](NATIVE_SMOKE.md) cover actual

@@ -1,4 +1,10 @@
-# Using ZipZap
+# Using ZipZap 0.2.0-beta.1
+
+[Download](https://zipzap-website.vercel.app) · [Release notes](releases/0.2.0-beta.1.md)
+
+Features below describe this beta. [Qualification evidence and limits](development/DAILY_USE_QUALIFICATION.md)
+separate automated checks, native observations and maintainer acceptance. Precise
+cold-boot/painted-readiness measurements remain open in #46.
 
 ZipZap targets Windows 11 x64 and uses the installed Microsoft Edge WebView2
 runtime. Choose an NTFS download folder with up to twice the file's size free
@@ -12,16 +18,15 @@ from the engine. Unknown lengths show an indeterminate progress bar. Select a fi
 and use the toolbar to pause, resume, cancel, or retry. Cancellation discards owned partial
 files; removing a completed history entry keeps the downloaded file.
 
-The development version uses a compact toolbar, category pane and download
+ZipZap uses a compact toolbar, category pane and download
 table. Select a filename to enable its available toolbar actions. **Pause all**
 pauses active and queued downloads, stopping if a command fails so you can
 inspect the error and retry. The category pane filters by filename extension;
 it does not move files or detect media. Search matches filenames and websites.
 Click Filename, Total size or Status to sort; click again to reverse. Unknown
 sizes stay last. Selecting a status filter clears the file-category filter.
-These workspace changes are not included in the published first beta.
 
-The development version shows the queue's saved running/held state. **Hold queue**
+ZipZap shows the queue's saved running/held state. **Hold queue**
 stops new starts while active downloads finish. Browser additions wait too;
 explicit metadata checks can still inspect headers. **Start queue** enables
 dispatch without resuming individually paused files. **Add for later** creates
@@ -30,7 +35,7 @@ see its priority and use **Move up/down in queue** with keyboard or mouse. Moves
 and hold survive restart; sorting the table does not change dispatch priority.
 Resumed jobs keep their priority, and host limits can defer an earlier job.
 
-In the development version, **Check filename** previews a safe server suggestion
+**Check filename** previews a safe server suggestion
 without downloading the file. Starting with an empty name also previews first;
 review or edit the name and press Start again. An explicit filename is kept.
 If it is occupied, review and accept the proposed numbered alternative or type
@@ -39,7 +44,7 @@ rejected safely. Closing the dialog cancels an outstanding metadata check; the
 check also stops after ten seconds. If it fails, you can enter a plain filename
 and retry. Unsupported/unsafe server names fall back to the link or download.bin.
 
-The development version also keeps a rejected pause/resume/cancel action from
+ZipZap also keeps a rejected pause/resume/cancel action from
 changing the download when its database save fails. If a worker cannot save its
 final state, it shows Failed with a **last saved state retained** message. Repair
 the storage problem, then retry; reopening uses the last saved checkpoint. For
@@ -55,14 +60,13 @@ If the retained assembly itself is damaged or missing, preserve any output and
 add a fresh download with a free filename. Retrying cannot rebuild missing
 ownership evidence; removing failed history keeps the final file.
 
-In the development version, opening first-beta saved state recovers the queue and
+Opening first-beta saved state recovers the queue and
 settings in one transaction. If recovery fails, the database and download files
 are retained for repair and retry. A database from a newer unsupported version
 is rejected without resetting it. Do not lower its schema number or delete it
 to make an older app start; use the compatible app or restore a coherent backup
 with all instances closed. A saved folder on an offline drive does not prevent
-opening history. These changes are not in the published first beta; installer
-upgrade qualification remains pending. The development database uses schema 5
+opening history. The current database uses schema 5
 for queue scheduling (schema 4 added category folders; schema 3 added durable queue control; schema 2
 introduced publication evidence). Older
 ZipZap versions cannot open it; use a compatible app or a
@@ -71,12 +75,12 @@ coherent pre-upgrade backup, never edit the schema number to force a downgrade.
 The add dialog shows that file size is initially unknown and recommends NTFS.
 Download details estimate peak storage at up to twice the known size; this does
 not reserve or guarantee capacity. If storage fills, becomes read-only or goes
-offline, the development version shows repair instructions and keeps saved
+offline, ZipZap shows repair instructions and keeps saved
 checkpoints. Free space, allow writes or restore the folder, then retry. Valid
 parts are reused; existing output files are kept. Physical full-volume behavior
 has not been exercised on the current unelevated verification host.
 
-The development version limits automatic retries to three attempts. Temporary
+ZipZap limits automatic retries to three attempts. Temporary
 network/server failures and rate limiting may retry; authentication, TLS,
 invalid requests and storage problems need your attention. Download details show
 the localized reason, attempt and next retry time. A valid Retry-After from a
@@ -84,7 +88,7 @@ the localized reason, attempt and next retry time. A valid Retry-After from a
 interrupt the wait; reopening leaves interrupted work paused, and Retry starts
 a new bounded sequence. Certificate and file-validation checks remain enabled.
 
-The development version shows the **Last recovery decision** from a saved core
+ZipZap shows the **Last recovery decision** from a saved core
 fact: new transfer, validated saved-prefix resume, safe restart after saved data
 was discarded, or recovered publication after digest/file-identity checks. Old or
 not-yet-started entries show that no decision is recorded; byte counts alone do
@@ -101,7 +105,7 @@ preview bytes, up to 8 KiB, through the native save dialog. Choose a new filenam
 existing files are kept. Cancellation creates no summary file; a failed write
 keeps the preview available for retry. Close and reopen the preview to refresh
 the counts. Native Windows save/cancel/existing-file acceptance was reported by
-the maintainer for #45; release-candidate qualification remains separate.
+the maintainer for #45; release evidence and remaining limits are recorded separately.
 
 For a paused/failed download, choose **Replace link** and paste a new direct
 HTTP/HTTPS link. Wait for its worker to stop first. ZipZap checks whether saved
@@ -120,7 +124,7 @@ closing the window pauses running work; queued work starts when the app next ope
 paused work explicitly. Resume can safely restart when the server cannot prove
 the resource has not changed. See [recovery limits](development/ENGINE.md).
 
-In the development version, **Queue schedule** saves one start/hold window for a
+**Queue schedule** saves one start/hold window for a
 date or selected weekdays. Times follow the system time zone shown in the dialog;
 weekdays refer to the start date. A hold earlier than the start is on the following
 day. Saving an enabled schedule holds new starts until a future boundary. Active
@@ -139,9 +143,9 @@ their first occurrence. The next start is shown in local time. If local time or
 state saving fails, new starts are blocked with repair advice. See
 [the scheduling policy](architecture/0008-queue-schedule.md). Real Windows
 sleep/resume acceptance was reported by the maintainer on 2026-10-20; the release
-candidate must repeat its own qualification. Clock fixtures are separate evidence.
+qualification record preserves the scope of that acceptance. Clock fixtures are separate evidence.
 
-In the development version, Settings offers **Keep downloads running in the
+Settings offers **Keep downloads running in the
 system tray when closing the window**, off by default. When enabled, closing
 hides the window and keeps the same queue running. Click the ZipZap tray icon to
 show it; right-click for **Show ZipZap**, **Hold queue**, **Start queue** or
@@ -158,13 +162,12 @@ Windows settings can suppress delivery; inspect the app for authoritative
 results. Downloads require the app to remain running. Tray mode does not keep
 Windows awake, start at login, wake the machine or run after sign-out. Native
 acceptance is [reported by the maintainer](development/NATIVE_SMOKE.md);
-release-candidate qualification remains with #47. These development changes
-are not in the published beta.
+release evidence and remaining limits are tracked with #47.
 
 The app never opens completed files automatically. Use **Open file** only when
 you trust the file; **Show in folder** reveals it without executing it.
 
-### Categories and suggested folders (development version)
+### Categories and suggested folders
 
 In Settings, edit **Category rules** to rename a group, change its comma-separated
 extensions or choose its save-folder suggestion. Add/remove groups up to 16;
@@ -187,10 +190,9 @@ Batch links keep their displayed common folder explicit. Existing/duplicate
 destinations still require a free name. An offline category folder is retained
 in Settings but new requests fail until it is restored or another folder is
 chosen. These changes require schema 4; older builds reject that state rather
-than ignore the saved folder choice. Native/browser/installer qualification for
-the next release remains pending.
+than ignore the saved folder choice. See the qualification record for installer and browser evidence.
 
-### Multiple files and links (development version)
+### Multiple files and links
 
 Use each row's checkbox with Tab/Space, **Select all visible downloads**, or
 Ctrl-click filenames to toggle selection. Shift-click selects a range in the
@@ -218,11 +220,9 @@ without creating a second job. After an enqueue attempt, its name, folder and
 mode stay fixed for replay. Inspect the queue before creating a new batch with
 changed details. Closing discards this transient preview; it is not a saved
 import list. Closing during preview cancels its current metadata check. The
-Close button and Escape remain disabled until enqueue responses finish. These workflows are not in
-the published first beta; UI evidence uses mocked IPC, separate from native
-release qualification.
+Close button and Escape remain disabled until enqueue responses finish. UI evidence uses mocked IPC, separate from native release qualification.
 
-## Windows Internet origin metadata (development)
+## Windows Internet origin metadata
 
 New Windows downloads receive an Internet zone marker before publication, without
 storing their private source link in the file's metadata or changing payload bytes.
@@ -235,8 +235,7 @@ still complete with a separate warning. **Open file** checks the current marker
 and asks for native confirmation when it cannot verify Internet/Restricted origin,
 including legacy files; Cancel keeps the file closed. **Show in folder** remains
 an explicit reveal action. Keep Windows security warnings enabled and open only
-files you trust. No downloaded file is opened automatically. This behavior is
-development work, separate from the published first beta.
+files you trust. No downloaded file is opened automatically. This behavior is included in 0.2.0-beta.1.
 
 ## Chrome and Edge
 
@@ -253,9 +252,9 @@ The extension is distributed as source/a ZIP, not through browser stores yet.
 Requests use the app's default folder. The app starts if it is closed. If the
 host is missing, open ZipZap settings and choose **Connect Chrome / Edge**. A
 red extension badge/error shows a handoff problem; inspect its message and the
-app's queue. The published first beta confirms only native receipt.
+app's queue. Use the matching 0.2 extension and host for enqueue feedback.
 
-The development extension and host use a versioned receipt: **Received locally**
+The 0.2 extension and host use a versioned receipt: **Received locally**
 means the request is saved, **Added to the queue** confirms the app accepted it,
 and rejection explains an occupied filename or asks you to inspect the app.
 A held queue still accepts jobs but waits for you to start it. No handoff message
@@ -266,17 +265,16 @@ so check the app before sending again. Closing the popup stops its feedback;
 it does not cancel a request already received. Context-menu feedback appears in
 the extension badge/title. Feedback is available in English and Arabic.
 
-The development version checks server filenames with the same rules as the
+ZipZap checks server filenames with the same rules as the
 manual dialog. A duplicate browser destination is rejected; **Review filename**
 offers the latest rejected link as a new editable download with an available
 alternative. The original request was not queued. Resend the link if this
 temporary review is dismissed or the app restarts. Metadata failures appear in
-the app notice and return a sanitized rejection to the development extension.
+the app notice and return a sanitized rejection to the 0.2 extension.
 Local results contain no links or filenames, expire after 24 hours and retain
 at most 100 receipts. Replays reuse the same job while its receipt/history is
 retained. Native acceptance is [reported by the maintainer](development/NATIVE_SMOKE.md);
-release-candidate qualification remains with #47. These changes are not
-part of the published first beta.
+release evidence and remaining limits are tracked with #47.
 
 No cookies, browser history or tabs are read. Authenticated sessions, blob/data
 URLs, protected players and HLS/DASH are unsupported. Signed direct links may
@@ -289,7 +287,7 @@ recover them. Remove the unpacked extension separately through your browser.
 
 ## Keyboard and accessibility
 
-The development version offers **Appearance** in Settings: Dark (the default),
+ZipZap offers **Appearance** in Settings: Dark (the default),
 Light or Follow system. System mode follows color-scheme changes while running.
 **Columns and sorting** saves each existing column's width/visibility; resize
 with the sliders or their arrow keys. Filename stays visible. Wide tables retain
@@ -309,8 +307,7 @@ open dialogs keep their normal keys. Hidden/filtered rows are deselected.
 
 Automated browser tests cover both themes, saved choices, focus, RTL and doubled
 CSS render scale. Native acceptance is [reported by the maintainer](development/NATIVE_SMOKE.md);
-release-candidate qualification remains with #47. These changes are not in the
-published beta.
+release evidence and remaining limits are tracked with #47.
 
 Tab/Shift+Tab move focus; Enter/Space activate buttons; Escape closes a dialog.
 Select a filename with Enter/Space to use the toolbar. Tab to the table region
@@ -323,7 +320,7 @@ tree checks; there is no claim of a full screen-reader certification.
 
 ## Distribution limits
 
-The first beta is unsigned. No Authenticode publisher signature or SmartScreen
+This beta is unsigned. No Authenticode publisher signature or SmartScreen
 reputation is claimed. Verify the published SHA-256 checksums. There is no
 automatic updater. Windows 10, other CPU architectures and other operating
 systems have not been validated.

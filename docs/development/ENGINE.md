@@ -1,5 +1,9 @@
 # Download core
 
+This describes the core shipped in 0.2.0-beta.1.
+[Qualification evidence and remaining limits](DAILY_USE_QUALIFICATION.md) keep
+process fixtures, native checks and full performance qualification distinct.
+
 The production core is `crates/zipzap-core`. It streams HTTP/HTTPS bodies to
 UUID-owned temporary files, validates exact range bounds and strong ETags,
 checkpoints durable prefixes and their SHA-256 hashes in SQLite, and publishes
@@ -14,13 +18,12 @@ responses trigger safe restarts or the single-stream fallback.
 Resume requests made while a paused worker finishes its durable checkpoint are
 queued immediately; the scheduler waits for that worker to exit before restarting.
 
-## Persistence failures (development version)
+## Persistence failures
 
 Pause, resume, cancel, scheduler starts and checkpoints save a candidate before
 changing live state or cancelling workers. A rejected action leaves its previous
 state, worker token and recoverable parts intact. A replacement transfer plan is
-also saved before discarding obsolete parts. These changes are not in the
-published first beta.
+also saved before discarding obsolete parts. These changes are included in 0.2.0-beta.1.
 
 Database failures stop automatic transfer retries. If the worker cannot save its
 terminal state, it releases its queue slot and exposes a live Failed status with
@@ -35,7 +38,7 @@ that save fails, the final file, owned assembly and saved publication evidence
 remain; the job reports failure. Reopening or retrying can validate and reconcile
 that output as described below.
 
-## Saved-state upgrades (development version)
+## Saved-state upgrades
 
 Startup accepts schemas 0/1/2/3/4/5 and upgrades to schema 5 for the one-queue
 schedule in [ADR 0008](../architecture/0008-queue-schedule.md). Schema 4 added
@@ -59,7 +62,7 @@ reopen, malformed records, and a child process killed with an uncommitted
 transaction in rollback-journal and WAL modes. The HTTP fixture resumes an owned
 first-beta prefix with its validator, verifies the final digest and reopens it.
 
-## Interrupted publication (development version)
+## Interrupted publication
 
 Before creating the final hard link, the shared core commits the assembled file's
 length, SHA-256 and filesystem identity. It retains the UUID-owned assembly
@@ -92,9 +95,10 @@ A newer schema is rejected before changing journal mode or records. Do not edit
 coherent pre-upgrade SQLite backup with all ZipZap instances closed. Never copy a
 live database/WAL pair separately. No additional snapshot is needed for this
 transactional upgrade. Keep databases private and preserve completed files;
-installer upgrade/downgrade qualification remains part of #47.
+see #47 and the qualification record for installer upgrade evidence. In-place
+downgrades remain unsupported.
 
-## Durable queue (development version)
+## Durable queue
 
 The single queue has a persisted run/hold flag separate from settings. Hold stops
 new dispatch; active transfers continue to completion. New manual/browser jobs
@@ -117,7 +121,7 @@ run/hold and waiting IDs in priority order. Keyboard move controls show waiting
 rank independently of table sorting. Ineligible hosts can be skipped under the
 existing per-host limit; global/host limits and old-worker exit guards remain.
 
-## Local queue schedule (development version)
+## Local queue schedule
 
 The Manager owns one optional local start/hold window. `schedule` reads its state;
 supplying `value` saves a `Schedule` or `null` to disable. A schedule has
@@ -138,7 +142,7 @@ crosses a real minute boundary and compares the completed bytes after restart.
 These checks do not establish actual Windows sleep/resume or native WebView2
 acceptance; see the [maintainer-reported acceptance and release procedure](NATIVE_SMOKE.md).
 
-## Desktop lifecycle (development version)
+## Desktop lifecycle
 
 Tauri owns one tray for the existing single-instance Manager. The serde-defaulted
 `close_to_tray` and `notifications` settings are false and compatible with the current schema 4. Older compatible builds ignore these fields and retain checkpointed quit with
@@ -163,7 +167,7 @@ Forced OS termination may still
 require ordinary checkpoint recovery; there is no service, autostart or wake
 mechanism, and tray mode does not prevent sleep.
 
-## Filename metadata (development version)
+## Filename metadata
 
 `Manager::suggest` and the CLI `suggest` command inspect headers through the same
 client, host slots, redirects and TLS policy as downloads. A single GET with
@@ -195,7 +199,7 @@ Native receipt remains separate from enqueue success until #43. The synchronous
 `add` API retains the safe URL fallback when callers omit a filename; callers
 wanting server metadata use `suggest` before `add`.
 
-## Workspace preferences (development version)
+## Workspace preferences
 
 Serde-defaulted `Settings.view` stores only the used appearance, six fixed-order
 column widths/visibility and sort key/direction, with shared JSON defaults. Core
@@ -206,7 +210,7 @@ builds ignoring them retain safe queue and destination behavior. No transfer/job
 fields or dependencies are added. Core tests cover persistence, rejected values
 and failed settings saves without changing job destinations.
 
-## Category rules (development version)
+## Category rules
 
 Settings stores 1–16 categories with unique IDs, a bounded display name, up to
 32 literal extensions and an optional absolute folder. The required Other rule
@@ -239,7 +243,7 @@ retained files and schema-3 upgrade rollback. The HTTP fixture exercises a
 server-selected name routed into its category folder with an exact output hash.
 These are local automated checks, separate from native release qualification.
 
-## Batch enqueue (development version)
+## Batch enqueue
 
 Desktop batch previews reuse `suggest` sequentially and have no durable state.
 The desktop add command accepts an optional request ID; `add_with_id` and
@@ -249,7 +253,7 @@ live insertion path. Accepted IDs do not change start mode on replay. The client
 keeps attempted payloads fixed and reports each result separately. A fresh batch
 after closing creates fresh IDs and must pass ordinary destination checks.
 
-## Replacing an expired link (development version)
+## Replacing an expired link
 
 `Manager::replace_link`, CLI `replace_link`, and the desktop **Replace link**
 action require a paused/failed job with no running worker. The replacement is
@@ -273,7 +277,7 @@ updated job remains paused until an explicit Resume. Pending publication
 evidence must use its existing recovery path before any link replacement; final
 output is never removed or repurposed. No schema/dependency change is needed.
 
-## Recovery facts and support summary (development version)
+## Recovery facts and support summary
 
 Jobs expose optional `recovery_mode` only after the core saves a transfer-plan
 decision, explicit link-replacement discard, or validated publication recovery.
@@ -295,7 +299,7 @@ syncs/persists a temporary file without clobbering. See
 [native acceptance record](NATIVE_SMOKE.md) for maintainer-reported Windows results
 and the separate release-candidate procedure.
 
-## Retry policy (development version)
+## Retry policy
 
 The shared worker classifies transient network failures, HTTP 408/500/502/503/504
 and rate limiting separately from permanent HTTP/authentication, TLS, input,
@@ -320,7 +324,7 @@ fields are compatible with schema 2 and do not create a durable retry scheduler.
 A missing destination is rejected before changing its saved transfer plan; an
 inaccessible prefix is retained for repair instead of being discarded.
 
-## Storage failures (development version)
+## Storage failures
 
 File-operation errors distinguish insufficient space/quota, read-only/access
 failure, missing destinations and other storage problems. They stop automatic

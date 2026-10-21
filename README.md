@@ -6,7 +6,7 @@ A free, open-source download manager focused on reliable downloads, safe resume,
 and a straightforward desktop experience. Windows first, with a Rust engine and
 a Tauri interface.
 
-**Status: [0.1.0-beta.1](https://github.com/Lord-shaban/ZipZap/releases/tag/v0.1.0-beta.1)
+**Status: [0.2.0-beta.1](https://github.com/Lord-shaban/ZipZap/releases/tag/v0.2.0-beta.1)
 is available for Windows 11 x64. This beta is unsigned; verify the published
 SHA-256 checksums before installing.**
 
@@ -14,22 +14,27 @@ SHA-256 checksums before installing.**
 [Project tracker](https://github.com/users/Lord-shaban/projects/12) ·
 [Contributing](CONTRIBUTING.md)
 
-The [next development phase](docs/planning/NEXT_PHASE.md) is prepared for a
-daily-use beta: recovery, durable queue/scheduling, desktop completion and
-release qualification. [الخطة بالعربية](docs/planning/NEXT_PHASE.ar.md).
-These are planned tasks, separate from the published first beta.
+The daily-use beta adds recovery, durable queue controls and scheduling, batch
+links, customizable categories, appearance, tray mode and browser enqueue feedback.
+See the [release notes](docs/releases/0.2.0-beta.1.md),
+[download page](https://zipzap-website.vercel.app) and
+[qualification record](docs/development/DAILY_USE_QUALIFICATION.md). The remaining
+cold-start measurement work in #46 keeps the full M6 gate open.
+[الخطة بالعربية](docs/planning/NEXT_PHASE.ar.md).
 
-## First-beta capabilities
+## Current beta capabilities
 
 - HTTP/HTTPS downloads with bounded parallel connections when supported.
 - Pause, safe resume after restart, queue management, and bandwidth control.
 - A Windows desktop interface in English and Arabic, including RTL support.
 - Explicit “Download with ZipZap” actions in Chrome and Edge.
 - Local download history and settings, with no account or hosted service required.
+- Saved queue priority/hold, in-app schedules, batch links and category folders.
+- Saved themes/columns, optional tray/notifications and a private support summary.
 
-Automatic
-browser interception, media extraction, scheduling by time, macOS, and Linux are
-outside the first beta. See [scope and acceptance criteria](docs/PRODUCT.md).
+Scheduling requires the app to stay open; it cannot wake or start the computer.
+Automatic browser interception, media extraction, macOS and Linux remain outside
+this beta. See [scope and acceptance criteria](docs/PRODUCT.md).
 
 ## Stack
 
@@ -70,7 +75,7 @@ from the production application.
 
 | Document                                                    | Purpose                                                        |
 | ----------------------------------------------------------- | -------------------------------------------------------------- |
-| [Product scope](docs/PRODUCT.md)                            | Users, first-beta requirements, and explicit exclusions        |
+| [Product scope](docs/PRODUCT.md)                            | Users, current beta capabilities, and explicit exclusions      |
 | [Roadmap](docs/ROADMAP.md)                                  | Ordered milestones, issues, and completion gates               |
 | [Next phase](docs/planning/NEXT_PHASE.md)                   | Daily-use beta scope, dependencies, research and release gates |
 | [Architecture](docs/architecture/0001-project-direction.md) | Stack, component ownership, and data flow                      |
@@ -95,6 +100,10 @@ is not affiliated with Internet Download Manager or Tonec.
 
 ## Desktop preview
 
-Actual Windows WebView2 interface in Arabic, showing local verification downloads:
+Current Windows WebView2 interface, captured with isolated test state and real
+loopback downloads. These are native debug-host captures with the production
+frontend, not installer or performance evidence; see [capture details](docs/images/README.md).
 
-![ZipZap Arabic desktop](docs/images/desktop-ar.png)
+![ZipZap 0.2 Arabic desktop](docs/images/desktop-ar-0.2.jpg)
+
+![ZipZap 0.2 English desktop](docs/images/desktop-en-0.2.jpg)

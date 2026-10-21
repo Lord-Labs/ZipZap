@@ -3,8 +3,7 @@
 ## Purpose
 
 Help Windows users download files reliably, recover from interruptions, and send
-links from their browser to a local desktop application. The first beta should
-be useful for direct file downloads without requiring an account or service.
+links from their browser to a local desktop application. The beta is useful for direct file downloads without requiring an account or service.
 
 ## First-beta requirements
 
@@ -21,17 +20,18 @@ be useful for direct file downloads without requiring an account or service.
 
 Credentials and authenticated URLs must not leak through logs, crash reports, or
 public issues. There is no telemetry or remote account system in the MVP scope.
-This describes a requirement, not an audit of an application that already exists.
+This is product scope; the qualification record defines the actual verification boundary.
 
-## Next-beta scope
+## Current daily-use beta
 
 The [M6 plan](planning/NEXT_PHASE.md) accepts post-beta work on persistence and
 storage failure recovery, safe upgrades/publication, actionable retries, safe
 filename suggestions and link refresh, one durable queue with scheduling,
 batch/category/desktop workflows, explicit tray behavior, browser enqueue
-feedback, Windows provenance, diagnostics and release qualification. These are
-acceptance targets, not shipped capabilities. The published beta remains as
-described above; application versions change only during a qualified release.
+feedback, Windows provenance, diagnostics and release qualification. These capabilities are shipped in 0.2.0-beta.1. See the
+[release notes](releases/0.2.0-beta.1.md) and
+[qualification record](development/DAILY_USE_QUALIFICATION.md). The quantitative
+cold-start gap in #46 remains open; publication does not complete the full M6 gate.
 
 Scheduling is in-process only while the app is running, including explicit tray
 mode. The plan does not introduce a daemon, OS wake/shutdown or several queues.
@@ -39,18 +39,18 @@ Automatic browser capture, authentication/proxies, Firefox/store packaging and
 media extraction have separate M7 go/no-go studies; no study implies feature
 acceptance or broad production permissions.
 
-## Outside the published first beta
+## Outside the current beta
 
 - Automatic interception of all browser downloads and session-cookie forwarding.
 - Video/audio extraction, HLS/DASH processing, and platform-specific extractors.
-- Time-based scheduling, site crawling, torrents, FTP, and cloud synchronization.
+- OS wake/shutdown scheduling, site crawling, torrents, FTP, and cloud synchronization.
 - macOS, Linux, mobile, plugins, and a public automation API.
 - Automatic application updates until artifact verification and signing are tested.
 
 Direct media-file URLs can use the ordinary HTTP engine; that does not imply
 support for arbitrary web players or protected streams. Firefox follows after
 the first Chrome/Edge integration is proven and its separate feasibility gate
-is accepted. Time-based scheduling is now planned in M6, within the limits above.
+is accepted. Time-based scheduling is included within the in-process limits above.
 
 ## Quality priorities
 
@@ -60,5 +60,5 @@ is accepted. Time-based scheduling is now planned in M6, within the limits above
 4. Reproducible performance evidence before marketing claims.
 
 Windows 11 x64 is the initial test target. A broader support promise requires
-actual CI and installation evidence. Exact minimum supported versions will be
-recorded before the first release.
+actual CI and installation evidence. Windows 10 and ARM remain unverified; the beta targets Windows 11 x64, local
+NTFS and WebView2.

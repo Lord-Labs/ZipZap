@@ -1,5 +1,9 @@
 # Daily-use beta qualification: issue #47
 
+This record preserves dated preparation snapshots below. Later publication
+authorization and hosted results supersede their pending-release status, without
+turning unmeasured cold-start evidence into a pass. #46 and full M6 remain open.
+
 Preparation recorded on 2026-10-20 against reviewed main
 `dd2ad091a4c4d4c2dee7d12f64d6ffb6cbd82506`, after PR #76. This is a preflight
 record, not candidate acceptance. Only `0.1.0-beta.1` is published. At this
@@ -235,3 +239,20 @@ boot/painted-readiness gap disclosed, not a claim that #46 or the full M6 exit
 gate is complete. No active-host reboot, sleep, privacy/security setting change,
 warning bypass or invented timing is authorized or needed. Retain #46 as a
 follow-up, and update #47/tracker with actual hosted/release results separately.
+
+## Hosted verification correction (2026-10-21)
+
+PR #78 merged as `88372e19cdef8ab3e906fd20f95b5cb6d2e54475`.
+The first authorized [Repository run](https://github.com/Lord-shaban/ZipZap/actions/runs/39527015548)
+passed Ubuntu but failed Windows in the engine fixture: TEMP used the 8.3 alias
+`RUNNER~1` while the core returned the full `runneradmin` folder. Installer checks
+were not reached, and the aggregate check failed. This is retained as a failure.
+
+[PR #80](https://github.com/Lord-shaban/ZipZap/pull/80), for #79, canonicalizes
+the owned fixture root once and its guarded cleanup parent. Exact category and
+explicit-folder assertions remain; production validation is unchanged.
+`npm run check` and all 48 engine scenarios passed locally with TEMP/TMP deliberately
+redirected through a filesystem junction. The fix merged at
+`3910ca549fd62034999371cfb9ae8c84ec24517b`; a fresh
+[Repository run](https://github.com/Lord-shaban/ZipZap/actions/runs/39527944143)
+is used for the release prerequisite. Its outcome is recorded separately below.
