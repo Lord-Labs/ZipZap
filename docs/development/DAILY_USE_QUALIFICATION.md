@@ -253,6 +253,43 @@ the owned fixture root once and its guarded cleanup parent. Exact category and
 explicit-folder assertions remain; production validation is unchanged.
 `npm run check` and all 48 engine scenarios passed locally with TEMP/TMP deliberately
 redirected through a filesystem junction. The fix merged at
-`3910ca549fd62034999371cfb9ae8c84ec24517b`; a fresh
+`3910ca549fd62034999371cfb9ae8c84ec24517b`. The fresh
 [Repository run](https://github.com/Lord-shaban/ZipZap/actions/runs/39527944143)
-is used for the release prerequisite. Its outcome is recorded separately below.
+passed Ubuntu and Windows formatting/clippy/tests/build/probe/engine/NSIS steps.
+Its installer phase also logged successful first-beta upgrade, same-version repair,
+schema-1-to-5 migration and settings/completed/partial retention. Installed Chromium
+156.0.8078.4 completed 1 MiB with SHA-256
+`b8a74bb29f5cab9c4aa7e78d78053b0c23ef8cbbaccd8796396659e39eb3623c` through
+extension `binbcpkdchddgajmemjmhakpamjdkhpl`.
+
+The browser script then stopped producing results before Edge/later lifecycle
+outcomes. The run was cancelled at 01:51 UTC to retrieve diagnostics; it is
+**cancelled**, not passed. The exact stall point/root cause is unconfirmed.
+[#82](https://github.com/Lord-shaban/ZipZap/issues/82) retains reproduction,
+bounded diagnostics and both browser exit/Edge acceptance as follow-up work.
+No later uninstall/reinstall outcome is inferred from that cancelled run.
+
+## Explicit incomplete-qualification release exception (2026-10-21)
+
+After that stall, the maintainer explicitly requested immediate publication and
+asked to record success. A false success was declined: failed/cancelled results
+remain unchanged. [PR #83](https://github.com/Lord-shaban/ZipZap/pull/83), merged
+as `e1edf759dad1292c1050025bde177fb2439d8718`, adds a separately selected
+`maintainer-exception-47` route limited to `0.2.0-beta.1`. It records an explicit
+warning/summary, keeps protected main/beta, version checks and immutable artifacts,
+and still runs locked builds/core and installer lifecycle without browser automation.
+The default route retains its exact-commit Repository-success prerequisite.
+No GitHub check status was forged, no protections were disabled, and no user
+device control was used.
+
+`npm run check` passed. Eight local assertions exercised the actual extracted
+PowerShell gate using an isolated read-only API stub: normal success/absence/wrong
+app, the version-specific exception, unknown route, configured-version mismatch
+and API failure. Exception disclosure was asserted. These are synthetic gate
+tests, not hosted-check results. Product source and dependencies did not change.
+
+The authorized [Windows beta run](https://github.com/Lord-shaban/ZipZap/actions/runs/39530014651)
+builds `e1edf759dad1292c1050025bde177fb2439d8718`; actual publication/artifact
+verification is recorded below after completion. #46, #47, #82 and the full M6
+qualification gate remain open. No full native/browser matrix or repeated
+cold-boot/painted-readiness acceptance is claimed by this delivery exception.

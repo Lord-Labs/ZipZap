@@ -20,4 +20,4 @@ body:
     id: alternatives
     attributes:
       label: Alternatives and scope
-      description: Include a smaller solution or existing workaround and whether this fits the first beta.
+      description: Include a smaller solution or existing workaround and whether this fits the accepted roadmap.
