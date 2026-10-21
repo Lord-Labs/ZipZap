@@ -14,6 +14,16 @@ Release decision, 2026-10-20: the maintainer authorized publication of
 delivery exception does not close #46 or declare the complete M6 exit gate met;
 see the [qualification record](../development/DAILY_USE_QUALIFICATION.md).
 
+On 2026-10-21 the maintainer further authorized immediate beta publication after
+installed-browser qualification stalled. The release uses an explicit, disclosed
+version-specific exception; failed/cancelled checks remain unchanged. #82 and
+full #47 native/browser qualification remain open alongside #46.
+
+Current delivery: [0.2.0-beta.1](../releases/0.2.0-beta.1.md) includes the
+implemented #29–#45 work. The paragraphs below preserve the original planning
+snapshot; use the roadmap and issue tracker for live status. #46 and full M6
+qualification remain open.
+
 Prepare ZipZap for everyday direct HTTP(S) downloads on Windows 11 x64, with
 strong recovery, useful queue/schedule controls and a complete classic desktop.
 The proposed candidate version is **0.2.0-beta.1**; this is a planning target,

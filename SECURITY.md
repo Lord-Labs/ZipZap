@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-The supported release is [0.1.0-beta.1](https://github.com/Lord-shaban/ZipZap/releases/tag/v0.1.0-beta.1)
+The supported release is [0.2.0-beta.1](https://github.com/Lord-shaban/ZipZap/releases/tag/v0.2.0-beta.1)
 for Windows 11 x64. Only the latest beta and current `main` receive security fixes; older prereleases
 must be upgraded. Development builds and unsupported operating systems have no
 support promise. Install updates manually from the repository's GitHub Releases,

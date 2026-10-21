@@ -1,5 +1,10 @@
 # First-beta security review
 
+This dated review is retained for the first beta. The
+[0.2.0-beta.1 review and qualification record](DAILY_USE_QUALIFICATION.md)
+adds current dependency results, schema/provenance/diagnostics boundaries,
+unsigned distribution and release evidence; it does not claim an independent audit.
+
 Review scope: production core, desktop commands/capabilities/CSP, native host,
 extension, temporary files, installer hooks, locks and dependency manifests.
 The review is a source/fixture review, not an independent penetration test.

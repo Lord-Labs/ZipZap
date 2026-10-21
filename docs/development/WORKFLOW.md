@@ -57,6 +57,7 @@ public `main` history.
 ## Versioning
 
 The repository tooling package is private and is not the application version.
-The application begins at `0.1.0-beta.1` only when the first-beta gates pass.
+The current application beta is `0.2.0-beta.1`; version changes use a reviewed
+release PR and the [release process](RELEASING.md).
 Pre-1.0 compatibility changes must be called out explicitly in release notes.
 There is no `develop` branch, automatic publishing, or release schedule.

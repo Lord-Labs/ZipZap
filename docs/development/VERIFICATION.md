@@ -1,5 +1,25 @@
 # Verification
 
+The [daily-use beta qualification record](DAILY_USE_QUALIFICATION.md) covers
+0.2.0-beta.1, including local and hosted results, the explicit publication
+decision and the remaining #46 measurement gap. The dated sections below retain
+their original source/version boundaries.
+
+## Daily-use beta publication (2026-10-21)
+
+[0.2.0-beta.1](https://github.com/Lord-shaban/ZipZap/releases/tag/v0.2.0-beta.1)
+is published from `e1edf759dad1292c1050025bde177fb2439d8718` by
+[run 39530014651](https://github.com/Lord-shaban/ZipZap/actions/runs/39530014651).
+Core/build and installer upgrade/repair/uninstall/reinstall checks passed.
+Seven downloaded assets, all six payload hashes, the browser/source ZIP contents
+and the exact tag target were verified. The qualification record contains actual
+hashes and the explicitly unsigned status.
+
+Publication used the maintainer's version-specific exception. Installed-browser
+automation was skipped in this run; earlier Repository failure/cancellation remain
+unchanged. #46, #47, #82 and the full M6 gate stay open. Do not describe this as
+complete hosted/native/browser/performance qualification.
+
 ## Native current-source baseline (2026-10-18)
 
 [Issue #29 evidence and repeatable procedure](NATIVE_SMOKE.md) cover actual
