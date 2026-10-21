@@ -8,6 +8,12 @@ on:
         required: true
         type: choice
         options: [0.2.0-beta.1]
+      qualification:
+        description: Qualification route; issue 47 exception is explicitly maintainer-authorized
+        required: true
+        default: repository-checks
+        type: choice
+        options: [repository-checks, maintainer-exception-47]
 
 permissions:
   contents: read
@@ -30,16 +36,22 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Require successful protected-main checks and matching version
+      - name: Verify qualification route and matching version
         id: commit
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ inputs.version }}
+          QUALIFICATION: ${{ inputs.qualification }}
         run: |
           $zipzapChecks = gh api "repos/$env:GITHUB_REPOSITORY/commits/$env:GITHUB_SHA/check-runs" | ConvertFrom-Json
           if($LASTEXITCODE -ne 0) { throw 'Cannot read required checks' }
-          if(-not ($zipzapChecks.check_runs | Where-Object { $_.name -eq 'Repository checks' -and $_.conclusion -eq 'success' -and $_.app.slug -eq 'github-actions' })) { throw 'Protected-main Repository checks must pass first' }
+          if($env:QUALIFICATION -eq 'maintainer-exception-47') {
+            if($env:VERSION -ne '0.2.0-beta.1') { throw 'The dated maintainer exception applies only to 0.2.0-beta.1' }
+            Write-Output '::warning::Explicit 2026-10-21 maintainer exception (#47): hosted qualification is incomplete, not passed; retain #46/#47/#82 and full M6 open.'
+            '## Explicit maintainer qualification exception' >> $env:GITHUB_STEP_SUMMARY
+            'For 0.2.0-beta.1 only, the maintainer requested publication on 2026-10-21 despite incomplete hosted qualification. Repository run 39527015548 failed; 39527944143 was cancelled after upgrade/migration/retention and Chromium download passed, before Edge/later lifecycle results. These runs are not successes. This build still verifies locked source, Rust/core and installer lifecycle without browser automation. Remaining browser/native/cold-start qualification: #46, #47 and #82. Protected main/beta publication and immutable checksummed artifacts remain required.' >> $env:GITHUB_STEP_SUMMARY
+          } elseif($env:QUALIFICATION -ne 'repository-checks' -or -not ($zipzapChecks.check_runs | Where-Object { $_.name -eq 'Repository checks' -and $_.conclusion -eq 'success' -and $_.app.slug -eq 'github-actions' })) { throw 'Protected-main Repository checks must pass first' }
           $zipzapConfig = Get-Content apps/desktop/src-tauri/tauri.conf.json -Raw | ConvertFrom-Json
           if($zipzapConfig.version -ne $env:VERSION) { throw 'Version differs from reviewed app configuration' }
           "sha=$env:GITHUB_SHA" >> $env:GITHUB_OUTPUT
@@ -73,10 +85,17 @@ jobs:
       - run: npm run build:extension
       - name: Verify installer lifecycle
         shell: pwsh
+        env:
+          QUALIFICATION: ${{ inputs.qualification }}
         run: |
-          npx playwright install chromium
-          if($LASTEXITCODE -ne 0) { throw 'Cannot install browser test runtime' }
-          ./scripts/test-installer.ps1 -Installer "target/release/bundle/nsis/ZipZap_${{ inputs.version }}_x64-setup.exe" -UpgradeFromFirstBeta -BrowserChecks
+          if($env:QUALIFICATION -eq 'maintainer-exception-47') {
+            Write-Output '::warning::Installed browser automation skipped under the explicit #47 exception; #82 remains open.'
+            ./scripts/test-installer.ps1 -Installer "target/release/bundle/nsis/ZipZap_${{ inputs.version }}_x64-setup.exe" -UpgradeFromFirstBeta
+          } else {
+            npx playwright install chromium
+            if($LASTEXITCODE -ne 0) { throw 'Cannot install browser test runtime' }
+            ./scripts/test-installer.ps1 -Installer "target/release/bundle/nsis/ZipZap_${{ inputs.version }}_x64-setup.exe" -UpgradeFromFirstBeta -BrowserChecks
+          }
       - name: Package immutable artifacts and checksums
         shell: pwsh
         env:

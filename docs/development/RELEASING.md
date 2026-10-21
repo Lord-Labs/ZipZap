@@ -18,6 +18,15 @@ publication and the required manual validation/release runs. The
 [qualification record](DAILY_USE_QUALIFICATION.md) records the remaining cold-start
 measurement gap and the distinction between release delivery and the full M6 gate.
 
+On 2026-10-21, after the installed-browser run stalled, the maintainer explicitly
+requested immediate publication. The version-specific manual route
+`maintainer-exception-47` records incomplete hosted qualification as an exception,
+never as a passing Repository result. It is limited to `0.2.0-beta.1`, keeps
+protected main/beta and immutable packaging, and still runs core/build and
+installer lifecycle checks. Browser automation is skipped in that route; #82 and
+the full #47/native/browser matrix remain open alongside #46. The default route
+still requires a successful exact-commit Repository check. No check status is forged.
+
 The [daily-use beta qualification record](DAILY_USE_QUALIFICATION.md) separates
 current-main preparation from the remaining #46 startup evidence and #47
 candidate/installer gates. A merged implementation or passing preflight does
