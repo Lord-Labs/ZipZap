@@ -17,6 +17,15 @@ inspection and official documentation inform the proposals below; actual
 Chrome/Edge behavior, store approval and site support remain to be qualified.
 No version, completion date, new dependency or performance claim is assigned.
 
+Execution checkpoint, 2026-10-23: #87/#91 and setup code #92/#93 are merged on main
+but not published. Complete setup platform acceptance stays in #88/#89; see the
+[evidence record](../development/BROWSER_SETUP_QUALIFICATION.md).
+[ADR 0011](../architecture/0011-public-link-capture.md) / #94 records the first
+scoped capture go decision: opt-in public direct anchor links before browser
+transfer, with metadata-only prepare then explicit activation. This replaces
+the downloads-API candidate for that slice; global interception remains no-go.
+Full #48 and media/YouTube #51 are not closed by this checkpoint.
+
 The remaining M6 work [#46](https://github.com/Lord-Labs/ZipZap/issues/46),
 [#47](https://github.com/Lord-Labs/ZipZap/issues/47) and
 [#82](https://github.com/Lord-Labs/ZipZap/issues/82) stays open. Setup/readiness
