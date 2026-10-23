@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 pub mod capture;
 pub mod health;
+pub mod video;
 use std::{
     io::{Read, Write},
     path::Path,
@@ -46,11 +47,11 @@ impl Inbox {
         }
         match (self.version, self.action.as_deref(), self.created_at) {
             (1 | 2, None, None) => Ok(self.id.clone()),
-            (3, Some("prepare"), Some(_)) if !self.url.is_empty() => {
-                Ok(format!("{}-prepare", self.id))
+            (3, Some(action @ ("prepare" | "prepare_video")), Some(_)) if !self.url.is_empty() => {
+                Ok(format!("{}-{action}", self.id))
             }
-            (3, Some("activate"), Some(_)) if self.url.is_empty() => {
-                Ok(format!("{}-activate", self.id))
+            (3, Some(action @ ("activate" | "cancel_prepare")), Some(_)) if self.url.is_empty() => {
+                Ok(format!("{}-{action}", self.id))
             }
             _ => Err("Unsupported browser operation".into()),
         }
@@ -76,6 +77,8 @@ pub enum Rejection {
     AppStartFailed,
     Expired,
     CaptureExpired,
+    VideoUnavailable,
+    CaptureCancelled,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -277,7 +280,7 @@ fn process(
         if !valid_id(&id) {
             return Err("Invalid request ID".into());
         }
-        for action in ["prepare", "activate"] {
+        for action in ["prepare", "prepare_video", "activate", "cancel_prepare"] {
             if state
                 .join("inbox")
                 .join(format!("{id}-{action}.json"))

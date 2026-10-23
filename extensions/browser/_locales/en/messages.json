@@ -63,16 +63,16 @@
     "message": "Extension and local host connected. The app has no recent readiness signal; open ZipZap and check again. No download was started."
   },
   "healthReady": {
-    "message": "Extension and local host connected. ZipZap was recently ready. Explicit link mode; no download was started."
+    "message": "Extension and local host connected. ZipZap was recently ready. No download was started."
   },
   "healthTimeout": {
     "message": "Connection check timed out. Open or repair ZipZap and try again. No download request was sent."
   },
   "captureTitle": {
-    "message": "Automatic public links"
+    "message": "Public links and video"
   },
   "captureHelp": {
-    "message": "Enable only for sites with public file links. Captures plain same-site file clicks; forms, sign-in downloads and video pages need explicit actions. Keep the page open until ZipZap confirms."
+    "message": "Optional site access for public file clicks and video buttons. Keep the page open until ZipZap confirms. Sign-in downloads and protected streams are unsupported."
   },
   "captureEnable": {
     "message": "Enable on this site"
@@ -121,5 +121,47 @@
   },
   "capture_expired": {
     "message": "Preparation expired before activation."
+  },
+  "videoDownload": {
+    "message": "Download with ZipZap"
+  },
+  "videoHide": {
+    "message": "Hide video buttons on this site"
+  },
+  "videoShow": {
+    "message": "Show video buttons on this site"
+  },
+  "videoPopup": {
+    "message": "Find a video on this page"
+  },
+  "videoHelp": {
+    "message": "Public MP4/WebM and available combined YouTube MP4. Save only when the site and rights holder allow it. Other streaming formats are unsupported."
+  },
+  "videoCancel": {
+    "message": "Cancel preparation"
+  },
+  "videoPreparing": {
+    "message": "Checking the public video source. Nothing is queued yet."
+  },
+  "videoCancelled": {
+    "message": "Preparation cancelled. This page will not activate that request."
+  },
+  "videoUnavailable": {
+    "message": "This video was not added. A public MP4/WebM or combined YouTube MP4 may be unavailable; update or repair ZipZap if its tools are missing. No browser copy was started."
+  },
+  "videoNoSource": {
+    "message": "No supported source is available here. Enable site access, show video buttons and reload. Cross-origin frames or native fullscreen may require returning to the main page."
+  },
+  "videoPageStatus": {
+    "message": "See the ZipZap message on the page for confirmation or recovery."
+  },
+  "video_unavailable": {
+    "message": "A public combined video is unavailable. Check supported sources or repair the app."
+  },
+  "capture_cancelled": {
+    "message": "Preparation was cancelled before activation."
+  },
+  "videoPlayer": {
+    "message": "Video"
   }
 }

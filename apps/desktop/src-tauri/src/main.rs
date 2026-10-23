@@ -7,6 +7,8 @@ mod capture;
 #[cfg(windows)]
 mod lifecycle;
 #[cfg(windows)]
+mod media;
+#[cfg(windows)]
 mod support;
 #[cfg(windows)]
 fn main() {

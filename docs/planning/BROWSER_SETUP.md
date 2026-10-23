@@ -35,7 +35,9 @@ blanket interception or media extraction.
 
 Media checkpoint: #101 / [ADR 0012](../architecture/0012-public-video-action.md)
 records a narrow public direct-player/YouTube progressive-MP4 go, requiring a
-new implementation issue after decision merge. A private feasibility probe
+separate implementation #103 after decision merge. Its
+[verification record](../development/VIDEO_ACTION.md) covers the explicit player
+action, bundled tools and current limitations. A private feasibility probe
 resolved public format 18 and downloaded combined audio/video through the
 existing Manager; it is not a shipped button or arbitrary-site support. Bundled
 Python/Node/pure yt-dlp avoid user-side runtime setup, with explicit notices,

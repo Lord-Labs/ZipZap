@@ -33,9 +33,11 @@
     "category": "Utility",
     "shortDescription": "Fast, reliable downloads. Yours to keep.",
     "license": "MIT",
+    "licenseFile": "../../../dist/release/INSTALLER_LICENSE.txt",
     "externalBin": ["binaries/zipzap-native"],
     "resources": {
       "../../../dist/extension/": "browser-extension/",
+      "../../../dist/media/": "media/",
       "../../../dist/release/THIRD_PARTY_LICENSES.txt": "THIRD_PARTY_LICENSES.txt",
       "../../../dist/release/sources/*": "third-party-sources/"
     },

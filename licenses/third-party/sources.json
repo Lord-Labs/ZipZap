@@ -40,5 +40,25 @@
     "source": "https://github.com/Rich-Harris/locate-character/blob/4f08a59ec248121f7002abd02ee7b94e8eda06bc/README.md",
     "note": "MIT declared in README and package metadata; standard MIT permission text supplied; upstream has no separate copyright notice",
     "sha256": "bde3dbdd5858b10f3ad3e4d5173401426ea089787eadcd6847a56aa33bf07012"
+  },
+  {
+    "package": "yt-dlp-2026.10.21",
+    "source": "https://github.com/yt-dlp/yt-dlp/blob/2026.10.21/LICENSE",
+    "sha256": "7e12e5df4bae12cb21581ba157ced20e1986a0508dd10d0e8a4ab9a4cf94e85c"
+  },
+  {
+    "package": "yt-dlp-ejs-0.8.0",
+    "source": "https://github.com/yt-dlp/ejs/blob/0.8.0/LICENSE",
+    "sha256": "b5065838cbac452dfc855ba6e6e031481ad2c68406f70d21ead9321374653e6c"
+  },
+  {
+    "package": "meriyah-6.1.4",
+    "source": "https://registry.npmjs.org/meriyah/-/meriyah-6.1.4.tgz",
+    "sha256": "e9a5df5a6ae5cd51ca430715f4c62fb5424946e8da07b7caa058a1ba0582a848"
+  },
+  {
+    "package": "astring-1.9.0",
+    "source": "https://registry.npmjs.org/astring/-/astring-1.9.0.tgz",
+    "sha256": "d7e882d386050a13b3244078d95b1e3d943b4741fb1b2d7d936cf39a08f52a09"
   }
 ]

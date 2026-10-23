@@ -340,6 +340,39 @@ Uninstall removes the native host registration and application binaries. It
 retains download files and the local database/settings so a later reinstall can
 recover them. Remove the unpacked extension separately through your browser.
 
+## Unreleased video action on main
+
+Enable **Public links and video** for the current site in the extension popup,
+then reload the page. A **Download with ZipZap** button appears over supported
+visible players. Tab to it and press Enter or Space, or use **Find a video on
+this page** in the popup. With native video fullscreen, use the popup or exit
+fullscreen; cross-origin embedded players require opening the original page.
+**Hide video buttons on this site**, site off and global off stop new actions.
+Existing accepted jobs remain in ZipZap.
+
+Supported sources are public direct MP4/WebM files exposed by a loaded player,
+and public `www.youtube.com/watch?v=…` pages when a combined progressive MP4
+with audio and video is available. No quality picker, playlists, live streams,
+HLS/DASH, separate-track assembly, sign-in/cookie forwarding or protected media
+is supported. Use only sources the site and rights holder allow saving.
+
+YouTube metadata extraction starts only on your explicit action. The installer
+includes pinned Python, Node and yt-dlp tools; no separate installation or first
+use helper download is required. The tools do not transfer the media file:
+the existing ZipZap engine does that after preparation and queue acceptance.
+Cancel preparation before activation to prevent a late result from queueing.
+Keep the page open until confirmation; once queued, use desktop pause/cancel.
+Unknown activation uses **Check the same request**, never an automatic second
+browser copy. A refused source is not downloaded as an HTML page or blob.
+
+Availability can change. If extraction fails, check the supported source and
+repair/update ZipZap when resources are missing. Expired links follow existing
+download recovery; the app does not silently refresh them. Selected sources and
+short-lived resolved URLs stay in private local proposals, accepted download
+URLs in the usual database, and recovery receipts contain no URLs. No browser
+history or cookies are exported. See [qualification](development/VIDEO_ACTION.md).
+This feature is not included in the published 0.2.0-beta.1.
+
 ## Keyboard and accessibility
 
 ZipZap offers **Appearance** in Settings: Dark (the default),

@@ -17,6 +17,12 @@ await copyFile(
   path.join(root, "target/release/zipzap-native.exe"),
   path.join(folder, "zipzap-native-x86_64-pc-windows-msvc.exe"),
 );
+const media = spawnSync(process.execPath, [path.join(root, "scripts/prepare-media.mjs")], {
+  cwd: root,
+  stdio: "inherit",
+  windowsHide: true,
+});
+if (media.status !== 0) process.exit(media.status ?? 1);
 const notices = spawnSync(process.execPath, [path.join(root, "scripts/licenses.mjs")], {
   cwd: root,
   stdio: "inherit",

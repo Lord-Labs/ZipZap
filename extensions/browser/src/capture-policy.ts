@@ -29,10 +29,49 @@ export async function permitted(origin: string): Promise<boolean> {
     origins: [sitePattern(origin)],
   });
 }
+export async function hiddenVideos(): Promise<string[]> {
+  const raw = (await chrome.storage.local.get("videoHiddenSites")).videoHiddenSites;
+  return Array.isArray(raw) ? (await sites()).filter((origin) => raw.includes(origin)) : [];
+}
+export function youtubePage(value: string): string | null {
+  try {
+    const url = new URL(value),
+      ids = url.searchParams.getAll("v");
+    return url.protocol === "https:" &&
+      url.hostname === "www.youtube.com" &&
+      !url.port &&
+      url.pathname === "/watch" &&
+      !url.username &&
+      !url.password &&
+      ids.length === 1 &&
+      /^[\w-]{11}$/.test(ids[0])
+      ? `https://www.youtube.com/watch?v=${ids[0]}`
+      : null;
+  } catch {
+    return null;
+  }
+}
+export function directVideo(value: string): string | null {
+  try {
+    const url = new URL(value);
+    return ["http:", "https:"].includes(url.protocol) &&
+      !url.username &&
+      !url.password &&
+      !url.hash &&
+      url.href.length <= 16384 &&
+      /\.(mp4|webm)$/i.test(url.pathname)
+      ? url.href
+      : null;
+  } catch {
+    return null;
+  }
+}
 export async function reconcile(): Promise<void> {
   const enabled: string[] = [];
   for (const origin of await sites()) if (await permitted(origin)) enabled.push(origin);
   await chrome.storage.local.set({ captureSites: enabled });
+  const hidden = await hiddenVideos();
+  await chrome.storage.local.set({ videoHiddenSites: hidden });
   if (await chrome.permissions.contains({ permissions: ["scripting"] })) {
     const old = (await chrome.scripting.getRegisteredContentScripts()).filter((script) =>
       script.id.startsWith("zipzap-site-"),
@@ -55,7 +94,7 @@ export async function reconcile(): Promise<void> {
   for (const tab of await chrome.tabs.query({}))
     if (tab.id !== undefined) {
       void chrome.tabs
-        .sendMessage(tab.id, { type: "zipzapPolicy", sites: enabled })
+        .sendMessage(tab.id, { type: "zipzapPolicy", sites: enabled, videoHidden: hidden })
         .catch(() => {});
     }
 }

@@ -436,6 +436,10 @@ pub fn run() {
                                         &root,
                                         &request,
                                         &folder(&handle.state::<AppState>()),
+                                        &handle
+                                            .path()
+                                            .resource_dir()
+                                            .map_err(|_| "Media resources unavailable")?,
                                     )
                                     .await
                                 } else {

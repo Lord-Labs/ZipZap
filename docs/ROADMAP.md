@@ -159,6 +159,7 @@ video-page extraction; existing release gates and broader studies remain open.
 Scoped media decision #101 / [ADR 0012](architecture/0012-public-video-action.md)
 accepts an explicit public direct-player/YouTube progressive-MP4 action, with
 bundled metadata tools and the existing Manager, after the decision PR merges.
-It requires its own implementation issue. Streaming assembly, protected/session
+Implementation #103 adds this scoped action; see [actual verification](development/VIDEO_ACTION.md).
+Streaming assembly, protected/session
 sources and store/publication approval are outside that go decision; full #51
 and startup/platform/release gates remain open.

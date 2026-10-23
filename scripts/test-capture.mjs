@@ -12,7 +12,9 @@ let allowed = false,
   registered = [],
   nativeCalls = [],
   state = "prepared",
-  broken = false;
+  broken = false,
+  pausePrepare = false,
+  heldPrepare;
 const storage = (data) => ({
   get: async (key) => ({ [key]: data[key] }),
   set: async (value) => Object.assign(data, value),
@@ -54,12 +56,17 @@ globalThis.chrome = {
     sendNativeMessage: (_host, message, callback) => {
       nativeCalls.push(message);
       if (broken) chrome.runtime.lastError = { message: "private path ?token=secret" };
-      callback({
-        version: 3,
-        id: message.id,
-        state: state.startsWith("reject:") ? "rejected" : state,
-        ...(state.startsWith("reject:") ? { code: state.slice(7) } : {}),
-      });
+      const deliver = () =>
+        callback({
+          version: 3,
+          id: message.id,
+          state: state.startsWith("reject:") ? "rejected" : state,
+          ...(state.startsWith("reject:") ? { code: state.slice(7) } : {}),
+        });
+      if (pausePrepare && message.action === "prepare_video") {
+        pausePrepare = false;
+        heldPrepare = deliver;
+      } else deliver();
       delete chrome.runtime.lastError;
     },
   },
@@ -89,14 +96,14 @@ const operation = (action, key, url) => ({
 const settings = (action, site) =>
   send({ type: "zipzapSettings", action, ...(site ? { origin: site } : {}) }, popup);
 await boot();
-assert.deepEqual(await send({ type: "zipzapPolicyRead" }), { enabled: false });
-assert.deepEqual(await settings("read"), { sites: [] });
+assert.deepEqual(await send({ type: "zipzapPolicyRead" }), { enabled: false, video: false });
+assert.deepEqual(await settings("read"), { sites: [], hiddenVideos: [] });
 assert.deepEqual(await settings("enable", origin), { error: true });
 assert.equal(nativeCalls.length, 0);
 allowed = true;
-assert.deepEqual(await settings("enable", origin), { sites: [origin] });
+assert.deepEqual(await settings("enable", origin), { sites: [origin], hiddenVideos: [] });
 assert.equal(registered.length, 1);
-assert.deepEqual(await send({ type: "zipzapPolicyRead" }), { enabled: true });
+assert.deepEqual(await send({ type: "zipzapPolicyRead" }), { enabled: true, video: true });
 
 for (const invalid of [
   { ...sender, id: "foreign" },
@@ -152,6 +159,48 @@ assert.equal(
 broken = false;
 assert.ok(!JSON.stringify(session).includes("file.zip"));
 assert.ok(!JSON.stringify(session).includes("secret"));
+state = "prepared";
+const watch = "https://www.youtube.com/watch?v=YE7VzlLtp-4",
+  youtube = { ...sender, url: watch + "&list=ignored" };
+await settings("enable", "https://www.youtube.com");
+assert.equal((await send(operation("prepare_video", randomUUID(), watch))).state, "fallback");
+const videoId = randomUUID();
+assert.equal((await send(operation("prepare_video", videoId, watch), youtube)).state, "prepared");
+assert.equal(
+  (
+    await send(
+      operation("prepare_video", randomUUID(), "https://www.youtube.com/watch?v=AAAAAAAAAAA"),
+      youtube,
+    )
+  ).state,
+  "fallback",
+);
+await settings("video_hide", "https://www.youtube.com");
+assert.equal((await send(operation("activate", videoId), youtube)).state, "fallback");
+assert.equal((await send({ type: "zipzapPolicyRead" }, youtube)).video, false);
+await settings("video_show", "https://www.youtube.com");
+pausePrepare = true;
+const cancelledId = randomUUID(),
+  preparation = send(operation("prepare_video", cancelledId, watch), youtube);
+for (let index = 0; index < 100 && !heldPrepare; index++)
+  await new Promise((resolve) => setTimeout(resolve, 5));
+assert.ok(heldPrepare);
+assert.equal((await send(operation("cancel_prepare", cancelledId), youtube)).state, "cancelled");
+heldPrepare();
+assert.equal((await preparation).state, "unknown");
+const activations = nativeCalls.filter((value) => value.action === "activate").length;
+assert.equal((await send(operation("activate", cancelledId), youtube)).state, "unknown");
+assert.equal(nativeCalls.filter((value) => value.action === "activate").length, activations);
+const directId = randomUUID();
+assert.equal(
+  (
+    await send(
+      operation("prepare_video", directId, "https://cdn.example.com/clip.mp4?signature=private"),
+    )
+  ).state,
+  "prepared",
+);
+assert.ok(!JSON.stringify(session).includes("signature"));
 session.captureAttempts = Array.from({ length: 100 }, () => ({ id: randomUUID(), at: Date.now() }));
 const retired = session.captureAttempts[0].id;
 state = "prepared";

@@ -15,6 +15,18 @@ Windows graph are not a claim of distributed platform support. See the
 
 ## Direct components
 
+Unreleased Windows builds also bundle full unmodified CPython 3.14.9 embedded
+x64, Node 24.22.1 (executable and full license), and the pure yt-dlp 2026.10.21
+archive with EJS 0.8.0, meriyah 6.1.4 and astring 1.9.0. These supply explicit
+metadata extraction only. Exact inputs and hashes are in
+[`tools/media/manifest.json`](tools/media/manifest.json) and
+[ADR 0012](docs/architecture/0012-public-video-action.md).
+The installer presents CPython's full license including bundled third-party and
+Windows redistribution terms. Installed notices include the complete Python/Node
+texts and Unlicense/ISC/MIT notices. No FFmpeg or yt-dlp PyInstaller executable is
+distributed. `npm run build:media` prepares verified resources before packaging;
+the installed application never downloads or auto-updates its tools.
+
 | Component                                                        | Use                                     | License metadata                        |
 | ---------------------------------------------------------------- | --------------------------------------- | --------------------------------------- |
 | Tokio, reqwest                                                   | HTTP/HTTPS engine                       | MIT; MIT OR Apache-2.0                  |

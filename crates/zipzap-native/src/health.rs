@@ -85,7 +85,7 @@ pub(crate) fn answer(
     Ok(
         serde_json::json!({"version":2,"id":session,"state":"health",
         "host_version":env!("CARGO_PKG_VERSION"),"app_ready":app.is_some(),
-        "app_version":app.map(|app| app.version),"capabilities":["explicit","capture_v3"]}),
+        "app_version":app.map(|app| app.version),"capabilities":["explicit","capture_v3","video_v1"]}),
     )
 }
 

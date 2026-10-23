@@ -131,6 +131,36 @@ for (const [folder, pkg] of Object.entries(lock.packages).sort(([a], [b]) => a.l
     pkg.resolved || manifest.repository?.url || "npm registry",
   );
 }
+if (process.platform === "win32") {
+  const media = JSON.parse(await readFile("tools/media/manifest.json", "utf8"));
+  await append(
+    "Bundled media runtime",
+    "CPython",
+    media.python.version,
+    "PSF and bundled third-party/Windows redistribution terms",
+    "dist/media/python",
+    media.python.url,
+  );
+  await append(
+    "Bundled media runtime",
+    "Node.js",
+    media.node.version,
+    "MIT and bundled third-party terms",
+    "dist/media/node",
+    media.node.url,
+  );
+  for (const [name, version, license, source] of [
+    ["yt-dlp", media["yt-dlp"].version, "Unlicense", media["yt-dlp"].url],
+    ["yt-dlp-ejs", "0.8.0", "Unlicense", "https://github.com/yt-dlp/ejs/tree/0.8.0"],
+    ["meriyah", "6.1.4", "ISC", "https://registry.npmjs.org/meriyah/-/meriyah-6.1.4.tgz"],
+    ["astring", "1.9.0", "MIT", "https://registry.npmjs.org/astring/-/astring-1.9.0.tgz"],
+  ])
+    await append("Bundled media component", name, version, license, "licenses/third-party", source);
+  await writeFile(
+    path.join(output, "INSTALLER_LICENSE.txt"),
+    `${await readFile("LICENSE", "utf8")}\n\nBundled CPython and Windows redistribution terms\n\n${await readFile("dist/media/python/LICENSE.txt", "utf8")}\n\nAdditional bundled component notices are installed in THIRD_PARTY_LICENSES.txt and media/licenses/.\n`,
+  );
+}
 await writeFile(path.join(output, "THIRD_PARTY_LICENSES.txt"), texts.join("\n"));
 await writeFile(path.join(output, "dependencies.json"), JSON.stringify(entries, null, 2) + "\n");
 console.log(`Collected license texts for ${entries.length} dependencies; MPL sources copied.`);

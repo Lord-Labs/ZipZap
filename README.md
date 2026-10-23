@@ -40,7 +40,9 @@ Unreleased work on main adds guided setup, truthful browser connection checks
 and optional capture of public file clicks on enabled sites. See the
 [user guide](docs/USER_GUIDE.md#unreleased-public-link-capture-on-main) and
 [actual Chrome/Edge evidence](docs/development/CAPTURE_PROTOCOL.md). These changes
-are not part of the published beta; video-page extraction remains separate.
+are not part of the published beta. The explicit video action supports loaded
+public MP4/WebM players and public YouTube watch pages with an available combined
+MP4. Its extraction tools are bundled; see [video scope](docs/USER_GUIDE.md#unreleased-video-action-on-main).
 
 ## Stack
 

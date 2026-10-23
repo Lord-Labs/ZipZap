@@ -52,6 +52,8 @@ const codes = [
   "inbox_full",
   "host_rejected",
   "capture_expired",
+  "capture_cancelled",
+  "video_unavailable",
 ];
 function native(message: object, id: string, timeoutMs = 3000, version = 2): Promise<Answer> {
   return new Promise((resolve, reject) => {
@@ -82,11 +84,11 @@ function native(message: object, id: string, timeoutMs = 3000, version = 2): Pro
 }
 
 export async function captureOperation(
-  action: "prepare" | "activate" | "status",
+  action: "prepare" | "prepare_video" | "activate" | "status" | "cancel_prepare",
   id: string,
   url?: string,
 ): Promise<Answer> {
-  const deadline = Date.now() + 15000;
+  const deadline = Date.now() + (action === "prepare_video" ? 55000 : 15000);
   let answer = await native({ version: 3, action, id, ...(url ? { url } : {}) }, id, 3000, 3);
   while (
     action !== "status" &&
