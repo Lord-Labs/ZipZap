@@ -10,7 +10,7 @@ publish.workspace = true
 tauri-build = { version = "=2.7.3", features = [] }
 
 [target.'cfg(windows)'.dependencies]
-tauri = { version = "=2.12.3", features = ["tray-icon"] }
+tauri = { version = "=2.12.4", features = ["tray-icon"] }
 tauri-plugin-dialog = "=2.8.3"
 tauri-plugin-opener = "=2.7.2"
 tauri-plugin-single-instance = "=2.5.4"
