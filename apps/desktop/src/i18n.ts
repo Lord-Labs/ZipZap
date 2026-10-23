@@ -19,7 +19,7 @@ const en = {
     "Enable ZipZap, open its toolbar popup and choose Check connection in the profile you will use.",
   setupOpenExtension: "Open included extension folder",
   setupExplicit:
-    "Explicit links are supported. Automatic capture and video extraction are not enabled by this step.",
+    "For automatic public-file links, open the extension on the site, choose Enable on this site, grant access and reload. Video-page extraction is separate.",
   setupManualReady:
     "Manual downloads are ready. Recent extension contact below is separate from native registration.",
   setupTestConsent:
@@ -368,7 +368,7 @@ const ar: Record<keyof typeof en, string> = {
     "فعّل ZipZap وافتح نافذة الإضافة من شريط المتصفح واضغط فحص الاتصال في ملف المتصفح المطلوب.",
   setupOpenExtension: "فتح مجلد الإضافة المرفقة",
   setupExplicit:
-    "إرسال الروابط الصريحة مدعوم. هذه الخطوة لا تفعّل الالتقاط التلقائي أو استخراج الفيديو.",
+    "لالتقاط روابط الملفات العامة، افتح الإضافة على الموقع واختر تفعيل لهذا الموقع، وامنح الصلاحية ثم أعد التحميل. استخراج صفحات الفيديو خطوة منفصلة.",
   setupManualReady: "التنزيل اليدوي جاهز. اتصال الإضافة الحديث أدناه مستقل عن تسجيل الجسر المحلي.",
   setupTestConsent:
     "اختياري: تنزيل رخصة ZipZap العامة (1076 بايت) عبر HTTPS من raw.githubusercontent.com إلى المجلد أدناه، ومقارنة بصمة SHA-256 المنشورة. يبقى الملف النصي باسم فريد وسجله؛ يمكنك إزالتهما يدويًا بعد الاختبار. تُطبق قواعد الطابور والإيقاف والجدولة المعتادة.",

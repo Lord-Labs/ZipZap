@@ -9,6 +9,15 @@ Review scope: production core, desktop commands/capabilities/CSP, native host,
 extension, temporary files, installer hooks, locks and dependency manifests.
 The review is a source/fixture review, not an independent penetration test.
 
+Unreleased extension changes #97/#98 add activeTab/storage plus optional
+scripting and selected-site host access. The
+[capture protocol/evidence](CAPTURE_PROTOCOL.md) records exact-origin policy,
+top-frame sender checks, staged ownership, private bounded metadata and failure
+recovery. The original beta review below describes its earlier explicit-only
+permissions. No cookies/history/downloads permission, page-provided native
+commands or general shell execution is added. The OS consent prompt and store
+review are not qualified by the pregranted browser fixture.
+
 ## Boundaries and data
 
 - All entry points share HTTP/HTTPS validation. Embedded credentials and unsafe

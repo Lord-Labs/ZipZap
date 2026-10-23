@@ -1,4 +1,6 @@
 import { sendLink } from "./shared.js";
+import { installCapture } from "./capture-background.js";
+installCapture();
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.removeAll(() =>
     chrome.contextMenus.create({

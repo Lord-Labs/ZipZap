@@ -301,10 +301,40 @@ at most 100 receipts. Replays reuse the same job while its receipt/history is
 retained. Native acceptance is [reported by the maintainer](development/NATIVE_SMOKE.md);
 release evidence and remaining limits are tracked with #47.
 
-No cookies, browser history or tabs are read. Authenticated sessions, blob/data
+The published beta reads no cookies, browser history or tabs. Authenticated sessions, blob/data
 URLs, protected players and HLS/DASH are unsupported. Signed direct links may
 work until they expire, but are private: the local database stores their URLs.
 Keep `%LOCALAPPDATA%\com.zipzap.desktop` private and out of bug reports.
+
+### Unreleased public-link capture on main
+
+Open the extension from a normal HTTP(S) page and choose **Enable on this site**.
+Grant the selected site's access, then reload that page. Capture is off by
+default; enable only sites whose files are public. **Turn off** removes a site,
+and **Turn off all sites** removes every capture choice. Removing browser site
+permission also disables capture. Accepted jobs stay in the app.
+
+Capture handles ordinary left clicks on same-origin, query-free anchors with a
+download attribute or these suffixes: zip, 7z, tar, gz, pdf, iso, exe, msi, mp4,
+webm, mp3, csv. Modified clicks, other targets/origins, forms, scripts, Save As,
+private browsing, credentials, blob/data links and video-page extraction are
+excluded. Normal browser behavior remains available outside that scope.
+
+Keep the page open until **Added to ZipZap** appears. Preparing only checks
+metadata; it cannot start a transfer. A preparation failure or confirmed app
+rejection returns the file to the browser. If activation's outcome is unknown,
+**Check the same request** or inspect ZipZap before retrying; a second browser
+copy is not started automatically. This confirms queue ownership, not completion.
+
+The extension reads the active page URL when its popup is opened, and link
+targets/clicks only on granted sites. Stored choices are limited to 32 origins;
+session recovery keeps at most 100 recent request IDs, origin/tab/document IDs
+and phases for 24 hours, without link lists. Old/evicted recovery remains
+ambiguous and directs you to the app. Native metadata proposals contain the
+selected link/name/folder for a 60-second activation lease; stale records are
+removed while the app runs. Accepted URLs remain in the normal local database.
+Cookies and browser history are never exported. This is not in the published
+0.2.0-beta.1 extension; see [capture qualification](development/CAPTURE_PROTOCOL.md).
 
 Uninstall removes the native host registration and application binaries. It
 retains download files and the local database/settings so a later reinstall can

@@ -77,3 +77,36 @@ footer {
   margin-top: 18px;
   padding-top: 12px;
 }
+h2 {
+  font-size: 15px;
+  margin: 18px 0 0;
+}
+#site-origin {
+  display: block;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+#capture-sites {
+  list-style: none;
+  padding: 0;
+  max-height: 160px;
+  overflow: auto;
+  font-size: 12px;
+}
+#capture-sites li {
+  padding: 8px 0;
+  border-bottom: 1px solid #d6e0dc;
+  overflow-wrap: anywhere;
+}
+#capture-sites button {
+  background: white;
+  color: #192d36;
+  border: 1px solid #aebbc4;
+  margin-top: 4px;
+  padding: 6px;
+}
+#capture-clear {
+  background: white;
+  color: #192d36;
+  border: 1px solid #aebbc4;
+}

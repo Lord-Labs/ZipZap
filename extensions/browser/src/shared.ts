@@ -51,8 +51,9 @@ const codes = [
   "expired",
   "inbox_full",
   "host_rejected",
+  "capture_expired",
 ];
-function native(message: object, id: string, timeoutMs = 3000): Promise<Answer> {
+function native(message: object, id: string, timeoutMs = 3000, version = 2): Promise<Answer> {
   return new Promise((resolve, reject) => {
     const timeout = setTimeout(
       () => reject(new Error(chrome.i18n.getMessage("timeout"))),
@@ -67,15 +68,37 @@ function native(message: object, id: string, timeoutMs = 3000): Promise<Answer> 
       }
       const answer = response as Answer | null;
       if (
-        answer?.version !== 2 ||
+        answer?.version !== version ||
         answer.id !== id ||
-        !["received", "queued", "rejected"].includes(answer.state) ||
+        !["received", "queued", "rejected", ...(version === 3 ? ["prepared"] : [])].includes(
+          answer.state,
+        ) ||
         (answer.state === "rejected" && !codes.includes(answer.code || ""))
       ) {
         reject(new Error(chrome.i18n.getMessage("protocol")));
       } else resolve(answer);
     });
   });
+}
+
+export async function captureOperation(
+  action: "prepare" | "activate" | "status",
+  id: string,
+  url?: string,
+): Promise<Answer> {
+  const deadline = Date.now() + 15000;
+  let answer = await native({ version: 3, action, id, ...(url ? { url } : {}) }, id, 3000, 3);
+  while (
+    action !== "status" &&
+    (answer.state === "received" || (action === "activate" && answer.state === "prepared"))
+  ) {
+    if (Date.now() >= deadline) throw new Error("Capture acknowledgment unavailable");
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    const remaining = deadline - Date.now();
+    if (remaining <= 0) throw new Error("Capture acknowledgment unavailable");
+    answer = await native({ version: 3, action: "status", id }, id, Math.min(3000, remaining), 3);
+  }
+  return answer;
 }
 
 export async function sendLink(value: string, received: () => void = () => {}): Promise<string> {

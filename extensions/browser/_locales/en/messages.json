@@ -67,5 +67,59 @@
   },
   "healthTimeout": {
     "message": "Connection check timed out. Open or repair ZipZap and try again. No download request was sent."
+  },
+  "captureTitle": {
+    "message": "Automatic public links"
+  },
+  "captureHelp": {
+    "message": "Enable only for sites with public file links. Captures plain same-site file clicks; forms, sign-in downloads and video pages need explicit actions. Keep the page open until ZipZap confirms."
+  },
+  "captureEnable": {
+    "message": "Enable on this site"
+  },
+  "captureDisable": {
+    "message": "Turn off"
+  },
+  "captureClear": {
+    "message": "Turn off all sites"
+  },
+  "captureSites": {
+    "message": "Enabled sites"
+  },
+  "captureReload": {
+    "message": "Saved. Reload the site to apply page access. Accepted downloads stay in ZipZap."
+  },
+  "captureSettingsError": {
+    "message": "Could not save site access. Check extension permissions and try again."
+  },
+  "captureDenied": {
+    "message": "Site access was declined. Normal browser downloads remain available."
+  },
+  "captureNoSite": {
+    "message": "Open a normal HTTP(S) page, then open this popup. Private browsing is excluded."
+  },
+  "captureCheck": {
+    "message": "Check the same request"
+  },
+  "captureDismiss": {
+    "message": "Dismiss message"
+  },
+  "capturePreparing": {
+    "message": "Preparing this link. No download has been queued yet."
+  },
+  "captureActivating": {
+    "message": "Handing this request to ZipZap…"
+  },
+  "captureQueued": {
+    "message": "Added to ZipZap. The app queue controls when it starts."
+  },
+  "captureFallback": {
+    "message": "ZipZap did not take this download. Returned to the browser."
+  },
+  "captureUnknown": {
+    "message": "The app may own this download. Check this request or open ZipZap before trying again. No browser copy was started."
+  },
+  "capture_expired": {
+    "message": "Preparation expired before activation."
   }
 }

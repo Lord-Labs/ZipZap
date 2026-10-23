@@ -2,8 +2,9 @@
 
 Native slice [#97](https://github.com/Lord-Labs/ZipZap/issues/97) implements
 [ADR 0011](../architecture/0011-public-link-capture.md) under #96. This is
-unreleased protocol infrastructure; the extension opt-in/click UI and complete
-Chrome/Edge capture acceptance belong to the next slice.
+unreleased protocol infrastructure. Extension slice
+[#98](https://github.com/Lord-Labs/ZipZap/issues/98) adds the opt-in/click UI;
+the checks below distinguish its actual browser evidence from mock boundaries.
 
 ## Local ownership and recovery
 
@@ -51,3 +52,49 @@ worker restart/late acknowledgment, the old cancelled runner #82, full platform
 setup #88 or candidate qualification #89/#46/#47. The reproduced inheritance bug
 is not claimed as the proven location of #82's original stall. No hosted checks,
 store submission or release publication were requested.
+
+## Extension slice #98: actual and simulated evidence
+
+Run `npm run build:extension`, `node scripts/test-capture.mjs` and
+`npx playwright test` for worker-boundary and content/popup checks. These cover
+default-off permission requests, declined consent, sender/frame/private/origin
+rejection, exact-origin choices, revocation, 100-record/24-hour recovery,
+activation ambiguity, app versus host refusal, no URL lists in session recovery,
+trusted click eligibility, browser fallback without recursion, late preparation
+after content timeout, late activation acknowledgment, same-ID status and EN/AR
+accessibility. The simulated timer/transport cases are not native-browser passes.
+
+`node scripts/test-capture-browser.mjs` builds a unique hidden debug app, uses a
+private state junction/profiles and a uniquely named test host, and asserts the
+ordinary Chrome/Edge registration is unchanged. Its test extension copy
+pregrants scripting/loopback access and delays one real activation acknowledgment;
+production code has no fault-injection switch. The OS permission consent prompt
+is not exercised by this fixture. It preserves private artifacts rather than
+deleting downloads/state.
+
+On 2026-10-23, installed Chrome **155.0.8059.86** and Edge **155.0.4283.62**, with
+WebView2 **155.0.4283.62**, both passed:
+
+- Real trusted page click → v3 prepare/activate → actual desktop Manager.
+- Held queue accepts one job without browser/output transfer; delayed activation
+  acknowledgment shows unknown ownership without a browser copy.
+- Capture preserves the fixture window's hidden state; the legacy explicit
+  handoff may raise it as intended. Each browser starts a fresh hidden app process.
+- Actual extension worker termination and desktop quit/reopen, then same-ID
+  status confirmation; one saved job remains.
+- Starting the shared queue publishes the exact 1,048,576-byte fixture,
+  SHA-256 `d12d0182a4797ab1c11f5c225073ab9d5a4d8061bbbd595e23dc6e0b4a69319e`.
+- Occupied destination returns once to the browser without another engine job or
+  replacing the existing file; explicit v2 popup handoff also matches the digest.
+- Turning the site off leaves its next click with the browser and adds no job.
+
+Initial fixture runs corrected a loopback permission pattern and the assertion's
+serialized status case; those aborted runs are not acceptance passes.
+The window check also exposed fixture setup/quit races: explicit v2 legitimately
+raises the previous process, and quit can close WebView before its IPC promise
+settles. The runner now starts a fresh hidden process and requires clean process
+exit; production permissions and test timeouts were not relaxed. Logical
+proposal expiry/quota/storage refusal are exercised by the native/worker tests,
+not claimed as separate full-browser scenarios. No ordinary installer, absent
+WebView2, browser consent prompt, store, YouTube or cold-boot qualification is
+implied. #88/#89/#46/#47 and the original #82 evidence gaps remain separate.
