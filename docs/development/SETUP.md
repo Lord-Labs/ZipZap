@@ -17,6 +17,12 @@ The sidecar preparation step is required before Windows workspace compilation
 because Tauri embeds its bundle metadata at compile time. `desktop:build` runs
 that step automatically. Do not run build tools as administrator.
 
+On Windows this also prepares the hash-pinned media resources and license texts
+from `tools/media/manifest.json`. Build-time network access is needed on the first
+run; verified archives are cached in ignored `.research-local/media-assets/`.
+`npm run build:media` rebuilds only generated `dist/media/`. The installed app
+requires no external Python/Node setup. See [video boundaries](VIDEO_ACTION.md).
+
 | Command                   | Purpose                                                      |
 | ------------------------- | ------------------------------------------------------------ |
 | `npm run check`           | Formatting, local links, checker tests and Svelte/TypeScript |

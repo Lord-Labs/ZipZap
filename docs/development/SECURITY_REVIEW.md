@@ -82,6 +82,17 @@ in the notice collection; they are not all runtime dependencies.
 
 ## Tested failure paths and limits
 
+Unreleased #103 implements [ADR 0012](../architecture/0012-public-video-action.md):
+selected-site explicit metadata extraction with pinned bundled tools, fixed
+absolute commands, disabled config/plugins/remote components and isolated temp.
+Windows assigns the bootstrap to a kill-on-close job before extraction can start;
+tests cover child termination, deadline, output bounds and missing resources.
+Returned ID/protocol/CDN/codecs are validated before a private inert proposal.
+Activation alone creates the existing Manager job. Cancellation prevents late
+activation; ambiguous activation cannot trigger a browser copy. No cookies,
+authenticated extraction, tool updater or new local network endpoint is added.
+See [actual results and outstanding qualification](VIDEO_ACTION.md).
+
 Development issue #45 adds an explicit support preview/export. Its schema is an
 allowlist of app/platform versions (including numeric Windows build), aggregate
 counts and typed codes/flags. It never serializes job identities, URLs, paths,

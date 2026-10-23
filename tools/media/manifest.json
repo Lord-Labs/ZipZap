@@ -1,0 +1,20 @@
+{
+  "python": {
+    "version": "3.14.9",
+    "bytes": 12609248,
+    "url": "https://www.python.org/ftp/python/3.14.9/python-3.14.9-embed-amd64.zip",
+    "sha256": "3c01d7cfc666f746a6f064f60fb2156ab0ec464d3d738ab796371a46a9bb24a2"
+  },
+  "node": {
+    "version": "24.22.1",
+    "bytes": 37748064,
+    "url": "https://nodejs.org/dist/v24.22.1/node-v24.22.1-win-x64.zip",
+    "sha256": "d2046d28c2c3dcd211ac5145c0bf30e2047ef9dfb306693c8c6e2eccd8b95fa5"
+  },
+  "yt-dlp": {
+    "version": "2026.10.21",
+    "bytes": 3074818,
+    "url": "https://github.com/yt-dlp/yt-dlp/releases/download/2026.10.21/yt-dlp",
+    "sha256": "b7af77f686e95f7845ce8d09d21957718febb8b48b30555adb9dd2292ad7bf14"
+  }
+}

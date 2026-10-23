@@ -21,6 +21,10 @@ header {
 header span {
   color: #087f70;
 }
+h1 {
+  font: inherit;
+  margin: 0;
+}
 p {
   font-size: 12px;
   color: #596b76;

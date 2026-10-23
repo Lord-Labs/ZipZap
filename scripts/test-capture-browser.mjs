@@ -11,6 +11,11 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 assert.equal(process.platform, "win32", "Requires Windows, WebView2 and installed Chrome/Edge");
+assert.ok(
+  process.argv.length <= 3 && (!process.argv[2] || process.argv[2] === "--video"),
+  "usage: node scripts/test-capture-browser.mjs [--video]",
+);
+const videoMode = process.argv[2] === "--video";
 const root = fileURLToPath(new URL("../", import.meta.url));
 const token = randomUUID().replaceAll("-", "");
 const run = path.join(root, ".research-local/capture-browser", token);
@@ -91,6 +96,8 @@ assert.ok(
 // The app must not find a production-named sidecar and register the ordinary host.
 await assert.rejects(access(path.join(run, "zipzap-native.exe")));
 await copyFile(path.join(root, "target/debug/zipzap-native.exe"), path.join(run, "host.exe"));
+if (videoMode)
+  await cp(path.join(root, "dist/media"), path.join(run, "media"), { recursive: true });
 await cp(path.join(root, "dist/extension"), extension, { recursive: true });
 await writeFile(
   path.join(extension, "shared.js"),
@@ -124,7 +131,48 @@ for (let index = 0; index < bytes.length; index++)
   bytes[index] = (index * 31 + (index >>> 9)) & 255;
 const digest = (value) => createHash("sha256").update(value).digest("hex");
 const requests = [];
+let ownedVideo = Buffer.alloc(0);
+if (videoMode) {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage();
+    ownedVideo = Buffer.from(
+      await page.evaluate(async () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 320;
+        canvas.height = 180;
+        const context = canvas.getContext("2d");
+        const recorder = new MediaRecorder(canvas.captureStream(10), {
+            mimeType: "video/webm;codecs=vp8",
+          }),
+          parts = [];
+        recorder.ondataavailable = (event) => parts.push(event.data);
+        const stopped = new Promise((resolve) => {
+          recorder.onstop = resolve;
+        });
+        let frame = 0;
+        const timer = setInterval(() => {
+          context.fillStyle = frame++ % 2 ? "#087f70" : "#df6b25";
+          context.fillRect(0, 0, 320, 180);
+        }, 40);
+        recorder.start();
+        await new Promise((resolve) => setTimeout(resolve, 400));
+        recorder.stop();
+        await stopped;
+        clearInterval(timer);
+        return Array.from(
+          new Uint8Array(await new Blob(parts, { type: "video/webm" }).arrayBuffer()),
+        );
+      }),
+    );
+  } finally {
+    await browser.close();
+  }
+  await writeFile(path.join(run, "owned.webm"), ownedVideo);
+  assert.ok(ownedVideo.length > 110, "Owned fixture must contain encoded frames");
+}
 const server = http.createServer((request, response) => {
+  const pathname = request.url.split("?")[0];
   requests.push({ path: request.url, range: request.headers.range || null });
   if (request.url === "/page") {
     response.setHeader("Content-Type", "text/html");
@@ -133,24 +181,38 @@ const server = http.createServer((request, response) => {
     );
     return;
   }
-  if (!/^\/(file\.zip|explicit-\w+\.bin)$/.test(request.url)) {
+  if (pathname === "/video-page" && videoMode) {
+    response.setHeader("Content-Type", "text/html");
+    response.end(
+      '<!doctype html><html lang="en"><title>Owned media</title><main><h1>Owned public clip</h1><video controls muted width="640" height="360" src="/clip.webm?signature=fixture"></video></main></html>',
+    );
+    return;
+  }
+  if (!/^\/(file\.zip|explicit-\w+\.bin|clip\.webm)$/.test(pathname)) {
     response.writeHead(404);
     response.end();
     return;
   }
-  response.setHeader("Content-Type", "application/octet-stream");
+  const payload = pathname === "/clip.webm" ? ownedVideo : bytes;
+  response.setHeader(
+    "Content-Type",
+    pathname === "/clip.webm" ? "video/webm" : "application/octet-stream",
+  );
   response.setHeader("Accept-Ranges", "bytes");
   response.setHeader("ETag", '"capture-fixture-v1"');
-  response.setHeader("Content-Disposition", `attachment; filename="${request.url.slice(1)}"`);
+  response.setHeader(
+    "Content-Disposition",
+    `${pathname === "/clip.webm" ? "inline" : "attachment"}; filename="${pathname.slice(1)}"`,
+  );
   const match = /^bytes=(\d+)-(\d*)$/.exec(request.headers.range || "");
   const start = match ? Number(match[1]) : 0,
-    end = match && match[2] ? Math.min(Number(match[2]), bytes.length - 1) : bytes.length - 1;
+    end = match && match[2] ? Math.min(Number(match[2]), payload.length - 1) : payload.length - 1;
   if (match) {
     response.statusCode = 206;
-    response.setHeader("Content-Range", `bytes ${start}-${end}/${bytes.length}`);
+    response.setHeader("Content-Range", `bytes ${start}-${end}/${payload.length}`);
   }
   response.setHeader("Content-Length", end - start + 1);
-  response.end(bytes.subarray(start, end + 1));
+  response.end(payload.subarray(start, end + 1));
 });
 server.listen(0, "127.0.0.1");
 await once(server, "listening");
@@ -159,6 +221,7 @@ const origin = `http://127.0.0.1:${server.address().port}`;
 const extensionManifest = JSON.parse(await readFile(path.join(extension, "manifest.json")));
 extensionManifest.permissions.push("scripting");
 extensionManifest.host_permissions = ["http://127.0.0.1/*"];
+if (videoMode) extensionManifest.host_permissions.push("https://www.youtube.com/*");
 await writeFile(path.join(extension, "manifest.json"), JSON.stringify(extensionManifest));
 let app, webview, appPage;
 async function startApp() {
@@ -184,6 +247,7 @@ async function startApp() {
   }
   webview = await chromium.connectOverCDP(`http://127.0.0.1:${port}`);
   appPage = webview.contexts()[0].pages()[0];
+  appPage.setDefaultTimeout(20000);
   await appPage.waitForFunction(() => !!window.__TAURI_INTERNALS__);
   assert.ok(
     (await invoke("snapshot")).native_error,
@@ -215,6 +279,42 @@ async function waitJob(name) {
   }
   throw new Error("Fixture download timeout");
 }
+function mp4Tracks(data) {
+  function boxes(start, end) {
+    const values = [];
+    for (let offset = start; offset + 8 <= end;) {
+      let size = data.readUInt32BE(offset),
+        header = 8;
+      if (size === 1) {
+        size = Number(data.readBigUInt64BE(offset + 8));
+        header = 16;
+      }
+      if (size === 0) size = end - offset;
+      assert.ok(size >= header && offset + size <= end);
+      values.push({
+        type: data.toString("ascii", offset + 4, offset + 8),
+        start: offset + header,
+        end: offset + size,
+      });
+      offset += size;
+    }
+    return values;
+  }
+  const top = boxes(0, data.length),
+    moov = top.find((box) => box.type === "moov");
+  assert.ok(
+    moov && top.some((box) => box.type === "ftyp") && top.some((box) => box.type === "mdat"),
+  );
+  const tracks = boxes(moov.start, moov.end)
+    .filter((box) => box.type === "trak")
+    .map((track) => {
+      const mdia = boxes(track.start, track.end).find((box) => box.type === "mdia"),
+        handler = boxes(mdia.start, mdia.end).find((box) => box.type === "hdlr");
+      return data.toString("ascii", handler.start + 8, handler.start + 12);
+    });
+  assert.ok(tracks.includes("vide") && tracks.includes("soun"));
+  return tracks;
+}
 const results = [];
 try {
   for (const key of keys(host))
@@ -227,6 +327,7 @@ try {
   await invoke("save_settings", { settings: { ...snapshot.settings, download_folder: output } });
   await invoke("set_queue_running", { running: false });
   for (const channel of ["chrome", "msedge"]) {
+    console.log(`${channel}: starting isolated capture checks`);
     // The preceding explicit v2 action intentionally raises the app; reset this capture fixture.
     await stopApp();
     await startApp();
@@ -277,7 +378,14 @@ try {
         .locator("[data-zipzap]")
         .getByRole("status")
         .filter({ hasText: "may own this download" })
-        .waitFor();
+        .waitFor()
+        .catch(async (error) => {
+          console.log(
+            `${channel}: initial capture feedback`,
+            await page.locator('[data-zipzap="capture"]').getByRole("status").allTextContents(),
+          );
+          throw error;
+        });
       let saved = await invoke("snapshot");
       assert.equal(
         await invoke("plugin:window|is_visible", { label: "main" }),
@@ -320,6 +428,127 @@ try {
       await popup.locator("#status.success").waitFor();
       const explicit = await waitJob(`explicit-${channel}.bin`);
       assert.equal(digest(await readFile(explicit.destination)), digest(bytes));
+      let mediaEvidence;
+      if (videoMode) {
+        console.log(`${channel}: checking direct video and fullscreen recovery`);
+        await stopApp();
+        await startApp();
+        await invoke("set_queue_running", { running: false });
+        const videoBefore = (await invoke("snapshot")).jobs.length;
+        await popup.evaluate(() => chrome.storage.session.set({ faulted: false }));
+        await page.goto(`${origin}/video-page`);
+        await page.bringToFront();
+        await page.waitForFunction(() => document.querySelector("video")?.readyState >= 1);
+        await page
+          .locator('[data-zipzap="video"]')
+          .getByRole("button", { name: /^Download with ZipZap/ })
+          .click();
+        await page
+          .locator('[data-zipzap="capture"]')
+          .getByRole("status")
+          .filter({ hasText: "may own this download" })
+          .waitFor();
+        assert.equal((await invoke("snapshot")).jobs.length, videoBefore + 1);
+        await assert.rejects(access(path.join(folder, "clip.webm")));
+        await page.locator("video").evaluate((video) => video.requestFullscreen());
+        await page.locator('[data-zipzap="video"]').waitFor({ state: "detached" });
+        const recovered = await popup.evaluate(async (origin) => {
+          const tab = (await chrome.tabs.query({})).find(
+            (tab) => tab.url === `${origin}/video-page`,
+          );
+          return chrome.runtime.sendMessage({ type: "zipzapVideoFromPopup", tabId: tab.id });
+        }, origin);
+        assert.equal(recovered.state, "queued");
+        assert.equal((await invoke("snapshot")).jobs.length, videoBefore + 1);
+        await page.evaluate(() => document.exitFullscreen());
+        await invoke("set_queue_running", { running: true });
+        const direct = await waitJob("clip.webm");
+        assert.equal(digest(await readFile(direct.destination)), digest(ownedVideo));
+        await popup.evaluate(() =>
+          chrome.runtime.sendMessage({
+            type: "zipzapSettings",
+            action: "enable",
+            origin: "https://www.youtube.com",
+          }),
+        );
+        console.log(`${channel}: checking public YouTube action`);
+        await invoke("set_queue_running", { running: false });
+        const youtubeBefore = (await invoke("snapshot")).jobs.length;
+        await page.goto("https://www.youtube.com/watch?v=YE7VzlLtp-4&hl=en", {
+          waitUntil: "domcontentloaded",
+          timeout: 45000,
+        });
+        await page.bringToFront();
+        const reject = page.getByRole("button", { name: "Reject all", exact: true });
+        if (await reject.isVisible().catch(() => false)) await reject.click();
+        await page.locator("video").first().scrollIntoViewIfNeeded();
+        const downloadVideo = page
+          .locator('[data-zipzap="video"]')
+          .getByRole("button", { name: /^Download with ZipZap/ });
+        await downloadVideo.waitFor({ timeout: 45000 }).catch(async (error) => {
+          await page.screenshot({ path: path.join(run, `${channel}-youtube-failure.png`) });
+          console.log(
+            `${channel}: extension diagnostics`,
+            await popup.evaluate(async () => ({
+              settings: await chrome.runtime.sendMessage({
+                type: "zipzapSettings",
+                action: "read",
+              }),
+              scripts: await chrome.scripting.getRegisteredContentScripts(),
+              permitted: await chrome.permissions.contains({
+                permissions: ["scripting"],
+                origins: ["https://www.youtube.com/*"],
+              }),
+            })),
+          );
+          console.log(
+            `${channel}: watch-page diagnostics`,
+            await page.evaluate(() => ({
+              host: location.hostname,
+              path: location.pathname,
+              title: document.title,
+              hidden: document.hidden,
+              players: Array.from(document.querySelectorAll("video"))
+                .slice(0, 8)
+                .map((video) => ({
+                  width: video.getBoundingClientRect().width,
+                  height: video.getBoundingClientRect().height,
+                  top: video.getBoundingClientRect().top,
+                  bottom: video.getBoundingClientRect().bottom,
+                  ready: video.readyState,
+                })),
+            })),
+          );
+          throw error;
+        });
+        await downloadVideo.click();
+        const videoStatus = page.locator('[data-zipzap="capture"]').getByRole("status");
+        await videoStatus.filter({ hasText: "Added to ZipZap" }).waitFor({ timeout: 65000 });
+        assert.equal((await invoke("snapshot")).jobs.length, youtubeBefore + 1);
+        await invoke("set_queue_running", { running: true });
+        const youtube = await waitJob("-YE7VzlLtp-4.mp4");
+        const data = await readFile(youtube.destination),
+          reference = await fetch(youtube.url, { signal: AbortSignal.timeout(60000) });
+        assert.equal(reference.status, 200);
+        assert.equal(digest(Buffer.from(await reference.arrayBuffer())), digest(data));
+        assert.equal(youtube.publication.sha256, digest(data));
+        mediaEvidence = {
+          direct: {
+            bytes: ownedVideo.length,
+            sha256: digest(ownedVideo),
+            nativeFullscreenPopupRecovery: "passed",
+          },
+          youtube: {
+            id: "YE7VzlLtp-4",
+            bytes: data.length,
+            sha256: digest(data),
+            tracks: mp4Tracks(data),
+            independentReference: "matched",
+          },
+        };
+        await page.screenshot({ path: path.join(run, `${channel}-youtube.png`) });
+        await page.goto(`${origin}/page`);
+      }
       const count = (await invoke("snapshot")).jobs.length;
       await popup.evaluate(
         (origin) =>
@@ -343,6 +572,7 @@ try {
         bytes: bytes.length,
         sha256: digest(bytes),
         permissionFixture: "pregranted; consent prompt not exercised",
+        ...(mediaEvidence ? { media: mediaEvidence } : {}),
       });
       console.log(JSON.stringify(results.at(-1)));
     } finally {

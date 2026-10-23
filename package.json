@@ -19,7 +19,8 @@
     "check:ui": "npm run check --workspace @zipzap/desktop",
     "desktop:dev": "npm run tauri --workspace @zipzap/desktop -- dev",
     "desktop:build": "node scripts/build-native.mjs && npm run tauri --workspace @zipzap/desktop -- build --bundles nsis",
-    "build:extension": "node scripts/build-extension.mjs"
+    "build:extension": "node scripts/build-extension.mjs",
+    "build:media": "node scripts/prepare-media.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

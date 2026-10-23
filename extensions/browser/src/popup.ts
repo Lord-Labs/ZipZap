@@ -51,7 +51,12 @@ const captureStatus = document.querySelector<HTMLElement>("#capture-status")!;
 const list = document.querySelector<HTMLUListElement>("#capture-sites")!;
 list.setAttribute("aria-label", chrome.i18n.getMessage("captureSites"));
 let origin = "",
-  enabled: string[] = [];
+  enabled: string[] = [],
+  hiddenVideos: string[] = [],
+  activeTab: number | undefined;
+const videoToggle = document.querySelector<HTMLButtonElement>("#video-toggle")!;
+const videoDownload = document.querySelector<HTMLButtonElement>("#video-download")!;
+const videoStatus = document.querySelector<HTMLElement>("#video-status")!;
 function renderSites(): void {
   toggle.textContent = chrome.i18n.getMessage(
     enabled.includes(origin) ? "captureDisable" : "captureEnable",
@@ -70,6 +75,12 @@ function renderSites(): void {
     list.append(li);
   }
   clear.disabled = enabled.length === 0;
+  videoToggle.disabled = !enabled.includes(origin);
+  videoDownload.disabled =
+    !enabled.includes(origin) || hiddenVideos.includes(origin) || activeTab === undefined;
+  videoToggle.textContent = chrome.i18n.getMessage(
+    hiddenVideos.includes(origin) ? "videoShow" : "videoHide",
+  );
 }
 async function updateSites(action: string, site?: string): Promise<void> {
   toggle.disabled = true;
@@ -81,6 +92,7 @@ async function updateSites(action: string, site?: string): Promise<void> {
     });
     if (!value || !Array.isArray(value.sites)) throw new Error("Settings unavailable");
     enabled = value.sites;
+    hiddenVideos = Array.isArray(value.hiddenVideos) ? value.hiddenVideos : [];
     renderSites();
     captureStatus.textContent = chrome.i18n.getMessage("captureReload");
     captureStatus.className = "success";
@@ -112,10 +124,44 @@ toggle.addEventListener("click", () => {
     });
 });
 clear.addEventListener("click", () => void updateSites("clear"));
+videoToggle.addEventListener(
+  "click",
+  () => void updateSites(hiddenVideos.includes(origin) ? "video_show" : "video_hide", origin),
+);
+videoDownload.addEventListener("click", async () => {
+  videoDownload.disabled = true;
+  videoStatus.textContent = chrome.i18n.getMessage("videoPreparing");
+  try {
+    const reply = await chrome.runtime.sendMessage({
+      type: "zipzapVideoFromPopup",
+      tabId: activeTab,
+    });
+    videoStatus.textContent = chrome.i18n.getMessage(
+      reply?.started
+        ? reply.state === "queued"
+          ? "captureQueued"
+          : reply.state === "unknown"
+            ? "captureUnknown"
+            : reply.state === "cancelled"
+              ? "videoCancelled"
+              : "videoUnavailable"
+        : reply?.busy
+          ? "videoPreparing"
+          : "videoNoSource",
+    );
+  } catch {
+    videoStatus.textContent = chrome.i18n.getMessage("videoNoSource");
+  } finally {
+    renderSites();
+  }
+});
 void (async () => {
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (tab?.url && !tab.incognito) origin = siteOrigin(tab.url);
+    if (tab?.url && !tab.incognito) {
+      origin = siteOrigin(tab.url);
+      activeTab = tab.id;
+    }
   } catch {}
   document.querySelector<HTMLElement>("#site-origin")!.textContent =
     origin || chrome.i18n.getMessage("captureNoSite");
@@ -123,6 +169,7 @@ void (async () => {
   try {
     const value = await chrome.runtime.sendMessage({ type: "zipzapSettings", action: "read" });
     enabled = Array.isArray(value?.sites) ? value.sites : [];
+    hiddenVideos = Array.isArray(value?.hiddenVideos) ? value.hiddenVideos : [];
     renderSites();
   } catch {
     clear.disabled = true;

@@ -11,6 +11,10 @@ use std::{
 #[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Proposal {
+    #[serde(default)]
+    pub video: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source: Option<String>,
     pub id: String,
     pub url: String,
     pub folder: PathBuf,
@@ -43,7 +47,18 @@ pub fn proposal(root: &Path, id: &str) -> Result<Option<Proposal>, String> {
         return Ok(None);
     }
     let url = zipzap_core::validate_url(&saved.url).map_err(|_| "Invalid capture link")?;
-    if url.query().is_some() {
+    let video_valid = if saved.video {
+        saved.source.as_deref().is_some_and(|source| {
+            if crate::video::youtube_id(source).is_some() {
+                crate::video::resolved(url.as_str())
+            } else {
+                crate::video::direct(source) && source == url.as_str()
+            }
+        })
+    } else {
+        saved.source.is_none() && url.query().is_none()
+    };
+    if !video_valid {
         return Err("Capture requires a public direct link".into());
     }
     Ok(Some(saved))
@@ -137,11 +152,13 @@ pub(crate) fn receive(request: Request, root: &Path) -> Result<(serde_json::Valu
         if let Some(saved) = result(root, &id)? {
             return answer(saved);
         }
-        let pending = ["prepare", "activate"].iter().any(|action| {
-            root.join("inbox")
-                .join(format!("{id}-{action}.json"))
-                .exists()
-        });
+        let pending = ["prepare", "prepare_video", "activate", "cancel_prepare"]
+            .iter()
+            .any(|action| {
+                root.join("inbox")
+                    .join(format!("{id}-{action}.json"))
+                    .exists()
+            });
         return Ok((
             receipt(
                 3,
@@ -165,19 +182,25 @@ pub(crate) fn receive(request: Request, root: &Path) -> Result<(serde_json::Valu
             }
             url.to_string()
         }
-        ("activate", None) => String::new(),
+        ("activate" | "cancel_prepare", None) => String::new(),
+        ("prepare_video", Some(value)) => crate::video::source(&value)?,
         _ => return Err("Invalid capture operation".into()),
     };
     if let Some(saved) = result(root, &id)? {
-        if action == "prepare"
+        if action.starts_with("prepare")
             && saved.version == 3
             && saved.outcome == Outcome::Prepared
             && let Some(proposal) = proposal(root, &id)?
-            && proposal.url != url
+            && (proposal.video != (action == "prepare_video")
+                || if proposal.video {
+                    proposal.source.as_deref() != Some(url.as_str())
+                } else {
+                    proposal.url != url
+                })
         {
             return Err("Request ID is already in use".into());
         }
-        if action == "prepare" || saved.outcome != Outcome::Prepared {
+        if action.starts_with("prepare") || saved.outcome != Outcome::Prepared {
             return answer(saved);
         }
         if saved.version != 3 {
@@ -194,6 +217,20 @@ pub(crate) fn receive(request: Request, root: &Path) -> Result<(serde_json::Valu
     let stem = pending.stem()?;
     let folder = root.join("inbox");
     std::fs::create_dir_all(&folder).map_err(|_| "Cannot create local inbox")?;
+    if action.starts_with("prepare") {
+        let other = if action == "prepare" {
+            "prepare_video"
+        } else {
+            "prepare"
+        };
+        if folder
+            .join(format!("{id}-{other}.json"))
+            .try_exists()
+            .map_err(|_| "Cannot inspect capture inbox")?
+        {
+            return Err("Request ID is already in use".into());
+        }
+    }
     let published = folder.join(format!("{stem}.json"));
     if published
         .try_exists()
@@ -208,7 +245,10 @@ pub(crate) fn receive(request: Request, root: &Path) -> Result<(serde_json::Valu
         {
             return Err("Request ID is already in use".into());
         }
-        return Ok((receipt(3, &id, Outcome::Received), true));
+        return Ok((
+            receipt(3, &id, Outcome::Received),
+            action != "cancel_prepare",
+        ));
     }
     if std::fs::read_dir(&folder)
         .map_err(|_| "Cannot inspect local inbox")?
@@ -240,7 +280,10 @@ pub(crate) fn receive(request: Request, root: &Path) -> Result<(serde_json::Valu
     let written = written.and_then(|_| std::fs::hard_link(&temporary, &published));
     let _ = std::fs::remove_file(temporary);
     written.map_err(|_: std::io::Error| "Cannot publish capture request")?;
-    Ok((receipt(3, &id, Outcome::Received), true))
+    Ok((
+        receipt(3, &id, Outcome::Received),
+        action != "cancel_prepare",
+    ))
 }
 
 #[cfg(test)]
@@ -304,6 +347,8 @@ mod tests {
         let root = temp.path();
         let id = uuid::Uuid::new_v4().to_string();
         let mut value = Proposal {
+            video: false,
+            source: None,
             id: id.clone(),
             url: "https://example.com/file.zip".into(),
             folder: root.into(),
@@ -333,6 +378,8 @@ mod tests {
             std::fs::write(
                 root.join("prepared").join(format!("{id}.json")),
                 serde_json::to_vec(&Proposal {
+                    video: false,
+                    source: None,
                     id,
                     url: value.url.clone(),
                     folder: root.into(),
@@ -375,5 +422,61 @@ mod tests {
             )
             .is_err()
         );
+    }
+
+    #[test]
+    fn video_and_cancel_operations_keep_source_binding_and_do_not_expand_plain_capture() {
+        let temp = tempfile::tempdir().unwrap();
+        let root = temp.path();
+        let id = uuid::Uuid::new_v4().to_string();
+        let source = "https://www.youtube.com/watch?v=YE7VzlLtp-4";
+        assert!(
+            receive(request("prepare_video", &id, Some(source)), root)
+                .unwrap()
+                .1
+        );
+        assert!(
+            receive(
+                request("prepare", &id, Some("https://example.com/file.zip")),
+                root
+            )
+            .is_err()
+        );
+        assert!(
+            !receive(request("cancel_prepare", &id, None), root)
+                .unwrap()
+                .1
+        );
+        assert!(
+            root.join(format!("inbox/{id}-cancel_prepare.json"))
+                .is_file()
+        );
+        let proposal = Proposal {
+            video: true,
+            source: Some(source.into()),
+            id: id.clone(),
+            url: "https://r1.googlevideo.com/video?signature=private".into(),
+            filename: "video.mp4".into(),
+            folder: root.into(),
+            deadline: now() + 60,
+        };
+        save_proposal(root, &proposal).unwrap();
+        assert!(super::proposal(root, &id).unwrap().unwrap().video);
+        crate::save_result_for(root, &id, 3, Outcome::Prepared).unwrap();
+        assert!(
+            receive(
+                request(
+                    "prepare_video",
+                    &id,
+                    Some("https://www.youtube.com/watch?v=AAAAAAAAAAA")
+                ),
+                root
+            )
+            .is_err()
+        );
+        let other = uuid::Uuid::new_v4().to_string();
+        let value = serde_json::json!({"id":other,"url":"https://example.com/clip.mp4?signature=private","filename":"clip.mp4","folder":root,"deadline":now()+60});
+        write_local(&root.join("prepared"), &format!("{other}.json"), &value).unwrap();
+        assert!(super::proposal(root, &other).is_err());
     }
 }
