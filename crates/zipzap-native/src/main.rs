@@ -1,5 +1,26 @@
 #![cfg_attr(windows, windows_subsystem = "windows")]
 
+// Null stdio alone still lets Windows inherit the browser's original pipe handles.
+#[cfg(windows)]
+fn detach_browser_pipes() -> std::io::Result<()> {
+    #[link(name = "kernel32")]
+    unsafe extern "system" {
+        fn GetStdHandle(kind: u32) -> *mut std::ffi::c_void;
+        fn SetHandleInformation(handle: *mut std::ffi::c_void, mask: u32, flags: u32) -> i32;
+    }
+    for kind in [-10i32, -11, -12] {
+        // Only alter inheritance on this short-lived host's own standard handles.
+        unsafe {
+            let handle = GetStdHandle(kind as u32);
+            if !handle.is_null() && handle as isize != -1 && SetHandleInformation(handle, 1, 0) == 0
+            {
+                return Err(std::io::Error::last_os_error());
+            }
+        }
+    }
+    Ok(())
+}
+
 fn main() {
     if std::env::args().nth(1).as_deref() == Some("--unregister-native") {
         let result = (|| {
@@ -42,7 +63,17 @@ fn main() {
         let launched = std::env::current_exe()
             .ok()
             .and_then(|exe| {
-                std::process::Command::new(exe.with_file_name("zipzap-desktop.exe"))
+                #[cfg(windows)]
+                detach_browser_pipes().ok()?;
+                let mut command =
+                    std::process::Command::new(exe.with_file_name("zipzap-desktop.exe"));
+                if value["version"] == 3 {
+                    command.arg("--browser-background");
+                }
+                command
+                    .stdin(std::process::Stdio::null())
+                    .stdout(std::process::Stdio::null())
+                    .stderr(std::process::Stdio::null())
                     .spawn()
                     .ok()
             })

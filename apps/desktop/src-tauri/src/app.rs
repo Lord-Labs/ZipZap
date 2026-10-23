@@ -360,8 +360,10 @@ async fn enqueue_browser(
 
 pub fn run() {
     tauri::Builder::default()
-        .plugin(tauri_plugin_single_instance::init(|app, _, _| {
-            lifecycle::show(app)
+        .plugin(tauri_plugin_single_instance::init(|app, args, _| {
+            if !args.iter().any(|arg| arg == "--browser-background") {
+                lifecycle::show(app);
+            }
         }))
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
@@ -402,6 +404,7 @@ pub fn run() {
                     }
                     if last_heartbeat.elapsed() >= Duration::from_secs(2) {
                         let _ = zipzap_native::health::heartbeat(&root, env!("CARGO_PKG_VERSION"));
+                        let _ = zipzap_native::capture::cleanup(&root);
                         last_heartbeat = std::time::Instant::now();
                     }
                     if let Ok(entries) = std::fs::read_dir(root.join("inbox")) {
@@ -421,22 +424,30 @@ pub fn run() {
                                     &std::fs::read(&path).map_err(|e| e.to_string())?,
                                 )
                                 .map_err(|_| "Invalid browser request")?;
-                                if ![1, 2].contains(&request.version)
-                                    || !zipzap_native::valid_id(&request.id)
-                                    || path.file_stem().and_then(|name| name.to_str())
-                                        != Some(&request.id)
+                                if path.file_stem().and_then(|name| name.to_str())
+                                    != Some(request.stem()?.as_str())
                                 {
                                     return Err("Unsupported browser request version".into());
                                 }
                                 let mut review = None;
-                                let result = enqueue_browser(
-                                    &manager,
-                                    &root,
-                                    &request,
-                                    &folder(&handle.state::<AppState>()),
-                                    &mut review,
-                                )
-                                .await;
+                                let result = if request.version == 3 {
+                                    crate::capture::accept(
+                                        &manager,
+                                        &root,
+                                        &request,
+                                        &folder(&handle.state::<AppState>()),
+                                    )
+                                    .await
+                                } else {
+                                    enqueue_browser(
+                                        &manager,
+                                        &root,
+                                        &request,
+                                        &folder(&handle.state::<AppState>()),
+                                        &mut review,
+                                    )
+                                    .await
+                                };
                                 if let Some(review) = review {
                                     *handle
                                         .state::<AppState>()
@@ -532,6 +543,8 @@ mod tests {
             let manager = Manager::open(&temp.path().join("state.sqlite")).unwrap();
             manager.set_queue_running(false).unwrap();
             let request = Inbox {
+                action: None,
+                created_at: None,
                 version: 2,
                 id: "2f2d7354-aedf-4f99-8a02-19136fe22cde".into(),
                 url: "https://example.com/file?token=private".into(),
@@ -598,6 +611,8 @@ mod tests {
             let manager = Manager::open(&temp.path().join("state.sqlite")).unwrap();
             std::fs::write(temp.path().join("file.bin"), b"existing").unwrap();
             let request = Inbox {
+                action: None,
+                created_at: None,
                 version: 2,
                 id: "792c88f0-fbc7-4dd6-a7b9-02a2277bb0f7".into(),
                 url,
