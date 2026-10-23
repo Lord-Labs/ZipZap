@@ -158,7 +158,7 @@ if (process.platform === "win32") {
     await append("Bundled media component", name, version, license, "licenses/third-party", source);
   await writeFile(
     path.join(output, "INSTALLER_LICENSE.txt"),
-    `${await readFile("LICENSE", "utf8")}\n\nBundled CPython and Windows redistribution terms\n\n${await readFile("dist/media/python/LICENSE.txt", "utf8")}\n\nAdditional bundled component notices are installed in THIRD_PARTY_LICENSES.txt and media/licenses/.\n`,
+    `${await readFile("LICENSE", "utf8")}\n\nBundled CPython and Windows redistribution terms\n\n${await readFile("dist/media/python/LICENSE.txt", "utf8")}\n\nMicrosoft Edge WebView2 Evergreen Runtime\nThe bundled, unmodified Microsoft bootstrapper is redistributed under Microsoft's terms, not the ZipZap MIT license. Setup runs it only when the runtime is absent; internet is then required to download the runtime from Microsoft. The shared runtime retains its normal Microsoft update behavior and is not removed with ZipZap.\nhttps://developer.microsoft.com/en-us/microsoft-edge/webview2/\nhttps://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/distribution\n\nAdditional bundled component notices are installed in THIRD_PARTY_LICENSES.txt and media/licenses/.\n`,
   );
 }
 await writeFile(path.join(output, "THIRD_PARTY_LICENSES.txt"), texts.join("\n"));

@@ -24,9 +24,7 @@ pub(crate) struct AppState {
 fn snapshot(state: State<AppState>) -> serde_json::Value {
     serde_json::json!({"first_run":state.first_run,"jobs":state.manager.jobs(),"queue":state.manager.queue(),"settings":state.manager.settings(),"tray_available":state.lifecycle.available(),"folder":folder(&state),"version":env!("CARGO_PKG_VERSION"),"native_error":*state.native.lock().expect("native lock"),"notice":state.notice.lock().expect("notice lock").take(),"browser_review":state.browser_review.lock().expect("review lock").take()})
 }
-#[tauri::command]
-fn open_extension_folder(app: tauri::AppHandle) -> Result<(), String> {
-    use tauri_plugin_opener::OpenerExt;
+fn extension_folder(app: &tauri::AppHandle) -> Result<PathBuf, String> {
     let folder = app
         .path()
         .resource_dir()
@@ -35,8 +33,21 @@ fn open_extension_folder(app: tauri::AppHandle) -> Result<(), String> {
     if !folder.join("manifest.json").is_file() {
         return Err("Extension resources unavailable".into());
     }
+    Ok(folder)
+}
+#[tauri::command]
+fn extension_directory(app: tauri::AppHandle) -> Result<String, String> {
+    Ok(extension_folder(&app)?.to_string_lossy().into_owned())
+}
+#[tauri::command]
+fn open_browser_extensions(browser: String) -> Result<(), String> {
+    crate::browser_setup::open(&browser)
+}
+#[tauri::command]
+fn open_extension_folder(app: tauri::AppHandle) -> Result<(), String> {
+    use tauri_plugin_opener::OpenerExt;
     app.opener()
-        .open_path(folder.to_string_lossy(), None::<&str>)
+        .open_path(extension_folder(&app)?.to_string_lossy(), None::<&str>)
         .map_err(|_| "Cannot open extension folder".into())
 }
 #[tauri::command]
@@ -507,6 +518,8 @@ pub fn run() {
             snapshot,
             browser_health,
             open_extension_folder,
+            extension_directory,
+            open_browser_extensions,
             add_download,
             set_queue_running,
             move_waiting,

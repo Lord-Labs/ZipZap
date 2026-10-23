@@ -53,7 +53,21 @@ test.beforeEach(async ({ page }) => {
       supportOutcome: "saved",
       supportPreview: "",
       exportedSupport: [] as string[],
+      extensionPath: "C:\\Program Files\\ZipZap\\browser-extension",
+      failBrowserSetup: "",
+      denyClipboard: false,
+      clipboardValues: [] as string[],
     };
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: {
+        writeText: async (value: string) => {
+          const fixture = (window as any).zipzapTest;
+          if (fixture.denyClipboard) throw new Error("Clipboard denied");
+          fixture.clipboardValues.push(value);
+        },
+      },
+    });
     (window as any).__TAURI_INTERNALS__ = {
       invoke: async (command: string, args: any) => {
         if (command === "snapshot")
@@ -66,6 +80,17 @@ test.beforeEach(async ({ page }) => {
             },
           });
         calls.push({ command, args: structuredClone(args) });
+        if (command === "extension_directory") {
+          if ((window as any).zipzapTest.failBrowserSetup === "path")
+            throw new Error("PRIVATE-resource-path");
+          return (window as any).zipzapTest.extensionPath;
+        }
+        if (command === "open_browser_extensions") {
+          if ((window as any).zipzapTest.failBrowserSetup === args.browser)
+            throw new Error("PRIVATE-browser-path");
+          return;
+        }
+        if (command === "open_extension_folder") return;
         if (command === "preview_support") {
           if ((window as any).zipzapTest.failSupport === "preview")
             throw new Error("PRIVATE-path-token");
@@ -210,6 +235,101 @@ async function openSetup(page: Page) {
   await page.getByRole("button", { name: "Set up ZipZap", exact: true }).click();
   return page.getByRole("dialog", { name: "Set up ZipZap" });
 }
+
+test("browser shortcut copies the included path and opens only the chosen page without downloads", async ({
+  page,
+}) => {
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await page.getByRole("button", { name: "Browser extension setup", exact: true }).click();
+  const setup = page.getByRole("dialog", { name: "Set up ZipZap" });
+  await expect(setup.locator("#setup-language")).not.toBeVisible();
+  await expect(setup.getByLabel("Included extension folder")).toHaveValue(
+    "C:\\Program Files\\ZipZap\\browser-extension",
+  );
+  const chrome = setup.getByRole("button", { name: "Copy path and open Chrome" });
+  await chrome.focus();
+  await chrome.press("Enter");
+  await expect(setup.getByRole("status")).toContainText("Folder path copied");
+  await setup.getByRole("button", { name: "Copy path and open Edge" }).click();
+  await expect(setup).toContainText("Opening the page does not install");
+  await expect(setup).toContainText("profile state unknown");
+  const fixture = await page.evaluate(() => (window as any).zipzapTest);
+  expect(fixture.clipboardValues).toEqual([fixture.extensionPath, fixture.extensionPath]);
+  expect(
+    fixture.calls
+      .filter((call: any) => call.command === "open_browser_extensions")
+      .map((call: any) => call.args),
+  ).toEqual([{ browser: "chrome" }, { browser: "edge" }]);
+  expect(
+    fixture.calls.some((call: any) =>
+      ["add_download", "save_settings", "connect_browser"].includes(call.command),
+    ),
+  ).toBe(false);
+  expect(fixture.state.jobs).toEqual([]);
+  await setup.screenshot({ path: ".research-local/closure-review/light-browser-setup-en.png" });
+});
+
+test("browser setup keeps manual paths available after clipboard or browser failure and can retry", async ({
+  page,
+}) => {
+  const setup = await openSetup(page);
+  await setup.getByRole("button", { name: "Continue", exact: true }).click();
+  await page.evaluate(() => {
+    (window as any).zipzapTest.denyClipboard = true;
+    (window as any).zipzapTest.failBrowserSetup = "edge";
+  });
+  await setup.getByRole("button", { name: "Copy path and open Edge" }).click();
+  await expect(setup.getByRole("alert")).toContainText(
+    "Open chrome://extensions or edge://extensions manually",
+  );
+  await expect(setup.getByRole("status")).toContainText("copy it manually");
+  await expect(setup.getByLabel("Included extension folder")).toHaveValue(
+    "C:\\Program Files\\ZipZap\\browser-extension",
+  );
+  await expect(setup).not.toContainText("PRIVATE-");
+  await page.evaluate(() => {
+    (window as any).zipzapTest.denyClipboard = false;
+    (window as any).zipzapTest.failBrowserSetup = "";
+  });
+  await setup.getByRole("button", { name: "Copy path and open Edge" }).click();
+  await expect(setup.getByRole("alert")).not.toBeVisible();
+  await expect(setup.getByRole("status")).toContainText("Folder path copied");
+});
+
+test("missing extension resources do not launch a browser or copy an empty path", async ({
+  page,
+}) => {
+  await page.evaluate(() => {
+    (window as any).zipzapTest.failBrowserSetup = "path";
+  });
+  const setup = await openSetup(page);
+  await setup.getByRole("button", { name: "Continue", exact: true }).click();
+  await expect(setup.getByRole("alert")).toContainText("extension folder is unavailable");
+  await expect(setup.getByRole("button", { name: "Copy path and open Chrome" })).toBeDisabled();
+  await expect(setup.getByRole("button", { name: "Copy folder path" })).toBeDisabled();
+  const fixture = await page.evaluate(() => (window as any).zipzapTest);
+  expect(fixture.clipboardValues).toEqual([]);
+  expect(fixture.calls.some((call: any) => call.command === "open_browser_extensions")).toBe(false);
+  await expect(setup).not.toContainText("PRIVATE-");
+});
+
+test("assisted browser setup remains accessible in Arabic and at narrow widths", async ({
+  page,
+}) => {
+  await openSetup(page);
+  const setup = page.locator('dialog[aria-labelledby="setup-title"]');
+  await setup.locator("#setup-language").selectOption("ar");
+  await setup.getByRole("button", { name: "متابعة", exact: true }).click();
+  await expect(setup.getByLabel("مجلد الإضافة المرفقة")).not.toHaveValue("");
+  await expect(setup).toHaveAttribute("dir", "rtl");
+  await page.setViewportSize({ width: 780, height: 560 });
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await setup.screenshot({ path: ".research-local/closure-review/light-browser-setup-ar.png" });
+  await page.setViewportSize({ width: 390, height: 280 });
+  expect(await setup.evaluate((node) => node.scrollWidth <= node.clientWidth)).toBe(true);
+  await setup.getByRole("button", { name: "نسخ مسار المجلد", exact: true }).click();
+  await expect(setup.getByRole("status")).toContainText("نُسخ مسار المجلد");
+});
 
 test("setup saves basics, skips browser and finishes without a download", async ({ page }) => {
   const setup = await openSetup(page);

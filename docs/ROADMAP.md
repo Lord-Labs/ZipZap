@@ -180,3 +180,15 @@ see [evidence and limits](development/INSTALLED_BROWSER_QUALIFICATION.md).
 The maintainer declined recording performance numbers. Quantitative #46,
 full candidate #47/#89 and full study #51 remain open, so M6/#28 is not complete.
 This checkpoint does not publish the unreleased capture/setup/video work.
+
+Requested one-file setup follow-up, 2026-10-23: #107 embeds a small WebView2
+bootstrapper and prepares new-profile defaults/native registration during
+NSIS installation, with original ZipZap branding and English/Arabic guidance.
+It reuses existing installer hooks and media/extension resources. Existing state
+must be retained without opening its database during repair/upgrade. Browser
+activation/permissions remain explicit; publication and broader gates are separate.
+See [candidate verification and manual checks](development/ONE_FILE_SETUP.md).
+The initial full offline payload was rejected as too large. The revised default
+requires internet only when WebView2 is missing. Assisted Chrome/Edge setup copies
+the included folder path and opens the chosen extensions page; activation and
+store publication remain separate decisions, not silent browser installation.

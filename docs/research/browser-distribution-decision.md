@@ -5,6 +5,13 @@ including its Chrome/Edge setup addendum. Source reviewed:
 `72d943a56467a1ed740647f60ac0f15f66a33f33`. This is a distribution study,
 not an approved listing, account registration or production Firefox port.
 
+The #107 / draft #108 setup revision adds only assisted unpacked loading: copy
+the bundled folder and open the chosen Chrome/Edge extensions page. This does
+not change these store decisions. Chrome's Windows external-install mechanism
+requires a published store item and confirmation, as documented in
+[alternative installation methods](https://developer.chrome.com/docs/extensions/how-to/distribute/install-extensions).
+No store ID, enterprise force-install policy or automatic activation is inferred.
+
 ## Decisions
 
 **Chrome/Edge: conditional go for a separately scoped package/identity change;

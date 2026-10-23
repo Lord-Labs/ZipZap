@@ -3,7 +3,11 @@
 #[cfg(windows)]
 mod app;
 #[cfg(windows)]
+mod browser_setup;
+#[cfg(windows)]
 mod capture;
+#[cfg(windows)]
+mod installer;
 #[cfg(windows)]
 mod lifecycle;
 #[cfg(windows)]
@@ -12,17 +16,18 @@ mod media;
 mod support;
 #[cfg(windows)]
 fn main() {
-    if std::env::args().nth(1).as_deref() == Some("--register-native") {
-        let result = (|| -> Result<(), String> {
-            let state = std::path::PathBuf::from(
-                std::env::var_os("LOCALAPPDATA").ok_or("Missing user profile")?,
-            )
-            .join(zipzap_native::APP_ID);
-            let binary = std::env::current_exe()
-                .map_err(|e| e.to_string())?
-                .with_file_name("zipzap-native.exe");
-            zipzap_native::register(&binary, &state)
-        })();
+    let mut args = std::env::args().skip(1);
+    let action = args.next();
+    if action.as_deref() == Some("--register-native") {
+        let result = installer::register();
+        std::process::exit(if result.is_ok() { 0 } else { 1 });
+    }
+    if action.as_deref() == Some("--prepare-install") {
+        let language = args.next();
+        let result = match (language.as_deref(), args.next()) {
+            (Some(language @ ("en" | "ar")), None) => installer::prepare(language),
+            _ => Err("Invalid setup arguments".into()),
+        };
         std::process::exit(if result.is_ok() { 0 } else { 1 });
     }
     app::run();
