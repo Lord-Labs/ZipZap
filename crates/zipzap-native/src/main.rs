@@ -1,6 +1,30 @@
 #![cfg_attr(windows, windows_subsystem = "windows")]
 
 fn main() {
+    if std::env::args().nth(1).as_deref() == Some("--unregister-native") {
+        let result = (|| {
+            let binary =
+                std::path::PathBuf::from(std::env::args().nth(2).ok_or("Missing host path")?);
+            if !binary.is_absolute()
+                || binary.file_name().and_then(|name| name.to_str()) != Some("zipzap-native.exe")
+            {
+                return Err("Invalid host path".to_owned());
+            }
+            let root = std::path::PathBuf::from(
+                std::env::var_os("LOCALAPPDATA").ok_or("Missing user state")?,
+            )
+            .join(zipzap_native::APP_ID);
+            #[cfg(windows)]
+            let result = zipzap_native::unregister(&binary, &root);
+            #[cfg(not(windows))]
+            let result = {
+                let _ = root;
+                Ok::<(), String>(())
+            };
+            result
+        })();
+        std::process::exit(if result.is_ok() { 0 } else { 1 });
+    }
     let origin = std::env::args().nth(1).unwrap_or_default();
     let Some(root) = std::env::var_os("LOCALAPPDATA") else {
         return;

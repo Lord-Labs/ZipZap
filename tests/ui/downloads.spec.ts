@@ -115,7 +115,7 @@ test.beforeEach(async ({ page }) => {
             id,
             url: args.url,
             destination: `${args.destination}\\${args.filename || "sample.zip"}`,
-            status: args.later ? "paused" : "completed",
+            status: (window as any).zipzapTest.addStatus || (args.later ? "paused" : "completed"),
             downloaded: args.later ? 0 : 1048576,
             total: 1048576,
             speed: 0,
@@ -203,6 +203,105 @@ test.beforeEach(async ({ page }) => {
 
 test.afterEach(async ({ page }) => {
   expect(browserErrors.get(page)).toEqual([]);
+});
+
+async function openSetup(page: Page) {
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await page.getByRole("button", { name: "Set up ZipZap", exact: true }).click();
+  return page.getByRole("dialog", { name: "Set up ZipZap" });
+}
+
+test("setup saves basics, skips browser and finishes without a download", async ({ page }) => {
+  const setup = await openSetup(page);
+  await setup.getByRole("button", { name: "Continue", exact: true }).click();
+  await expect(setup).toContainText("Developer mode");
+  await setup.getByRole("button", { name: "Skip browser setup" }).click();
+  await expect(setup).toContainText("No test requested");
+  await setup.getByRole("button", { name: "Finish setup", exact: true }).click();
+  await expect(setup).not.toBeVisible();
+  const result = await page.evaluate(() => ({
+    calls: (window as any).zipzapTest.calls,
+    progress: JSON.parse(localStorage.getItem("zipzap.setup.v1")!),
+  }));
+  expect(result.calls.filter((call: any) => call.command === "add_download")).toHaveLength(0);
+  expect(result.calls.filter((call: any) => call.command === "save_settings")).toHaveLength(1);
+  expect(result.progress.done).toBe(true);
+});
+
+test("setup failed saves keep the step and can retry; incomplete first-run setup resumes", async ({
+  page,
+}) => {
+  const setup = await openSetup(page);
+  await page.evaluate(() => {
+    (window as any).zipzapTest.failSettings = "unavailable";
+  });
+  await setup.getByRole("button", { name: "Continue", exact: true }).click();
+  await expect(setup.getByRole("alert")).toContainText("Could not save this step");
+  await expect(setup.locator("#setup-folder")).toBeVisible();
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem("zipzap.setup.v1")!).step)).toBe(
+    1,
+  );
+  await page.evaluate(() => {
+    (window as any).zipzapTest.failSettings = "";
+  });
+  await setup.getByRole("button", { name: "Continue", exact: true }).click();
+  await setup.getByRole("button", { name: "Finish later", exact: true }).click();
+  await page.reload();
+  await expect(page.getByRole("dialog", { name: "Set up ZipZap" })).toContainText("Developer mode");
+  await expect(page.locator("[aria-current=step]")).toContainText("Browser");
+});
+
+test("setup test is explicit, cancellable and verifies publication bytes rather than completion alone", async ({
+  page,
+}) => {
+  const setup = await openSetup(page);
+  await setup.getByRole("button", { name: "Continue", exact: true }).click();
+  await setup.getByRole("button", { name: "Skip browser setup" }).click();
+  await page.evaluate(() => {
+    (window as any).zipzapTest.addStatus = "queued";
+  });
+  await setup.getByRole("button", { name: "Download and verify test file" }).click();
+  await expect(setup.getByRole("button", { name: "Cancel download", exact: true })).toBeVisible();
+  await setup.getByRole("button", { name: "Cancel download", exact: true }).click();
+  await setup.getByRole("button", { name: "Download and verify test file" }).click();
+  await page.evaluate(() => {
+    const job = (window as any).zipzapTest.state.jobs.at(-1);
+    job.status = "completed";
+    job.publication = { sha256: "wrong", bytes: 1076 };
+  });
+  await expect(setup).toContainText("did not match");
+  await page.evaluate(() => {
+    const job = (window as any).zipzapTest.state.jobs.at(-1);
+    job.publication.sha256 = "86c61424f3af99d567c4386400a28c9f47b0e33a6228a59b671c81797b266120";
+  });
+  await expect(setup).toContainText("Expected bytes verified");
+  const calls = await page.evaluate(() => (window as any).zipzapTest.calls);
+  const adds = calls.filter((call: any) => call.command === "add_download");
+  expect(adds).toHaveLength(2);
+  expect(adds[0].args.requestId).not.toBe(adds[1].args.requestId);
+  expect(adds[0].args.url).toContain("https://raw.githubusercontent.com/Lord-Labs/ZipZap/");
+});
+
+test("fresh setup is accessible in RTL at the minimum viewport and returns to manual mode", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    (window as any).zipzapTest.state.first_run = true;
+  });
+  await page.reload();
+  await page.setViewportSize({ width: 780, height: 560 });
+  const setup = page.locator('dialog[aria-labelledby="setup-title"]');
+  await expect(setup).toBeVisible();
+  await setup.locator("#setup-language").selectOption("ar");
+  await expect(setup).toHaveAttribute("dir", "rtl");
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await setup.screenshot({ path: ".research-local/setup-ar.png" });
+  await page.setViewportSize({ width: 390, height: 280 });
+  expect(await setup.evaluate((node) => node.scrollWidth <= node.clientWidth)).toBe(true);
+  await setup.getByRole("button", { name: "متابعة", exact: true }).click();
+  await setup.getByRole("button", { name: "تخطي ربط المتصفح" }).click();
+  await setup.getByRole("button", { name: "إنهاء الإعداد", exact: true }).click();
+  await expect(page.getByRole("button", { name: "تنزيل جديد" })).toBeVisible();
 });
 
 test("support preview is explicit and export preserves the preview across cancellation and write errors", async ({

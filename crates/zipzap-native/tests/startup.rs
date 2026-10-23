@@ -3,6 +3,47 @@ use std::{
     process::{Command, Stdio},
 };
 
+#[cfg(windows)]
+#[test]
+fn copied_uninstall_helper_validates_original_path_and_keeps_foreign_registration() {
+    let temp = tempfile::tempdir().unwrap();
+    let state = temp.path().join(zipzap_native::APP_ID);
+    std::fs::create_dir_all(&state).unwrap();
+    let manifest = state.join("native-host.json");
+    let original = temp.path().join("zipzap-native.exe");
+    let foreign = serde_json::to_vec(&serde_json::json!({"name":zipzap_native::HOST,"path":temp.path().join("another-install/zipzap-native.exe")})).unwrap();
+    std::fs::write(&manifest, &foreign).unwrap();
+    let helper = temp.path().join("uninstall-helper.exe");
+    std::fs::copy(env!("CARGO_BIN_EXE_zipzap-native"), &helper).unwrap();
+    let invoke = |path: &std::path::Path| {
+        Command::new(&helper)
+            .env("LOCALAPPDATA", temp.path())
+            .arg("--unregister-native")
+            .arg(path)
+            .output()
+            .unwrap()
+    };
+    let output = invoke(&original);
+    assert!(output.status.success());
+    assert!(output.stdout.is_empty());
+    assert_eq!(std::fs::read(&manifest).unwrap(), foreign);
+    assert!(
+        !invoke(std::path::Path::new("relative/zipzap-native.exe"))
+            .status
+            .success()
+    );
+    assert!(!invoke(&temp.path().join("other.exe")).status.success());
+    std::fs::write(
+        &manifest,
+        serde_json::to_vec(&serde_json::json!({"name":zipzap_native::HOST,"path":original}))
+            .unwrap(),
+    )
+    .unwrap();
+    assert!(invoke(&original).status.success());
+    assert!(!manifest.exists());
+    assert!(!state.join("inbox").exists());
+}
+
 #[test]
 fn missing_app_returns_a_durable_start_failure_without_launching_device_ui() {
     let temp = tempfile::tempdir().unwrap();

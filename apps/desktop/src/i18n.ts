@@ -1,4 +1,50 @@
 const en = {
+  setupTestSummary:
+    "Optional: download a small public text file from GitHub to check the connection. The file stays in your chosen folder.",
+  setupTestDetails: "Test details and privacy",
+  setupTitle: "Set up ZipZap",
+  setupIntro: "Three short steps. You can download manually and finish browser setup later.",
+  setupProgress: "Setup progress",
+  setupBasics: "Basics",
+  setupBrowser: "Browser",
+  setupVerify: "Verify",
+  setupBasicsHelp:
+    "Keep the default Downloads folder or choose a writable NTFS folder. Existing downloads and advanced settings are kept.",
+  setupExtensionHelp:
+    "The installer includes the Chrome/Edge extension. Store listings are not available yet; loading this local extension currently needs Developer mode.",
+  setupExtensionOne: "Open chrome://extensions in Chrome or edge://extensions in Edge.",
+  setupExtensionTwo:
+    "Enable Developer mode, choose Load unpacked and select the browser-extension folder opened below.",
+  setupExtensionThree:
+    "Enable ZipZap, open its toolbar popup and choose Check connection in the profile you will use.",
+  setupOpenExtension: "Open included extension folder",
+  setupExplicit:
+    "Explicit links are supported. Automatic capture and video extraction are not enabled by this step.",
+  setupManualReady:
+    "Manual downloads are ready. Recent extension contact below is separate from native registration.",
+  setupTestConsent:
+    "Optional: download the public ZipZap license (1,076 bytes) from raw.githubusercontent.com over HTTPS into the folder below, and check its published SHA-256. The uniquely named text file and history are kept; remove them manually when finished. The normal queue, hold and schedule rules apply.",
+  setupTest: "Download and verify test file",
+  setupTestVerified:
+    "Expected bytes verified during download. The test file is kept in your folder.",
+  setupTestMismatch:
+    "The file completed but did not match the expected size/hash. Keep it for inspection; retry creates a different filename.",
+  setupTestState: "Test download:",
+  setupTestOptional: "No test requested. You can finish without a network request.",
+  setupTestFailed:
+    "Could not confirm the test request. Check its row in the download list before retrying; the same request ID is retained.",
+  setupSaveFailed:
+    "Could not save this step. Check the folder and available storage, then retry. Existing saved settings are kept.",
+  setupStorage:
+    "Setup progress could not be saved. You can close this window and reopen setup from Settings.",
+  setupFolderFailed: "The folder picker could not open. Retry or keep the current folder.",
+  setupExtensionMissing:
+    "The included extension folder is unavailable. Use the browser ZIP from the matching GitHub release, or repair the installation.",
+  setupLater: "Finish later",
+  setupBack: "Back",
+  setupSkipBrowser: "Skip browser setup",
+  setupNext: "Continue",
+  setupFinish: "Finish setup",
   browserRecent: "Recent extension contact (within 5 minutes)",
   browserUnknown: "No recent contact; profile state unknown",
   browserCheckHelp:
@@ -302,6 +348,49 @@ const en = {
     "Check the destination drive and NTFS support, then retry; saved checkpoints are kept.",
 };
 const ar: Record<keyof typeof en, string> = {
+  setupTestSummary:
+    "اختياري: تنزيل ملف نصي عام صغير من GitHub لفحص الاتصال. يبقى الملف في المجلد الذي اخترته.",
+  setupTestDetails: "تفاصيل الاختبار والخصوصية",
+  setupTitle: "إعداد ZipZap",
+  setupIntro: "ثلاث خطوات قصيرة. يمكنك التنزيل يدويًا وإكمال ربط المتصفح لاحقًا.",
+  setupProgress: "تقدم الإعداد",
+  setupBasics: "الأساسيات",
+  setupBrowser: "المتصفح",
+  setupVerify: "التحقق",
+  setupBasicsHelp:
+    "احتفظ بمجلد Downloads أو اختر مجلد NTFS قابلًا للكتابة. تبقى التنزيلات والإعدادات المتقدمة كما هي.",
+  setupExtensionHelp:
+    "يضم المثبت إضافة Chrome وEdge. لا توجد صفحات متجر معتمدة بعد؛ تحميل الإضافة المحلية يحتاج حاليًا وضع المطور.",
+  setupExtensionOne: "افتح chrome://extensions في Chrome أو edge://extensions في Edge.",
+  setupExtensionTwo:
+    "فعّل وضع المطور، ثم تحميل إضافة غير مضغوطة، واختر مجلد browser-extension الذي يفتحه الزر أدناه.",
+  setupExtensionThree:
+    "فعّل ZipZap وافتح نافذة الإضافة من شريط المتصفح واضغط فحص الاتصال في ملف المتصفح المطلوب.",
+  setupOpenExtension: "فتح مجلد الإضافة المرفقة",
+  setupExplicit:
+    "إرسال الروابط الصريحة مدعوم. هذه الخطوة لا تفعّل الالتقاط التلقائي أو استخراج الفيديو.",
+  setupManualReady: "التنزيل اليدوي جاهز. اتصال الإضافة الحديث أدناه مستقل عن تسجيل الجسر المحلي.",
+  setupTestConsent:
+    "اختياري: تنزيل رخصة ZipZap العامة (1076 بايت) عبر HTTPS من raw.githubusercontent.com إلى المجلد أدناه، ومقارنة بصمة SHA-256 المنشورة. يبقى الملف النصي باسم فريد وسجله؛ يمكنك إزالتهما يدويًا بعد الاختبار. تُطبق قواعد الطابور والإيقاف والجدولة المعتادة.",
+  setupTest: "تنزيل ملف الاختبار والتحقق منه",
+  setupTestVerified: "طابقت البيانات المتوقعة أثناء التنزيل. يبقى ملف الاختبار في المجلد.",
+  setupTestMismatch:
+    "اكتمل الملف لكن الحجم أو البصمة مختلفان. احتفظ به للفحص؛ إعادة الاختبار تستخدم اسمًا آخر.",
+  setupTestState: "تنزيل الاختبار:",
+  setupTestOptional: "لم يُطلب اختبار. يمكنك الإنهاء دون أي طلب شبكة.",
+  setupTestFailed:
+    "تعذر تأكيد طلب الاختبار. راجع صفه في قائمة التنزيلات قبل المحاولة؛ يحتفظ المعالج بنفس رقم الطلب.",
+  setupSaveFailed:
+    "تعذر حفظ الخطوة. راجع المجلد ومساحة التخزين ثم أعد المحاولة. تبقى الإعدادات المحفوظة السابقة.",
+  setupStorage: "تعذر حفظ تقدم الإعداد. يمكنك إغلاق النافذة وإعادة فتح المعالج من الإعدادات.",
+  setupFolderFailed: "تعذر فتح اختيار المجلد. أعد المحاولة أو احتفظ بالمجلد الحالي.",
+  setupExtensionMissing:
+    "مجلد الإضافة المرفقة غير متاح. استخدم ملف إضافة المتصفح من إصدار GitHub المطابق أو أصلح التثبيت.",
+  setupLater: "الإكمال لاحقًا",
+  setupBack: "رجوع",
+  setupSkipBrowser: "تخطي ربط المتصفح",
+  setupNext: "متابعة",
+  setupFinish: "إنهاء الإعداد",
   browserRecent: "اتصال حديث من الإضافة (خلال 5 دقائق)",
   browserUnknown: "لا اتصال حديث؛ حالة ملف المتصفح غير معروفة",
   browserCheckHelp:
