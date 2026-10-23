@@ -1,4 +1,4 @@
-import { sendLink } from "./shared.js";
+import { sendLink, checkConnection } from "./shared.js";
 document.documentElement.lang = chrome.i18n.getUILanguage();
 document.documentElement.dir = chrome.i18n.getUILanguage().startsWith("ar") ? "rtl" : "ltr";
 for (const node of document.querySelectorAll<HTMLElement>("[data-i18n]"))
@@ -25,5 +25,21 @@ form.addEventListener("submit", async (event) => {
     status.className = "error";
   } finally {
     button.disabled = false;
+  }
+});
+const check = document.querySelector<HTMLButtonElement>("#check-connection")!;
+const health = document.querySelector<HTMLElement>("#health")!;
+check.addEventListener("click", async () => {
+  check.disabled = true;
+  health.textContent = chrome.i18n.getMessage("checkingConnection");
+  try {
+    const ready = await checkConnection();
+    health.textContent = chrome.i18n.getMessage(ready ? "healthReady" : "healthHost");
+    health.className = ready ? "success" : "pending";
+  } catch (error) {
+    health.textContent = error instanceof Error ? error.message : chrome.i18n.getMessage("missing");
+    health.className = "error";
+  } finally {
+    check.disabled = false;
   }
 });

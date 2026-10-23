@@ -1,4 +1,8 @@
 const en = {
+  browserRecent: "Recent extension contact (within 5 minutes)",
+  browserUnknown: "No recent contact; profile state unknown",
+  browserCheckHelp:
+    "In the chosen browser profile, open the ZipZap extension and choose Check connection. Registration alone does not prove the extension is enabled. This check downloads nothing.",
   supportTitle: "Support summary",
   supportPrivacy:
     "Preview app/platform versions, counts and safe error codes only. URLs, filenames, local paths, usernames, raw errors, cookies and databases are omitted. Nothing uploads automatically.",
@@ -298,6 +302,10 @@ const en = {
     "Check the destination drive and NTFS support, then retry; saved checkpoints are kept.",
 };
 const ar: Record<keyof typeof en, string> = {
+  browserRecent: "اتصال حديث من الإضافة (خلال 5 دقائق)",
+  browserUnknown: "لا اتصال حديث؛ حالة ملف المتصفح غير معروفة",
+  browserCheckHelp:
+    "افتح إضافة ZipZap في ملف المتصفح المختار واضغط فحص الاتصال. تسجيل الجسر وحده لا يثبت تفعيل الإضافة. الفحص لا ينزّل أي ملف.",
   supportTitle: "ملخص الدعم",
   supportPrivacy:
     "تحتوي المعاينة على إصدارات التطبيق والنظام وأعداد مجمّعة ورموز أخطاء آمنة فقط. تُستبعد الروابط وأسماء الملفات والمسارات وأسماء المستخدمين والأخطاء الخام والكوكيز وقواعد البيانات. لا يُرفع شيء تلقائيًا.",

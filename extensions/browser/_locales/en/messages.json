@@ -52,5 +52,20 @@
   },
   "host_rejected": {
     "message": "The local host could not confirm receipt. Open ZipZap, check its queue and available storage, then reconnect the browser."
+  },
+  "checkingConnection": {
+    "message": "Checking local connection…"
+  },
+  "checkConnection": {
+    "message": "Check connection"
+  },
+  "healthHost": {
+    "message": "Extension and local host connected. The app has no recent readiness signal; open ZipZap and check again. No download was started."
+  },
+  "healthReady": {
+    "message": "Extension and local host connected. ZipZap was recently ready. Explicit link mode; no download was started."
+  },
+  "healthTimeout": {
+    "message": "Connection check timed out. Open or repair ZipZap and try again. No download request was sent."
   }
 }

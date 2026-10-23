@@ -1,7 +1,13 @@
 import { test, expect, type Page } from "@playwright/test";
 import { readFile } from "node:fs/promises";
 
-async function popup(page: Page, states: string[], language = "en", missing = false) {
+async function popup(
+  page: Page,
+  states: string[],
+  language = "en",
+  missing = false,
+  submit = true,
+) {
   const messages = JSON.parse(
     await readFile(`extensions/browser/_locales/${language}/messages.json`, "utf8"),
   );
@@ -30,12 +36,21 @@ async function popup(page: Page, states: string[], language = "en", missing = fa
             callback(
               state === "legacy"
                 ? { ok: true, id: message.id }
-                : {
-                    version: 2,
-                    id: message.id,
-                    state: state === "destination" ? "rejected" : state,
-                    ...(state === "destination" ? { code: "destination" } : {}),
-                  },
+                : message.action === "health"
+                  ? {
+                      version: 2,
+                      id: message.id,
+                      state: "health",
+                      app_ready: state === "health_ready",
+                      host_version: "0.2.0-beta.1",
+                      capabilities: ["explicit"],
+                    }
+                  : {
+                      version: 2,
+                      id: message.id,
+                      state: state === "destination" ? "rejected" : state,
+                      ...(state === "destination" ? { code: "destination" } : {}),
+                    },
             );
             delete (window as any).chrome.runtime.lastError;
           },
@@ -45,8 +60,9 @@ async function popup(page: Page, states: string[], language = "en", missing = fa
     { states, language, messages, missing },
   );
   await page.goto("/extension/popup.html");
+  if (!submit) return;
   await page.locator("#url").fill("https://example.com/file?token=private");
-  await page.locator("button").click();
+  await page.locator("form button").click();
 }
 
 for (const language of ["en", "ar"]) {
@@ -54,7 +70,7 @@ for (const language of ["en", "ar"]) {
     await page.clock.install();
     await popup(page, ["received", "queued"], language);
     await expect(page.locator("#status.pending")).toBeVisible();
-    await expect(page.locator("button")).toBeDisabled();
+    await expect(page.locator("form button")).toBeDisabled();
     await page.clock.runFor(350);
     await expect(page.locator("#status.success")).toBeVisible();
     await expect(page.locator("#url")).toHaveValue("");
@@ -71,7 +87,7 @@ for (const language of ["en", "ar"]) {
       language === "ar" ? "اسم الملف مشغول" : "filename is occupied",
     );
     await expect(page.locator("#url")).toHaveValue("https://example.com/file?token=private");
-    await expect(page.locator("button")).toBeEnabled();
+    await expect(page.locator("form button")).toBeEnabled();
   });
 }
 
@@ -86,6 +102,26 @@ test("receipt timeout never resends an enqueue or claims completion", async ({ p
     ),
   ).toBe(1);
 });
+
+for (const language of ["en", "ar"]) {
+  test(`health is separate from enqueue and reports app readiness in ${language}`, async ({
+    page,
+  }) => {
+    await popup(page, ["health_host"], language, false, false);
+    await page.locator("#check-connection").click();
+    await expect(page.locator("#health")).toContainText(
+      language === "ar" ? "لا توجد إشارة" : "no recent readiness",
+    );
+    const calls = await page.evaluate(() => (window as any).nativeCalls);
+    expect(calls).toHaveLength(1);
+    expect(calls[0].action).toBe("health");
+    expect(calls[0].url).toBeUndefined();
+    await page.unrouteAll();
+    await popup(page, ["health_ready"], language, false, false);
+    await page.locator("#check-connection").click();
+    await expect(page.locator("#health.success")).toBeVisible();
+  });
+}
 
 test("missing host errors omit native details and legacy hosts need an update", async ({
   page,

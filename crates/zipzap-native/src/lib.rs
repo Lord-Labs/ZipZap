@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+pub mod health;
 use std::{
     io::{Read, Write},
     path::Path,
@@ -23,6 +24,7 @@ pub struct Request {
     pub url: Option<String>,
     pub id: Option<String>,
     pub action: Option<String>,
+    pub browser: Option<health::Browser>,
 }
 #[derive(Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -199,7 +201,7 @@ fn process(
     }
     let legacy = request.version == 1;
     let id = if legacy {
-        if request.id.is_some() || request.action.is_some() {
+        if request.id.is_some() || request.action.is_some() || request.browser.is_some() {
             return Err("Invalid native message".into());
         }
         uuid::Uuid::new_v4().to_string()
@@ -207,6 +209,13 @@ fn process(
         let id = request.id.ok_or("Missing request ID")?;
         if !valid_id(&id) {
             return Err("Invalid request ID".into());
+        }
+        if request.action.as_deref() == Some("health") && request.url.is_none() {
+            let browser = request.browser.ok_or("Missing browser")?;
+            return Ok((health::answer(state, browser, &id)?, false));
+        }
+        if request.browser.is_some() {
+            return Err("Unexpected browser metadata".into());
         }
         if request.action.as_deref() == Some("status") && request.url.is_none() {
             if let Some(saved) = result(state, &id)? {
@@ -338,6 +347,34 @@ pub fn register(binary: &Path, state: &Path) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn health_validates_schema_and_never_requests_app_launch() {
+        let temp = tempfile::tempdir().unwrap();
+        let id = uuid::Uuid::new_v4().to_string();
+        let origin = format!("chrome-extension://{}/", extension_id());
+        let bytes = serde_json::to_vec(
+            &serde_json::json!({"version":2,"action":"health","id":id,"browser":"edge"}),
+        )
+        .unwrap();
+        let mut input = (bytes.len() as u32).to_ne_bytes().to_vec();
+        input.extend(bytes);
+        let mut output = Vec::new();
+        assert!(!receive(&mut &input[..], &mut output, &origin, temp.path()).unwrap());
+        let health: serde_json::Value = serde_json::from_slice(&output[4..]).unwrap();
+        assert_eq!(health["state"], "health");
+        assert_eq!(health["app_ready"], false);
+        for payload in [
+            serde_json::json!({"version":2,"action":"health","id":id,"browser":"firefox"}),
+            serde_json::json!({"version":2,"action":"health","id":id,"browser":"chrome","url":"https://example.com"}),
+            serde_json::json!({"version":1,"action":"health","browser":"chrome"}),
+        ] {
+            assert_eq!(
+                send(&serde_json::to_vec(&payload).unwrap(), &origin, temp.path())["ok"],
+                false
+            );
+        }
+        assert!(!temp.path().join("inbox").exists());
+    }
     fn send(payload: &[u8], origin: &str, state: &Path) -> serde_json::Value {
         let mut input = (payload.len() as u32).to_ne_bytes().to_vec();
         input.extend_from_slice(payload);

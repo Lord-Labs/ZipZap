@@ -12,6 +12,13 @@ while assembly completes. Existing files are never overwritten.
 
 ## Desktop
 
+Unreleased browser-readiness work on main adds **Check connection** in the
+extension. It sends no download and does not launch the desktop. The popup
+distinguishes a reachable host from a recently ready app. Desktop Settings shows
+recent Chrome/Edge contact separately from host registration; missing contact
+means the profile state is unknown. See [the readiness decision](architecture/0010-browser-readiness.md).
+This is not included in the published 0.2.0-beta.1 extension.
+
 Open **New download**, paste a direct HTTP/HTTPS link, optionally choose a plain
 filename, select a folder, then start. Progress, speed and remaining time come
 from the engine. Unknown lengths show an indeterminate progress bar. Select a file
