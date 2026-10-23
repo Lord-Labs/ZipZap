@@ -140,3 +140,11 @@ reviewed scoped go decisions. #89 owns subsequent candidate qualification,
 including outstanding #46/#47/#82 evidence. New follow-ups are Todo proposals,
 not shipped features, completed studies or a new release milestone. Existing
 M6 gates and M7 decision-only boundaries remain in effect.
+
+Implementation checkpoint, 2026-10-23: readiness #87/#91 and the setup code slice
+#92/#93 are merged, unreleased. #88 retains complete platform acceptance in #89.
+[ADR 0011](architecture/0011-public-link-capture.md), decision #94 under #48,
+accepts only opt-in public same-origin file-link capture with prepare/activate
+ownership after its decision PR merges. Blanket download interception and page-link
+collection are not accepted by that decision. It authorizes a new scoped
+implementation issue; the broader M7 studies and outstanding M6 gates stay open.
