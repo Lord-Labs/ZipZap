@@ -120,6 +120,15 @@ These are decisions, not accepted feature implementations or M6 release blockers
 The [feature study](research/next-phase-features.md) separates source observations,
 official vendor claims, existing REA evidence and remaining unknowns.
 
+Decision records, 2026-10-23: [capture and collection](research/browser-collection-decision.md)
+retain the narrow capture go and defer page collection; [auth/proxies](research/auth-proxy-decision.md)
+reject new credential/session features in this phase; [Firefox/distribution](research/browser-distribution-decision.md)
+record actual Firefox refusal and defer shipping/submission pending a separately scoped
+identity/package change. The [media study](research/media-formats-decision.md)
+retains the existing direct/progressive-MP4 action and recommends no streaming
+assembly. Full #51 still retains its #46 prerequisite and unperformed assembly
+qualification; these records do not close M6 or authorize new product features.
+
 One in-process queue is accepted for M6, including scheduling while the app runs.
 Named/synchronization queues, FTP/torrents, cloud sync, website crawling, other
 operating systems, OS wake/shutdown and an automatic updater remain deferred.
