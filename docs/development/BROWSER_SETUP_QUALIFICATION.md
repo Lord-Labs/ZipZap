@@ -82,3 +82,9 @@ those platform cases. Retain them in #88/#89; do not tick them from a build alon
 and full #47/#89 candidate qualification remain open. No active host reboot,
 browser-store submission, account purchase or release publication occurred.
 Hosted workflows were skipped under #54, never reported passed.
+
+The [#82 follow-up and user-run Windows checklist](INSTALLED_BROWSER_QUALIFICATION.md)
+records a command-line handle-inheritance regression, the launcher fix and bounded
+browser diagnostics. Corrected Chrome/Edge GUI checks and production installer
+acceptance remain pending. The maintainer will perform Windows-control tests;
+no VM or active-host reboot is assumed.
