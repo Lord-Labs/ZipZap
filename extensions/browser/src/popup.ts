@@ -1,4 +1,5 @@
 import { sendLink, checkConnection } from "./shared.js";
+import { siteOrigin, sitePattern } from "./capture-policy.js";
 document.documentElement.lang = chrome.i18n.getUILanguage();
 document.documentElement.dir = chrome.i18n.getUILanguage().startsWith("ar") ? "rtl" : "ltr";
 for (const node of document.querySelectorAll<HTMLElement>("[data-i18n]"))
@@ -43,3 +44,87 @@ check.addEventListener("click", async () => {
     check.disabled = false;
   }
 });
+
+const toggle = document.querySelector<HTMLButtonElement>("#capture-toggle")!;
+const clear = document.querySelector<HTMLButtonElement>("#capture-clear")!;
+const captureStatus = document.querySelector<HTMLElement>("#capture-status")!;
+const list = document.querySelector<HTMLUListElement>("#capture-sites")!;
+list.setAttribute("aria-label", chrome.i18n.getMessage("captureSites"));
+let origin = "",
+  enabled: string[] = [];
+function renderSites(): void {
+  toggle.textContent = chrome.i18n.getMessage(
+    enabled.includes(origin) ? "captureDisable" : "captureEnable",
+  );
+  list.replaceChildren();
+  for (const site of enabled) {
+    const li = document.createElement("li"),
+      label = document.createElement("bdi"),
+      off = document.createElement("button");
+    label.textContent = site;
+    off.type = "button";
+    off.textContent = chrome.i18n.getMessage("captureDisable");
+    off.setAttribute("aria-label", `${off.textContent}: ${site}`);
+    off.addEventListener("click", () => void updateSites("disable", site));
+    li.append(label, off);
+    list.append(li);
+  }
+  clear.disabled = enabled.length === 0;
+}
+async function updateSites(action: string, site?: string): Promise<void> {
+  toggle.disabled = true;
+  try {
+    const value = await chrome.runtime.sendMessage({
+      type: "zipzapSettings",
+      action,
+      ...(site ? { origin: site } : {}),
+    });
+    if (!value || !Array.isArray(value.sites)) throw new Error("Settings unavailable");
+    enabled = value.sites;
+    renderSites();
+    captureStatus.textContent = chrome.i18n.getMessage("captureReload");
+    captureStatus.className = "success";
+  } catch {
+    captureStatus.textContent = chrome.i18n.getMessage("captureSettingsError");
+    captureStatus.className = "error";
+  } finally {
+    toggle.disabled = !origin;
+  }
+}
+toggle.addEventListener("click", () => {
+  if (enabled.includes(origin)) {
+    void updateSites("disable", origin);
+    return;
+  }
+  // Request immediately in the user gesture; no permission is requested on load.
+  void chrome.permissions
+    .request({ permissions: ["scripting"], origins: [sitePattern(origin)] })
+    .then((granted) => {
+      if (granted) void updateSites("enable", origin);
+      else {
+        captureStatus.textContent = chrome.i18n.getMessage("captureDenied");
+        captureStatus.className = "error";
+      }
+    })
+    .catch(() => {
+      captureStatus.textContent = chrome.i18n.getMessage("captureSettingsError");
+      captureStatus.className = "error";
+    });
+});
+clear.addEventListener("click", () => void updateSites("clear"));
+void (async () => {
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (tab?.url && !tab.incognito) origin = siteOrigin(tab.url);
+  } catch {}
+  document.querySelector<HTMLElement>("#site-origin")!.textContent =
+    origin || chrome.i18n.getMessage("captureNoSite");
+  toggle.disabled = !origin;
+  try {
+    const value = await chrome.runtime.sendMessage({ type: "zipzapSettings", action: "read" });
+    enabled = Array.isArray(value?.sites) ? value.sites : [];
+    renderSites();
+  } catch {
+    clear.disabled = true;
+  }
+})();

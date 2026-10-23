@@ -151,5 +151,7 @@ implementation issue; the broader M7 studies and outstanding M6 gates stay open.
 
 Accepted implementation parent #96 starts with native protocol #97; its
 [protocol notes](development/CAPTURE_PROTOCOL.md) keep preparation separate from
-activation. Extension capture and end-to-end qualification remain a subsequent
-slice; native infrastructure alone is not automatic download capture.
+activation. Extension slice #98 adds opt-in exact-site public file clicks and
+records isolated actual Chrome/Edge output/restart evidence in those notes.
+This unreleased scope excludes global interception, authenticated downloads and
+video-page extraction; existing release gates and broader studies remain open.

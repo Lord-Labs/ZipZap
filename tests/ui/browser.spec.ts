@@ -18,6 +18,10 @@ async function popup(
   await page.addInitScript(
     ({ states, language, messages, missing }) => {
       const calls: any[] = [];
+      const permissionCalls: any[] = [];
+      let sites: string[] = [];
+      (window as any).permissionCalls = permissionCalls;
+      (window as any).captureGrant = true;
       (window as any).nativeCalls = calls;
       (window as any).chrome = {
         i18n: {
@@ -25,7 +29,21 @@ async function popup(
           getMessage: (key: string) => messages[key]?.message || key,
         },
         action: { setBadgeText: async () => {} },
+        tabs: { query: async () => [{ id: 1, url: "https://example.com/page", incognito: false }] },
+        permissions: {
+          request: async (value: any) => {
+            permissionCalls.push(value);
+            return (window as any).captureGrant;
+          },
+        },
         runtime: {
+          sendMessage: async (message: any) => {
+            if (message.action === "enable") sites = [message.origin];
+            if (message.action === "clear") sites = [];
+            if (message.action === "disable")
+              sites = sites.filter((site) => site !== message.origin);
+            return { sites };
+          },
           sendNativeMessage: (_host: string, message: any, callback: (value: unknown) => void) => {
             calls.push(message);
             const state = states.length > 1 ? states.shift() : states[0];
@@ -133,3 +151,35 @@ test("missing host errors omit native details and legacy hosts need an update", 
   await popup(page, ["legacy"]);
   await expect(page.locator("#status.error")).toContainText("Update ZipZap");
 });
+
+for (const language of ["en", "ar"]) {
+  test(`site capture requests only selected permission and can be disabled in ${language}`, async ({
+    page,
+  }) => {
+    await popup(page, ["queued"], language, false, false);
+    await expect(page.locator("#capture-toggle")).toBeEnabled();
+    expect(await page.evaluate(() => (window as any).permissionCalls)).toEqual([]);
+    await page.evaluate(() => {
+      (window as any).captureGrant = false;
+    });
+    await page.locator("#capture-toggle").click();
+    await expect(page.locator("#capture-status.error")).toBeVisible();
+    await expect(page.locator("#capture-sites li")).toHaveCount(0);
+    await page.evaluate(() => {
+      (window as any).captureGrant = true;
+    });
+    await page.locator("#capture-toggle").click();
+    await expect(page.locator("#capture-sites li")).toHaveCount(1);
+    expect(await page.evaluate(() => (window as any).permissionCalls)).toEqual([
+      { permissions: ["scripting"], origins: ["https://example.com/*"] },
+      { permissions: ["scripting"], origins: ["https://example.com/*"] },
+    ]);
+    await page.locator("#capture-sites button").click();
+    await expect(page.locator("#capture-sites li")).toHaveCount(0);
+    await page.locator("#capture-toggle").click();
+    await expect(page.locator("#capture-sites li")).toHaveCount(1);
+    await page.locator("#capture-clear").click();
+    await expect(page.locator("#capture-sites li")).toHaveCount(0);
+    expect(await page.evaluate(() => (window as any).nativeCalls)).toEqual([]);
+  });
+}

@@ -36,6 +36,12 @@ Scheduling requires the app to stay open; it cannot wake or start the computer.
 Automatic browser interception, media extraction, macOS and Linux remain outside
 this beta. See [scope and acceptance criteria](docs/PRODUCT.md).
 
+Unreleased work on main adds guided setup, truthful browser connection checks
+and optional capture of public file clicks on enabled sites. See the
+[user guide](docs/USER_GUIDE.md#unreleased-public-link-capture-on-main) and
+[actual Chrome/Edge evidence](docs/development/CAPTURE_PROTOCOL.md). These changes
+are not part of the published beta; video-page extraction remains separate.
+
 ## Stack
 
 | Component           | Direction                                                                                            |

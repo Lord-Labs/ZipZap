@@ -26,6 +26,13 @@ transfer, with metadata-only prepare then explicit activation. This replaces
 the downloads-API candidate for that slice; global interception remains no-go.
 Full #48 and media/YouTube #51 are not closed by this checkpoint.
 
+Capture checkpoint: native #97/#99 is merged; extension #98 implements opt-in
+exact-site public file clicks, with actual isolated Chrome/Edge output and
+worker/app restart evidence in the [protocol record](../development/CAPTURE_PROTOCOL.md).
+Its fixture pregrants page permission; the OS consent prompt and ordinary
+installer/platform qualification remain explicit gaps. This does not approve
+blanket interception or media extraction.
+
 The remaining M6 work [#46](https://github.com/Lord-Labs/ZipZap/issues/46),
 [#47](https://github.com/Lord-Labs/ZipZap/issues/47) and
 [#82](https://github.com/Lord-Labs/ZipZap/issues/82) stays open. Setup/readiness
@@ -34,6 +41,9 @@ needs the qualification gate below. A narrow beta exception is not a waiver
 for subsequent releases.
 
 ## Source observations
+
+This table records the original `e59b281` baseline before the implementation
+checkpoints above; it is not a description of today's main tree.
 
 | Path                                                                                                                                                         | Observed behavior                                                                                                                | Consequence for this request                                                                                              |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
