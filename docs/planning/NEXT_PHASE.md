@@ -6,6 +6,11 @@ Prepared 2026-10-17 in [#27](https://github.com/Lord-shaban/ZipZap/issues/27).
 [M6 milestone](https://github.com/Lord-shaban/ZipZap/milestone/7) ·
 [Development Project](https://github.com/users/Lord-shaban/projects/12)
 
+Requested follow-up, 2026-10-23: [browser capture, guided setup and video actions](BROWSER_SETUP.md)
+([العربية](BROWSER_SETUP.ar.md)), tracked in #86. This proposed sequence reuses
+the M7 studies and preserves their decision gates and outstanding M6 qualification;
+it does not add automatic capture or media extraction to the published beta.
+
 ## Outcome and current truth
 
 Release decision, 2026-10-20: the maintainer authorized publication of

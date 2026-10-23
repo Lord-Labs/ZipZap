@@ -124,3 +124,19 @@ One in-process queue is accepted for M6, including scheduling while the app runs
 Named/synchronization queues, FTP/torrents, cloud sync, website crawling, other
 operating systems, OS wake/shutdown and an automatic updater remain deferred.
 Scope changes need an explicit issue/plan update; planned checks are not results.
+
+## Proposed browser and setup follow-up
+
+The 2026-10-23 [browser capture, guided setup and video plan](planning/BROWSER_SETUP.md)
+([العربية](planning/BROWSER_SETUP.ar.md)) is prepared in
+[#86](https://github.com/Lord-Labs/ZipZap/issues/86). Source analysis identifies
+registration-only readiness and the current enqueue timeout as boundaries to
+address before a reliable automatic handoff.
+
+The proposed order is #87 truthful browser readiness, then #88 guided Windows
+setup; #48/#50/#51 retain separate capture, distribution and media/YouTube
+decisions. Capture/video implementation issues are created only after their
+reviewed scoped go decisions. #89 owns subsequent candidate qualification,
+including outstanding #46/#47/#82 evidence. New follow-ups are Todo proposals,
+not shipped features, completed studies or a new release milestone. Existing
+M6 gates and M7 decision-only boundaries remain in effect.
