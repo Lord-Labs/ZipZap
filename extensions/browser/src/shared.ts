@@ -10,6 +10,40 @@ export function validateLink(value: string): string {
   return url.href;
 }
 type Answer = { version: number; id: string; state: string; code?: string };
+export function checkConnection(): Promise<boolean> {
+  const id = crypto.randomUUID();
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(
+      () => reject(new Error(chrome.i18n.getMessage("healthTimeout"))),
+      3000,
+    );
+    chrome.runtime.sendNativeMessage(
+      "com.zipzap.native",
+      {
+        version: 2,
+        action: "health",
+        id,
+        browser: navigator.userAgent.includes("Edg/") ? "edge" : "chrome",
+      },
+      (value: unknown) => {
+        clearTimeout(timeout);
+        if (chrome.runtime.lastError) return reject(new Error(chrome.i18n.getMessage("missing")));
+        const answer = value as Record<string, unknown> | null;
+        if (
+          answer?.version !== 2 ||
+          answer.id !== id ||
+          answer.state !== "health" ||
+          typeof answer.app_ready !== "boolean" ||
+          typeof answer.host_version !== "string" ||
+          !Array.isArray(answer.capabilities) ||
+          !answer.capabilities.includes("explicit")
+        )
+          return reject(new Error(chrome.i18n.getMessage("protocol")));
+        resolve(answer.app_ready);
+      },
+    );
+  });
+}
 const codes = [
   "destination",
   "app_rejected",

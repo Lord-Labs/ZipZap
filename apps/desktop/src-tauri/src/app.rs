@@ -24,6 +24,14 @@ fn snapshot(state: State<AppState>) -> serde_json::Value {
     serde_json::json!({"jobs":state.manager.jobs(),"queue":state.manager.queue(),"settings":state.manager.settings(),"tray_available":state.lifecycle.available(),"folder":folder(&state),"version":env!("CARGO_PKG_VERSION"),"native_error":*state.native.lock().expect("native lock"),"notice":state.notice.lock().expect("notice lock").take(),"browser_review":state.browser_review.lock().expect("review lock").take()})
 }
 #[tauri::command]
+fn browser_health(app: tauri::AppHandle) -> serde_json::Value {
+    let root = app.path().app_local_data_dir().ok();
+    serde_json::json!({
+        "chrome":root.as_ref().is_some_and(|root| zipzap_native::health::recent(root, zipzap_native::health::Browser::Chrome)),
+        "edge":root.as_ref().is_some_and(|root| zipzap_native::health::recent(root, zipzap_native::health::Browser::Edge))
+    })
+}
+#[tauri::command]
 fn preview_support(state: State<AppState>) -> Result<String, String> {
     let mut preview = state.support_preview.lock().expect("support lock");
     *preview = None;
@@ -368,9 +376,15 @@ pub fn run() {
             let handle = app.handle().clone();
             tauri::async_runtime::spawn(async move {
                 manager.start();
+                let mut last_heartbeat = std::time::Instant::now() - Duration::from_secs(2);
                 loop {
                     if manager.is_stopping() {
+                        let _ = std::fs::remove_file(root.join("app-ready.json"));
                         return;
+                    }
+                    if last_heartbeat.elapsed() >= Duration::from_secs(2) {
+                        let _ = zipzap_native::health::heartbeat(&root, env!("CARGO_PKG_VERSION"));
+                        last_heartbeat = std::time::Instant::now();
                     }
                     if let Ok(entries) = std::fs::read_dir(root.join("inbox")) {
                         for entry in entries.flatten().take(100) {
@@ -458,6 +472,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             snapshot,
+            browser_health,
             add_download,
             set_queue_running,
             move_waiting,

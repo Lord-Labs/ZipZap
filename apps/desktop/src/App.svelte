@@ -8,6 +8,7 @@
   import BatchDialog from "./BatchDialog.svelte";
   import SupportDialog from "./SupportDialog.svelte";
   import ScheduleDialog, { type ScheduleState } from "./ScheduleDialog.svelte";
+  import BrowserStatus from "./BrowserStatus.svelte";
   import defaultCategories from "../../../config/categories.json";
   import defaultView from "../../../config/view.json";
 
@@ -1768,7 +1769,7 @@
     </section>
     <div class="browser-setting">
       <h3>{text.browser}</h3>
-      <p class="helper">{connected ? text.connected : text.nativeError}</p>
+      <BrowserStatus {language} registered={connected} />
       {#if !connected}<p class="helper">{text.nativeRecovery}</p>{/if}
       <button type="button" class="secondary" onclick={connectBrowser}>{text.connect}</button>
       <p class="helper">{text.browserHelp}</p>
