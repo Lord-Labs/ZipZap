@@ -99,11 +99,12 @@ export async function testInstalledBrowsers(
         },
         15000,
       );
-      const page = await context.newPage();
+      let page;
       result = await stage(
         channel,
         "handoff and verify bytes",
         async () => {
+          page = await context.newPage();
           await page.goto(`chrome-extension://${id}/popup.html`, { timeout: 15000 });
           await page.locator("#url").fill(`${url}/${filename}`);
           await page.locator("form button").click();

@@ -37,7 +37,43 @@ blocks close; its earlier PID-presence assertion was insufficient because an
 exited process can retain an observable process object. It now waits for process
 exit. The corrected real-browser cleanup check remains pending.
 
+## Local verification and candidate
+
+Build input: `980c0787ade8e57d406bddbb5efeb1f45146c76c`, 2026-10-23.
+Later edits affect only test bounds, checklists and evidence, not production source.
+
+- `npm run check`, Rust formatting, workspace/all-target clippy with warnings
+  denied, all 90 workspace tests and locked workspace build passed.
+- Six historical comparison cases and 48 production-engine cases passed with
+  verified bytes. Optional aria2 comparison was skipped. The built capture
+  worker's consent, phase/restart/failure/retention/privacy checks also passed;
+  these use controlled transport, not actual browser consent.
+- npm and Cargo audits found zero vulnerability advisories. Cargo retains five
+  informational warnings (proc-macro-error, zbus_names, zvariant,
+  zvariant_derive and glib); all are absent from the resolved Windows closure.
+  No warning suppression or dependency-policy change was made.
+- Release desktop/sidecar/frontend/NSIS build passed. Extracted sidecar bytes,
+  all 46 media resources, 13 extension files, five source archives and notices
+  matched build inputs. The desktop matched after the single documented
+  `UNK` to `NSS` bundle marker substitution: exactly three differing bytes.
+  [Pinned Tauri CLI source](https://github.com/tauri-apps/tauri/blob/tauri-cli-v2.12.3/crates/tauri-bundler/src/bundle.rs)
+  patches for NSIS, then restores the unpackaged binary. An initial raw equality
+  assertion failed on that marker; no other difference was accepted.
+
+Local installer: **41,194,390 bytes**, Authenticode **NotSigned**, SHA-256
+`33e231e5071842f5076a03cb6c7e9fb95f2eaf744f725c12d356f70b85d72f29`.
+Packaged native host SHA-256:
+`469eeedd39398bf26c0986666952349fdfecd0af7ed43971397e48319aafb133`.
+It is an unreleased local candidate under the existing beta filename, not a
+replacement for the published beta. It was extracted and checked, not installed
+or executed. Private build/audit/package records remain under
+`.research-local/closure-review/`.
+
 ## User-run Windows checks
+
+The [complete grouped Arabic checklist](WINDOWS_MANUAL_CHECKLIST.ar.md) includes
+browser, capture/video, installer/setup/permissions and startup evidence. Run and
+report the groups together at the maintainer's chosen time.
 
 The maintainer requested on 2026-10-23 to perform tests needing Windows control
 personally. Do not run these UI checks on their behalf. No VM is required for
