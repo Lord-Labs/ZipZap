@@ -155,3 +155,10 @@ activation. Extension slice #98 adds opt-in exact-site public file clicks and
 records isolated actual Chrome/Edge output/restart evidence in those notes.
 This unreleased scope excludes global interception, authenticated downloads and
 video-page extraction; existing release gates and broader studies remain open.
+
+Scoped media decision #101 / [ADR 0012](architecture/0012-public-video-action.md)
+accepts an explicit public direct-player/YouTube progressive-MP4 action, with
+bundled metadata tools and the existing Manager, after the decision PR merges.
+It requires its own implementation issue. Streaming assembly, protected/session
+sources and store/publication approval are outside that go decision; full #51
+and startup/platform/release gates remain open.

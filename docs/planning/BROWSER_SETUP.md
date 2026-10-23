@@ -33,6 +33,15 @@ Its fixture pregrants page permission; the OS consent prompt and ordinary
 installer/platform qualification remain explicit gaps. This does not approve
 blanket interception or media extraction.
 
+Media checkpoint: #101 / [ADR 0012](../architecture/0012-public-video-action.md)
+records a narrow public direct-player/YouTube progressive-MP4 go, requiring a
+new implementation issue after decision merge. A private feasibility probe
+resolved public format 18 and downloaded combined audio/video through the
+existing Manager; it is not a shipped button or arbitrary-site support. Bundled
+Python/Node/pure yt-dlp avoid user-side runtime setup, with explicit notices,
+process lifetime/output bounds and measured packaging cost. No HLS/DASH/mux/DRM
+or cookie scope is accepted, and complete #51/#46/#89 acceptance stays separate.
+
 The remaining M6 work [#46](https://github.com/Lord-Labs/ZipZap/issues/46),
 [#47](https://github.com/Lord-Labs/ZipZap/issues/47) and
 [#82](https://github.com/Lord-Labs/ZipZap/issues/82) stays open. Setup/readiness
