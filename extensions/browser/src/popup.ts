@@ -5,7 +5,7 @@ for (const node of document.querySelectorAll<HTMLElement>("[data-i18n]"))
   node.textContent = chrome.i18n.getMessage(node.dataset.i18n!);
 const form = document.querySelector<HTMLFormElement>("form")!;
 const input = document.querySelector<HTMLInputElement>("#url")!;
-const button = document.querySelector<HTMLButtonElement>("button")!;
+const button = document.querySelector<HTMLButtonElement>("form button")!;
 const status = document.querySelector<HTMLElement>("#status")!;
 form.addEventListener("submit", async (event) => {
   event.preventDefault();

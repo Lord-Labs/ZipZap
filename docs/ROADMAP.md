@@ -148,3 +148,8 @@ accepts only opt-in public same-origin file-link capture with prepare/activate
 ownership after its decision PR merges. Blanket download interception and page-link
 collection are not accepted by that decision. It authorizes a new scoped
 implementation issue; the broader M7 studies and outstanding M6 gates stay open.
+
+Accepted implementation parent #96 starts with native protocol #97; its
+[protocol notes](development/CAPTURE_PROTOCOL.md) keep preparation separate from
+activation. Extension capture and end-to-end qualification remain a subsequent
+slice; native infrastructure alone is not automatic download capture.

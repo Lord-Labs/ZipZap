@@ -1,3 +1,4 @@
+use crate::write_local as save;
 use serde::{Deserialize, Serialize};
 use std::{
     path::Path,
@@ -45,24 +46,6 @@ fn fresh(at: u64, now: u64, seconds: u64) -> bool {
     now.checked_sub(at).is_some_and(|age| age < seconds)
 }
 
-fn save(state: &Path, name: &str, value: &impl Serialize) -> Result<(), String> {
-    use std::io::Write;
-    std::fs::create_dir_all(state).map_err(|_| "Cannot create local health state")?;
-    let temporary = state.join(format!("health-{}.tmp", uuid::Uuid::new_v4()));
-    let written = (|| {
-        let mut file = std::fs::OpenOptions::new()
-            .write(true)
-            .create_new(true)
-            .open(&temporary)?;
-        file.write_all(&serde_json::to_vec(value)?)?;
-        file.sync_all()?;
-        drop(file);
-        std::fs::rename(&temporary, state.join(name))
-    })();
-    let _ = std::fs::remove_file(temporary);
-    written.map_err(|_: std::io::Error| "Cannot save local health state".into())
-}
-
 pub fn heartbeat(state: &Path, version: &str) -> Result<(), String> {
     save(
         state,
@@ -102,7 +85,7 @@ pub(crate) fn answer(
     Ok(
         serde_json::json!({"version":2,"id":session,"state":"health",
         "host_version":env!("CARGO_PKG_VERSION"),"app_ready":app.is_some(),
-        "app_version":app.map(|app| app.version),"capabilities":["explicit"]}),
+        "app_version":app.map(|app| app.version),"capabilities":["explicit","capture_v3"]}),
     )
 }
 

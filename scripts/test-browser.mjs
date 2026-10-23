@@ -43,7 +43,7 @@ for (const channel of ["chromium", "msedge"]) {
     const page = await context.newPage();
     await page.goto(`chrome-extension://${id}/popup.html`, { timeout: 15000 });
     await page.locator("#url").fill(`${url}/${filename}`);
-    await page.locator("button").click();
+    await page.locator("form button").click();
     await page.locator("#status.success").waitFor({ timeout: 15000 });
     const output = path.join(destination, filename);
     for (let attempt = 0; attempt < 120; attempt++) {
@@ -67,7 +67,7 @@ for (const channel of ["chromium", "msedge"]) {
       }),
     );
     await page.locator("#url").fill("file:///private");
-    await page.locator("button").click();
+    await page.locator("form button").click();
     await page.locator("#status.error").waitFor();
   } finally {
     await context.close();

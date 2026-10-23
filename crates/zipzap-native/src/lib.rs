@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+pub mod capture;
 pub mod health;
 use std::{
     io::{Read, Write},
@@ -32,12 +33,35 @@ pub struct Inbox {
     pub version: u32,
     pub id: String,
     pub url: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub action: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub created_at: Option<u64>,
+}
+
+impl Inbox {
+    pub fn stem(&self) -> Result<String, String> {
+        if !valid_id(&self.id) {
+            return Err("Invalid request ID".into());
+        }
+        match (self.version, self.action.as_deref(), self.created_at) {
+            (1 | 2, None, None) => Ok(self.id.clone()),
+            (3, Some("prepare"), Some(_)) if !self.url.is_empty() => {
+                Ok(format!("{}-prepare", self.id))
+            }
+            (3, Some("activate"), Some(_)) if self.url.is_empty() => {
+                Ok(format!("{}-activate", self.id))
+            }
+            _ => Err("Unsupported browser operation".into()),
+        }
+    }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "state", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Outcome {
     Received,
+    Prepared,
     Queued,
     Rejected { code: Rejection },
 }
@@ -51,6 +75,7 @@ pub enum Rejection {
     AppRejected,
     AppStartFailed,
     Expired,
+    CaptureExpired,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -65,9 +90,9 @@ pub fn valid_id(id: &str) -> bool {
     uuid::Uuid::parse_str(id).is_ok_and(|value| value.to_string() == id)
 }
 
-fn receipt(id: &str, outcome: Outcome) -> serde_json::Value {
+fn receipt(version: u32, id: &str, outcome: Outcome) -> serde_json::Value {
     serde_json::to_value(Receipt {
-        version: 2,
+        version,
         id: id.to_owned(),
         outcome,
     })
@@ -80,6 +105,28 @@ fn read_local(path: &Path) -> Result<Vec<u8>, String> {
         return Err("Invalid local message".into());
     }
     std::fs::read(path).map_err(|_| "Local message unavailable".into())
+}
+
+pub(crate) fn write_local(state: &Path, name: &str, value: &impl Serialize) -> Result<(), String> {
+    use std::io::Write;
+    let bytes = serde_json::to_vec(value).map_err(|_| "Cannot encode local record")?;
+    if bytes.len() > 32768 {
+        return Err("Local record size rejected".into());
+    }
+    std::fs::create_dir_all(state).map_err(|_| "Cannot create local record folder")?;
+    let temporary = state.join(format!("record-{}.tmp", uuid::Uuid::new_v4()));
+    let written = (|| {
+        let mut file = std::fs::OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&temporary)?;
+        file.write_all(&bytes)?;
+        file.sync_all()?;
+        drop(file);
+        std::fs::rename(&temporary, state.join(name))
+    })();
+    let _ = std::fs::remove_file(temporary);
+    written.map_err(|_: std::io::Error| "Cannot save local record".into())
 }
 
 // Results are private local acknowledgments, never a log of links or raw errors.
@@ -104,14 +151,31 @@ pub fn result(state: &Path, id: &str) -> Result<Option<Receipt>, String> {
     }
     let saved: Receipt =
         serde_json::from_slice(&read_local(&path)?).map_err(|_| "Invalid local result")?;
-    if saved.id != id || saved.version != 2 || saved.outcome == Outcome::Received {
+    if saved.id != id
+        || ![2, 3].contains(&saved.version)
+        || saved.outcome == Outcome::Received
+        || (saved.version == 2 && saved.outcome == Outcome::Prepared)
+    {
         return Err("Invalid local result".into());
     }
     Ok(Some(saved))
 }
 
 pub fn save_result(state: &Path, id: &str, outcome: Outcome) -> Result<(), String> {
-    if !valid_id(id) || outcome == Outcome::Received {
+    save_result_for(state, id, 2, outcome)
+}
+
+pub fn save_result_for(
+    state: &Path,
+    id: &str,
+    version: u32,
+    outcome: Outcome,
+) -> Result<(), String> {
+    if !valid_id(id)
+        || ![2, 3].contains(&version)
+        || outcome == Outcome::Received
+        || (version == 2 && outcome == Outcome::Prepared)
+    {
         return Err("Invalid local result".into());
     }
     let folder = state.join("results");
@@ -133,8 +197,8 @@ pub fn save_result(state: &Path, id: &str, outcome: Outcome) -> Result<(), Strin
         }
     }
     let temporary = folder.join(format!("{id}-{}.tmp", uuid::Uuid::new_v4()));
-    let bytes =
-        serde_json::to_vec(&receipt(id, outcome)).map_err(|_| "Cannot encode local result")?;
+    let bytes = serde_json::to_vec(&receipt(version, id, outcome))
+        .map_err(|_| "Cannot encode local result")?;
     let mut file = std::fs::OpenOptions::new()
         .write(true)
         .create_new(true)
@@ -196,6 +260,9 @@ fn process(
         .read_exact(&mut data)
         .map_err(|_| "Truncated native message")?;
     let request: Request = serde_json::from_slice(&data).map_err(|_| "Invalid native message")?;
+    if request.version == 3 {
+        return capture::receive(request, state);
+    }
     if ![1, 2].contains(&request.version) {
         return Err("Unsupported message version".into());
     }
@@ -210,6 +277,16 @@ fn process(
         if !valid_id(&id) {
             return Err("Invalid request ID".into());
         }
+        for action in ["prepare", "activate"] {
+            if state
+                .join("inbox")
+                .join(format!("{id}-{action}.json"))
+                .try_exists()
+                .map_err(|_| "Cannot inspect local inbox")?
+            {
+                return Err("Request ID is already in use".into());
+            }
+        }
         if request.action.as_deref() == Some("health") && request.url.is_none() {
             let browser = request.browser.ok_or("Missing browser")?;
             return Ok((health::answer(state, browser, &id)?, false));
@@ -219,11 +296,15 @@ fn process(
         }
         if request.action.as_deref() == Some("status") && request.url.is_none() {
             if let Some(saved) = result(state, &id)? {
-                return Ok((receipt(&id, saved.outcome), false));
+                if saved.version != 2 {
+                    return Err("Request ID is already in use".into());
+                }
+                return Ok((receipt(2, &id, saved.outcome), false));
             }
             let pending = state.join("inbox").join(format!("{id}.json"));
             return Ok((
                 receipt(
+                    2,
                     &id,
                     if pending
                         .try_exists()
@@ -249,7 +330,10 @@ fn process(
     let enqueue = (|| {
         if !legacy {
             if let Some(saved) = result(state, &id)? {
-                return Ok((receipt(&id, saved.outcome), false));
+                if saved.version != 2 {
+                    return Err("Request ID is already in use".into());
+                }
+                return Ok((receipt(2, &id, saved.outcome), false));
             }
             let pending = state.join("inbox").join(format!("{id}.json"));
             if pending
@@ -261,7 +345,7 @@ fn process(
                 if previous.id != id || previous.url != url || previous.version != 2 {
                     return Err("Request ID is already in use".into());
                 }
-                return Ok((receipt(&id, Outcome::Received), true));
+                return Ok((receipt(2, &id, Outcome::Received), true));
             }
         }
         let folder = state.join("inbox");
@@ -276,6 +360,8 @@ fn process(
         }
         let path = folder.join(format!("{id}.tmp"));
         let pending = Inbox {
+            created_at: None,
+            action: None,
             version: request.version,
             id: id.clone(),
             url,
@@ -296,7 +382,7 @@ fn process(
             if legacy {
                 serde_json::json!({"ok":true,"id":id})
             } else {
-                receipt(&id, Outcome::Received)
+                receipt(2, &id, Outcome::Received)
             },
             true,
         ))
@@ -304,6 +390,7 @@ fn process(
     match enqueue {
         Err(error) if !legacy => Ok((
             receipt(
+                2,
                 &id,
                 Outcome::Rejected {
                     code: if error == "ZipZap inbox is full; open the application" {
