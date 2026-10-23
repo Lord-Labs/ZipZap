@@ -180,3 +180,11 @@ see [evidence and limits](development/INSTALLED_BROWSER_QUALIFICATION.md).
 The maintainer declined recording performance numbers. Quantitative #46,
 full candidate #47/#89 and full study #51 remain open, so M6/#28 is not complete.
 This checkpoint does not publish the unreleased capture/setup/video work.
+
+Requested one-file setup follow-up, 2026-10-23: #107 embeds the x64 offline
+WebView2 installer and prepares new-profile defaults/native registration during
+NSIS installation, with original ZipZap branding and English/Arabic guidance.
+It reuses existing installer hooks and media/extension resources. Existing state
+must be retained without opening its database during repair/upgrade. Browser
+activation/permissions remain explicit; publication and broader gates are separate.
+See [candidate verification and manual checks](development/ONE_FILE_SETUP.md).

@@ -19,9 +19,16 @@ recent Chrome/Edge contact separately from host registration; missing contact
 means the profile state is unknown. See [the readiness decision](architecture/0010-browser-readiness.md).
 This is not included in the published 0.2.0-beta.1 extension.
 
-Unreleased setup work adds **Set up ZipZap** in Settings and offers it on a new
-profile's first launch. Choose language/folder, connect the included extension,
-then finish or explicitly request a test download. Back, skip and finish later
+Unreleased one-file setup includes the x64 WebView2 offline installer, media
+tools and browser extension. After downloading the setup EXE, run it and choose
+English or Arabic. It prepares a new profile's language, Windows Downloads folder
+and native bridge before Finish, without a test download or a second required
+setup wizard. An installed WebView2 is reused; bundling the offline runtime makes
+the download larger. Browser activation and site access still need your approval.
+
+**Set up ZipZap** remains available in Settings to change language/folder, connect
+the included extension, or explicitly request a test download. It is also offered
+for an unprepared new profile. Back, skip and finish later
 are supported; incomplete setup resumes on reopening. Advanced settings and
 existing jobs are kept. Upgrading an existing database does not force setup.
 

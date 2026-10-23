@@ -50,8 +50,28 @@ db.close();
   & node --input-type=module -e $zipzapSeed $zipzapDatabase $zipzapRetainedFolder (Join-Path $zipzapWorkspace 'crates/zipzap-core/tests/fixtures/first-beta-state.json')
   if($LASTEXITCODE -ne 0) { throw 'Cannot create first-beta state fixture' }
 } else {
-  '{"command":"shutdown"}' | & (Join-Path $zipzapWorkspace 'target/debug/zipzap.exe') $zipzapDatabase | Out-Null
-  if($LASTEXITCODE -ne 0) { throw 'Cannot initialize fixture database' }
+  # Verify real fresh preparation before the retention/repair passes below.
+  $zipzapProcess = Start-Process -FilePath $zipzapInstallerPath -ArgumentList @('/S',('/D=' + $zipzapInstallPath)) -WindowStyle Hidden -Wait -PassThru
+  if($zipzapProcess.ExitCode -ne 0) { throw 'Fresh automatic installation failed' }
+  $zipzapVerifyPrepared = @'
+import assert from 'node:assert/strict';
+import {statSync} from 'node:fs';
+import {DatabaseSync} from 'node:sqlite';
+const db = new DatabaseSync(process.argv[1], {readOnly:true});
+try {
+  assert.equal(db.prepare('SELECT count(*) AS n FROM jobs').get().n, 0);
+  const settings = JSON.parse(db.prepare('SELECT data FROM settings WHERE id=1').get().data);
+  assert.ok(['en','ar'].includes(settings.language));
+  assert.equal(typeof settings.download_folder, 'string');
+  assert.ok(statSync(settings.download_folder).isDirectory());
+  assert.equal(settings.close_to_tray, false);
+  assert.equal(settings.notifications, false);
+} finally { db.close(); }
+'@
+  & node --input-type=module -e $zipzapVerifyPrepared $zipzapDatabase
+  if($LASTEXITCODE -ne 0) { throw 'Installer did not prepare safe defaults before application launch' }
+  if(Get-Process zipzap-desktop -ErrorAction SilentlyContinue) { throw 'Silent setup launched the application unexpectedly' }
+  Write-Output 'fresh automatic setup, empty queue and no GUI launch: passed'
 }
 $zipzapStateHash = (Get-FileHash -LiteralPath $zipzapDatabase).Hash
 $zipzapRetainedFile = Join-Path $zipzapRetainedFolder ('retained-' + [Guid]::NewGuid().ToString() + '.txt')
