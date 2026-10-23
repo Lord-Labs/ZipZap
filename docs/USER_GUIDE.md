@@ -310,7 +310,7 @@ Keep `%LOCALAPPDATA%\com.zipzap.desktop` private and out of bug reports.
 
 Open the extension from a normal HTTP(S) page and choose **Enable on this site**.
 Grant the selected site's access, then reload that page. Capture is off by
-default; enable only sites whose files are public. **Turn off** removes a site,
+default; enable only sites whose file links are public and reusable. **Turn off** removes a site,
 and **Turn off all sites** removes every capture choice. Removing browser site
 permission also disables capture. Accepted jobs stay in the app.
 
@@ -319,6 +319,10 @@ download attribute or these suffixes: zip, 7z, tar, gz, pdf, iso, exe, msi, mp4,
 webm, mp3, csv. Modified clicks, other targets/origins, forms, scripts, Save As,
 private browsing, credentials, blob/data links and video-page extraction are
 excluded. Normal browser behavior remains available outside that scope.
+
+One-use links are unsupported even when they have no query. The metadata check
+can consume their access, so returning to the browser may also fail. Leave
+capture off for sites with signed, one-use or session-dependent downloads.
 
 Keep the page open until **Added to ZipZap** appears. Preparing only checks
 metadata; it cannot start a transfer. A preparation failure or confirmed app

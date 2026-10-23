@@ -27,6 +27,13 @@ baseline and official IDM/platform documentation to the accepted M6 backlog and
 separate M7 decisions. It reuses existing REA evidence and does not claim new
 native analysis, runtime verification or performance results.
 
+The 2026-10-23 decision records cover [capture/page collection](browser-collection-decision.md),
+[authentication/proxies](auth-proxy-decision.md), [Firefox/store distribution](browser-distribution-decision.md)
+and [media formats](media-formats-decision.md). They distinguish reused evidence,
+new controlled probes, source findings and untested paths. A no-go study does
+not implement or qualify the rejected feature; full #51 and M6 retain the
+remaining acceptance listed in their records.
+
 ## Tools
 
 - [Ponytail](https://github.com/DietrichGebert/ponytail) guides small complete changes
