@@ -86,6 +86,53 @@ No prior acceptance report qualifies this newly changed installer.
 Hosted checks remain skipped under #54. Existing #46/#47/#89 and M7 study gates
 are not waived by this packaging change.
 
+## Current smaller candidate (2026-10-23)
+
+Production build input: `7a081dd0cf3d39a1ac86b9351c51958ddd8e979d`.
+Subsequent edits document evidence only. The installer is now **42,976,230 bytes
+(40.99 MiB)** versus **258,809,630 bytes (246.82 MiB)** for the offline candidate:
+an **83.39%** reduction. Media tools and extension resources remain included.
+
+Current file: `target/release/bundle/nsis/ZipZap_0.2.0-beta.1_x64-setup.exe`,
+Authenticode **NotSigned**, SHA-256:
+
+`762c4904af5f56b447137eb0e31d47a09a9c3ef47b80109a30589fcfb20ffeea`
+
+Local validation passed:
+
+- `npm run check`, five Node tests and zero Svelte errors/warnings.
+- Rust fmt, workspace/all-target clippy with warnings denied, all **95** workspace
+  tests and locked build; six comparison cases and **48** engine scenarios.
+  Optional aria2 and hosted checks (#54) skipped, not passed.
+- All **72** UI/Axe tests with two workers, including both browser choices,
+  clipboard/open failure recovery, missing resources, keyboard and Arabic/narrow
+  layouts. The initial targeted run passed three cases but failed the Arabic
+  helper's stale English dialog-name locator after translation. A stable dialog
+  locator fixed the test; the complete suite then passed without a product workaround.
+  EN/AR screenshots were visually inspected. Native calls/clipboard were mocked;
+  no ordinary browser or system clipboard was changed by these tests.
+- Release sidecar/desktop/frontend/extension/NSIS builds passed. Extracted native
+  bytes, all **46** media files, **13** extension files, **five** source archives
+  and notices matched inputs. Desktop matched after only Tauri's documented
+  three-byte NSIS marker substitution. Packaged desktop SHA-256:
+  `106badfd77a7a916686986b93d74956fc2fb08291cf9bac38a0e95670f15ba67`;
+  native SHA-256:
+  `574436b7e6f33fd55e3566f90ac8c7e1b18ec8744adc648c33443ac085638db7`.
+- The embedded bootstrapper is **1,876,736 bytes**, exactly matching its fetched
+  input, SHA-256
+  `f414de01c4680f0bb0694d1ea7803c6968f3a81bf6bad01b89bfc65dce14c2a2`.
+  Authenticode is **Valid**, signer **Microsoft Corporation**; its container
+  ProductVersion is `1.3.299.15`, not an observed installed runtime version.
+  Inspection confirmed the full offline installer is absent from the new payload.
+
+No dependency version/lockfile, browser/native identity or media permission changed.
+Private records are in `.research-local/closure-review/108-light-*` and
+`package-108-light.json`. The previous offline artifact remains in ignored storage.
+The agent extracted/compared this new candidate without installing or executing
+it; actual Windows helper/clipboard/browser activation/runtime/installer lifecycle
+checks below remain maintainer-run. PR #108 stays draft. No release, store
+submission or startup performance measurements occurred.
+
 ## Historical offline candidate (2026-10-23, superseded)
 
 The following records the earlier 246.82 MiB artifact, rejected by the maintainer
