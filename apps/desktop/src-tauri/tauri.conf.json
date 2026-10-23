@@ -6,7 +6,7 @@
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "npm run build",
+    "beforeBuildCommand": "npm run build && node ../../scripts/build-extension.mjs",
     "frontendDist": "../dist"
   },
   "app": {
@@ -35,6 +35,7 @@
     "license": "MIT",
     "externalBin": ["binaries/zipzap-native"],
     "resources": {
+      "../../../dist/extension/": "browser-extension/",
       "../../../dist/release/THIRD_PARTY_LICENSES.txt": "THIRD_PARTY_LICENSES.txt",
       "../../../dist/release/sources/*": "third-party-sources/"
     },

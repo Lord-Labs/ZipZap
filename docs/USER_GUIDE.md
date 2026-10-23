@@ -19,6 +19,24 @@ recent Chrome/Edge contact separately from host registration; missing contact
 means the profile state is unknown. See [the readiness decision](architecture/0010-browser-readiness.md).
 This is not included in the published 0.2.0-beta.1 extension.
 
+Unreleased setup work adds **Set up ZipZap** in Settings and offers it on a new
+profile's first launch. Choose language/folder, connect the included extension,
+then finish or explicitly request a test download. Back, skip and finish later
+are supported; incomplete setup resumes on reopening. Advanced settings and
+existing jobs are kept. Upgrading an existing database does not force setup.
+
+The installer includes `browser-extension`; **Open included extension folder**
+opens that fixed resource directory. Until approved store listings exist, load
+it unpacked through Chrome/Edge's extensions page with Developer mode. Setup
+does not enable automatic capture or install an extension without browser consent.
+
+The optional test downloads the public 1,076-byte project license from a pinned
+GitHub HTTPS URL into the selected folder, using the normal queue and a unique
+text filename. It checks the engine's publication size/SHA-256, not just Completed.
+It can wait behind a held/scheduled queue or be cancelled. The file/history are
+kept for manual removal; mismatched completed output is kept, and another test
+uses a fresh name. No test network request is made automatically.
+
 Open **New download**, paste a direct HTTP/HTTPS link, optionally choose a plain
 filename, select a folder, then start. Progress, speed and remaining time come
 from the engine. Unknown lengths show an indeterminate progress bar. Select a file

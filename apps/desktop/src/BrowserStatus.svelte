@@ -4,6 +4,7 @@
   import { dictionary, type Language } from "./i18n";
   export let language: Language;
   export let registered: boolean;
+  export let help = true;
   let contact = { chrome: false, edge: false };
   $: text = dictionary(language);
   onMount(() => {
@@ -26,4 +27,4 @@
   <p>Chrome: {contact.chrome ? text.browserRecent : text.browserUnknown}</p>
   <p>Edge: {contact.edge ? text.browserRecent : text.browserUnknown}</p>
 </div>
-<p class="helper">{text.browserCheckHelp}</p>
+{#if help}<p class="helper">{text.browserCheckHelp}</p>{/if}

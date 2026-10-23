@@ -9,6 +9,7 @@ use tauri_plugin_dialog::DialogExt;
 use zipzap_core::{CancellationToken, LinkReplacement, Manager, Settings, Status, Suggestion};
 
 pub(crate) struct AppState {
+    first_run: bool,
     pub(crate) manager: Arc<Manager>,
     folder: PathBuf,
     native: Mutex<Option<String>>,
@@ -21,7 +22,22 @@ pub(crate) struct AppState {
 
 #[tauri::command]
 fn snapshot(state: State<AppState>) -> serde_json::Value {
-    serde_json::json!({"jobs":state.manager.jobs(),"queue":state.manager.queue(),"settings":state.manager.settings(),"tray_available":state.lifecycle.available(),"folder":folder(&state),"version":env!("CARGO_PKG_VERSION"),"native_error":*state.native.lock().expect("native lock"),"notice":state.notice.lock().expect("notice lock").take(),"browser_review":state.browser_review.lock().expect("review lock").take()})
+    serde_json::json!({"first_run":state.first_run,"jobs":state.manager.jobs(),"queue":state.manager.queue(),"settings":state.manager.settings(),"tray_available":state.lifecycle.available(),"folder":folder(&state),"version":env!("CARGO_PKG_VERSION"),"native_error":*state.native.lock().expect("native lock"),"notice":state.notice.lock().expect("notice lock").take(),"browser_review":state.browser_review.lock().expect("review lock").take()})
+}
+#[tauri::command]
+fn open_extension_folder(app: tauri::AppHandle) -> Result<(), String> {
+    use tauri_plugin_opener::OpenerExt;
+    let folder = app
+        .path()
+        .resource_dir()
+        .map_err(|_| "Extension resources unavailable")?
+        .join("browser-extension");
+    if !folder.join("manifest.json").is_file() {
+        return Err("Extension resources unavailable".into());
+    }
+    app.opener()
+        .open_path(folder.to_string_lossy(), None::<&str>)
+        .map_err(|_| "Cannot open extension folder".into())
 }
 #[tauri::command]
 fn browser_health(app: tauri::AppHandle) -> serde_json::Value {
@@ -355,10 +371,12 @@ pub fn run() {
             std::fs::create_dir_all(&root)?;
             let downloads = app.path().download_dir()?;
             std::fs::create_dir_all(&downloads)?;
+            let first_run = !root.join("zipzap.sqlite").try_exists()?;
             let manager =
                 Manager::open(&root.join("zipzap.sqlite")).map_err(std::io::Error::other)?;
             let native = register(app.handle()).err();
             app.manage(AppState {
+                first_run,
                 manager: Arc::clone(&manager),
                 folder: downloads,
                 native: Mutex::new(native),
@@ -473,6 +491,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             snapshot,
             browser_health,
+            open_extension_folder,
             add_download,
             set_queue_running,
             move_waiting,

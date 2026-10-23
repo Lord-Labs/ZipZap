@@ -344,9 +344,70 @@ pub fn register(binary: &Path, state: &Path) -> Result<(), String> {
     Ok(())
 }
 
+#[cfg(windows)]
+pub fn unregister(binary: &Path, state: &Path) -> Result<(), String> {
+    use winreg::{RegKey, enums::HKEY_CURRENT_USER};
+    let manifest = state.join("native-host.json");
+    if !manifest
+        .try_exists()
+        .map_err(|_| "Cannot inspect native registration")?
+    {
+        return Ok(());
+    }
+    let value: serde_json::Value = serde_json::from_slice(&read_local(&manifest)?)
+        .map_err(|_| "Invalid native registration")?;
+    // Another installation may own the shared registration; never remove its bridge.
+    if value["name"] != HOST
+        || value["path"]
+            .as_str()
+            .is_none_or(|path| !path.eq_ignore_ascii_case(&binary.to_string_lossy()))
+    {
+        return Ok(());
+    }
+    let current = RegKey::predef(HKEY_CURRENT_USER);
+    for vendor in ["Google\\Chrome", "Microsoft\\Edge"] {
+        let path = format!("Software\\{vendor}\\NativeMessagingHosts\\{HOST}");
+        let registered: Option<String> = current
+            .open_subkey(&path)
+            .ok()
+            .and_then(|key| key.get_value("").ok());
+        if registered
+            .as_deref()
+            .is_some_and(|value| value.eq_ignore_ascii_case(&manifest.to_string_lossy()))
+        {
+            current
+                .delete_subkey(&path)
+                .map_err(|_| "Cannot remove owned native registration")?;
+        }
+    }
+    std::fs::remove_file(manifest).map_err(|_| "Cannot remove owned native manifest".into())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[cfg(windows)]
+    #[test]
+    fn unregister_keeps_a_different_installation_and_removes_only_its_owned_manifest() {
+        let temp = tempfile::tempdir().unwrap();
+        let binary = temp.path().join("host.exe");
+        let manifest = temp.path().join("native-host.json");
+        let foreign = serde_json::to_vec(
+            &serde_json::json!({"name":HOST,"path":temp.path().join("other.exe")}),
+        )
+        .unwrap();
+        std::fs::write(&manifest, &foreign).unwrap();
+        unregister(&binary, temp.path()).unwrap();
+        assert_eq!(std::fs::read(&manifest).unwrap(), foreign);
+        std::fs::write(
+            &manifest,
+            serde_json::to_vec(&serde_json::json!({"name":HOST,"path":binary})).unwrap(),
+        )
+        .unwrap();
+        unregister(&binary, temp.path()).unwrap();
+        assert!(!manifest.exists());
+        unregister(&binary, temp.path()).unwrap();
+    }
     #[test]
     fn health_validates_schema_and_never_requests_app_launch() {
         let temp = tempfile::tempdir().unwrap();

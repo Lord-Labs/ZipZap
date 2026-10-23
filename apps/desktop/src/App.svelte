@@ -9,6 +9,7 @@
   import SupportDialog from "./SupportDialog.svelte";
   import ScheduleDialog, { type ScheduleState } from "./ScheduleDialog.svelte";
   import BrowserStatus from "./BrowserStatus.svelte";
+  import SetupDialog from "./SetupDialog.svelte";
   import defaultCategories from "../../../config/categories.json";
   import defaultView from "../../../config/view.json";
 
@@ -17,6 +18,7 @@
   type Status = "queued" | "downloading" | "paused" | "completed" | "failed" | "cancelled";
 
   type Job = {
+    publication?: { sha256: string; bytes: number } | null;
     id: string;
     url: string;
     destination: string;
@@ -51,6 +53,7 @@
   };
 
   type Snapshot = {
+    first_run?: boolean;
     jobs: Job[];
     queue: { running: boolean; waiting: string[]; schedule?: ScheduleState };
     settings: Settings;
@@ -72,6 +75,7 @@
   let jobs: Job[] = [];
   let queue: Snapshot["queue"] = { running: true, waiting: [] };
   let scheduleDialog: ScheduleDialog;
+  let setupDialog: SetupDialog;
   let queueBusy = false;
   let addLater = false;
 
@@ -427,6 +431,7 @@
 
     try {
       const value = await invoke<Snapshot>("snapshot");
+      const firstSnapshot = !ready;
 
       if (ready) {
         const changed = value.jobs.find(
@@ -449,6 +454,10 @@
       connected = !value.native_error;
       trayAvailable = value.tray_available;
       ready = true;
+      if (firstSnapshot) {
+        await tick();
+        setupDialog.offer(value.first_run === true);
+      }
 
       if (value.notice) error = errorMessage(value.notice);
       if (value.browser_review) browserReview = value.browser_review;
@@ -1769,6 +1778,14 @@
     </section>
     <div class="browser-setting">
       <h3>{text.browser}</h3>
+      <button
+        type="button"
+        class="secondary"
+        onclick={() => {
+          settingsDialog.close();
+          void setupDialog.open();
+        }}>{text.setupTitle}</button
+      >
       <BrowserStatus {language} registered={connected} />
       {#if !connected}<p class="helper">{text.nativeRecovery}</p>{/if}
       <button type="button" class="secondary" onclick={connectBrowser}>{text.connect}</button>
@@ -1788,3 +1805,21 @@
     </div>
   </form>
 </dialog>
+
+<SetupDialog
+  bind:this={setupDialog}
+  {language}
+  {folder}
+  {jobs}
+  registered={connected}
+  onsave={async (setupLanguage, setupFolder) => {
+    await invoke("save_settings", {
+      settings: { ...settings, language: setupLanguage, download_folder: setupFolder },
+    });
+    await refresh();
+  }}
+  onconnect={async () => {
+    await invoke("connect_browser");
+    await refresh();
+  }}
+/>
