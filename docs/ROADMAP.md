@@ -172,3 +172,11 @@ Implementation #103 adds this scoped action; see [actual verification](developme
 Streaming assembly, protected/session
 sources and store/publication approval are outside that go decision; full #51
 and startup/platform/release gates remain open.
+
+Functional acceptance checkpoint, 2026-10-23: after PR #106's launcher fix,
+bounded browser diagnostics and local verification, the maintainer reported all
+grouped Windows tests successful. This completes #82/#88's functional acceptance;
+see [evidence and limits](development/INSTALLED_BROWSER_QUALIFICATION.md).
+The maintainer declined recording performance numbers. Quantitative #46,
+full candidate #47/#89 and full study #51 remain open, so M6/#28 is not complete.
+This checkpoint does not publish the unreleased capture/setup/video work.

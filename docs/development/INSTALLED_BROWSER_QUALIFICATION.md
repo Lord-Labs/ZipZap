@@ -26,8 +26,8 @@ requested. It closes its process/thread handles, preserves launch-failure
 receipts and adds no shell invocation. It reuses the existing pinned
 windows-sys dependency; no new crate/version is introduced. The corresponding
 regression failed before this change and passed afterward. This is a verified
-handle-boundary fix; its effect on the actual browser stall still requires the
-installed-browser run below.
+handle-boundary fix. Subsequent corrected browser runs were reported successful
+by the maintainer, as recorded below; the precise original blocker remains unknown.
 
 The runner reports bounded launch, extension-load, transfer, invalid-link and
 close stages. It emits a pass only after all stages finish. On close failure it
@@ -35,7 +35,7 @@ stops only the browser tree with this run's exact randomly generated profile,
 preserving the original and cleanup failures. The cleanup regression deliberately
 blocks close; its earlier PID-presence assertion was insufficient because an
 exited process can retain an observable process object. It now waits for process
-exit. The corrected real-browser cleanup check remains pending.
+exit. The maintainer subsequently reported the corrected cleanup check successful.
 
 ## Local verification and candidate
 
@@ -65,15 +65,32 @@ Local installer: **41,194,390 bytes**, Authenticode **NotSigned**, SHA-256
 Packaged native host SHA-256:
 `469eeedd39398bf26c0986666952349fdfecd0af7ed43971397e48319aafb133`.
 It is an unreleased local candidate under the existing beta filename, not a
-replacement for the published beta. It was extracted and checked, not installed
-or executed. Private build/audit/package records remain under
+replacement for the published beta. The agent extracted and checked it without
+installing or executing it. Private build/audit/package records remain under
 `.research-local/closure-review/`.
 
-## User-run Windows checks
+## Maintainer-reported acceptance (2026-10-23)
+
+After receiving the complete grouped checklist at `b358201`, the maintainer
+reported that all tests had been performed successfully and requested continuation.
+This is human-reported functional acceptance of the corrected Chrome/Edge and
+cleanup runners, scoped capture/video, setup, installer lifecycle, permissions,
+language/accessibility and retained-state checks. Together with the local checks
+above, it supports closing #82 and #88. It is not a new agent-observed Windows run.
+
+No new per-run logs, environment versions or raw startup result files were supplied.
+The maintainer explicitly declined recording performance measurements. No numerical
+result is recorded or inferred, and #46's quantitative criterion remains incomplete.
+Full #47/#89/#28 qualification and #51's outstanding study/dependency remain open.
+Earlier failed/cancelled runs retain their original results. No public release,
+store submission, version change or hosted-check pass follows from this acceptance.
+
+## Windows reproduction reference
 
 The [complete grouped Arabic checklist](WINDOWS_MANUAL_CHECKLIST.ar.md) includes
-browser, capture/video, installer/setup/permissions and startup evidence. Run and
-report the groups together at the maintainer's chosen time.
+browser, capture/video, installer/setup/permissions and startup procedures. The
+functional groups are now reported complete; these instructions remain for
+reproduction, not as a request to repeat them or supply performance measurements.
 
 The maintainer requested on 2026-10-23 to perform tests needing Windows control
 personally. Do not run these UI checks on their behalf. No VM is required for
@@ -99,25 +116,26 @@ uses an unregistered private host and a deliberately blocked close to verify
 bounded cleanup and preservation of the handoff error. A nonzero exit, timeout,
 missing browser result or surviving private process is a failure, not a pass.
 
-Share the last lines above and the generated result path. Review raw logs before
-sharing; retained browser profiles, binaries, state and full logs stay ignored.
+For future reproductions, review raw logs before sharing; retained browser
+profiles, binaries, state and full logs stay ignored.
 
 ## Remaining platform gates
 
-Keep #82 open until both corrected browser runs pass. Keep #46/#47/#88/#89 and
-full #51 open where their acceptance is still missing. This runner uses a private
-identity, not production-identity installed qualification.
+#82/#88 have maintainer-reported functional acceptance. Keep #46/#47/#89 and
+full #51 open where quantitative evidence, exact candidate provenance or study
+acceptance is still missing. The isolated runner and the maintainer's installer
+checks are separate evidence; the runner itself uses a private identity.
 
 - #46: three independently recorded first app launches after real Windows boots,
   warm reopens, visible/painted readiness and resource/100/1000-row measurements.
   Follow [the performance procedure](../research/performance.md); a new profile
   is not a cold boot. Do not reboot the active host automatically.
-- #88/#89/#47: production installer, published-beta upgrade, repair,
+- #89/#47: production installer, published-beta upgrade, repair,
   uninstall/reinstall with retained state/files, actual permission refusal/revoke,
   English/Arabic interactive installer, and WebView2-absent/offline behavior.
   Follow [release qualification](RELEASING.md) in a disposable Windows user/session.
-  The existing installer script refuses personal state/registration. No such
-  isolated environment is assumed available, and these checks are deferred.
+  The existing installer script refuses personal state/registration. Functional
+  success is now maintainer-reported; exact per-run provenance was not supplied.
 - Capture/video: retain the specific approved fixtures and the limits in
   [capture evidence](CAPTURE_PROTOCOL.md) and [video evidence](VIDEO_ACTION.md).
   Core/worker mocks do not replace actual consent or installed-identity results.
