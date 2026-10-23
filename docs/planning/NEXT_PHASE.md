@@ -24,6 +24,13 @@ installed-browser qualification stalled. The release uses an explicit, disclosed
 version-specific exception; failed/cancelled checks remain unchanged. #82 and
 full #47 native/browser qualification remain open alongside #46.
 
+Follow-up acceptance, 2026-10-23: the maintainer reported all grouped Windows
+functional tests successful, completing #82/#88's functional follow-up. See
+[acceptance and limits](../development/INSTALLED_BROWSER_QUALIFICATION.md).
+Performance measurements were not recorded at the maintainer's request. #46,
+full #47/#89 qualification and the M6 exit gate remain open; the historical
+publication exception and failed/cancelled results above remain unchanged.
+
 Current delivery: [0.2.0-beta.1](../releases/0.2.0-beta.1.md) includes the
 implemented #29–#45 work. The paragraphs below preserve the original planning
 snapshot; use the roadmap and issue tracker for live status. #46 and full M6

@@ -1,24 +1,64 @@
 #![cfg_attr(windows, windows_subsystem = "windows")]
 
-// Null stdio alone still lets Windows inherit the browser's original pipe handles.
 #[cfg(windows)]
-fn detach_browser_pipes() -> std::io::Result<()> {
-    #[link(name = "kernel32")]
-    unsafe extern "system" {
-        fn GetStdHandle(kind: u32) -> *mut std::ffi::c_void;
-        fn SetHandleInformation(handle: *mut std::ffi::c_void, mask: u32, flags: u32) -> i32;
+fn launch_app(executable: &std::path::Path, background: bool) -> std::io::Result<()> {
+    use std::os::windows::ffi::OsStrExt;
+    use windows_sys::Win32::{
+        Foundation::CloseHandle,
+        System::Threading::{CreateProcessW, DETACHED_PROCESS, PROCESS_INFORMATION, STARTUPINFOW},
+    };
+    let application: Vec<u16> = executable
+        .as_os_str()
+        .encode_wide()
+        .chain(Some(0))
+        .collect();
+    let mut arguments = std::ffi::OsString::from("\"");
+    arguments.push(executable);
+    arguments.push("\"");
+    if background {
+        arguments.push(" --browser-background");
     }
-    for kind in [-10i32, -11, -12] {
-        // Only alter inheritance on this short-lived host's own standard handles.
-        unsafe {
-            let handle = GetStdHandle(kind as u32);
-            if !handle.is_null() && handle as isize != -1 && SetHandleInformation(handle, 1, 0) == 0
-            {
-                return Err(std::io::Error::last_os_error());
-            }
-        }
+    let mut arguments: Vec<u16> = arguments.encode_wide().chain(Some(0)).collect();
+    let mut startup: STARTUPINFOW = unsafe { std::mem::zeroed() };
+    startup.cb = std::mem::size_of::<STARTUPINFOW>() as u32;
+    let mut process: PROCESS_INFORMATION = unsafe { std::mem::zeroed() };
+    // The GUI needs no inherited handles, including browser pipes outside standard IO.
+    if unsafe {
+        CreateProcessW(
+            application.as_ptr(),
+            arguments.as_mut_ptr(),
+            std::ptr::null(),
+            std::ptr::null(),
+            0,
+            DETACHED_PROCESS,
+            std::ptr::null(),
+            std::ptr::null(),
+            &startup,
+            &mut process,
+        )
+    } == 0
+    {
+        return Err(std::io::Error::last_os_error());
+    }
+    unsafe {
+        CloseHandle(process.hThread);
+        CloseHandle(process.hProcess);
     }
     Ok(())
+}
+
+#[cfg(not(windows))]
+fn launch_app(executable: &std::path::Path, background: bool) -> std::io::Result<()> {
+    let mut command = std::process::Command::new(executable);
+    if background {
+        command.arg("--browser-background");
+    }
+    command
+        .stdin(std::process::Stdio::null())
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
+        .spawn()
+        .map(|_| ())
 }
 
 fn main() {
@@ -63,19 +103,11 @@ fn main() {
         let launched = std::env::current_exe()
             .ok()
             .and_then(|exe| {
-                #[cfg(windows)]
-                detach_browser_pipes().ok()?;
-                let mut command =
-                    std::process::Command::new(exe.with_file_name("zipzap-desktop.exe"));
-                if value["version"] == 3 {
-                    command.arg("--browser-background");
-                }
-                command
-                    .stdin(std::process::Stdio::null())
-                    .stdout(std::process::Stdio::null())
-                    .stderr(std::process::Stdio::null())
-                    .spawn()
-                    .ok()
+                launch_app(
+                    &exe.with_file_name("zipzap-desktop.exe"),
+                    value["version"] == 3,
+                )
+                .ok()
             })
             .is_some();
         if !launched && value["version"] == 2 {

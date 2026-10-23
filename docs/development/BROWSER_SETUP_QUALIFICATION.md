@@ -69,7 +69,7 @@ immutable release or a claim that every later source-only layout adjustment is
 contained in that artifact. Private drivers, profiles, screenshots and builds
 remain in ignored local research storage.
 
-## Remaining qualification
+## Qualification gaps before maintainer acceptance
 
 The isolated installer omitted the production sidecar deliberately. It does not
 qualify ordinary production registration or the complete installed-download path.
@@ -82,3 +82,20 @@ those platform cases. Retain them in #88/#89; do not tick them from a build alon
 and full #47/#89 candidate qualification remain open. No active host reboot,
 browser-store submission, account purchase or release publication occurred.
 Hosted workflows were skipped under #54, never reported passed.
+
+The [#82 follow-up and user-run Windows checklist](INSTALLED_BROWSER_QUALIFICATION.md)
+records a command-line handle-inheritance regression, the launcher fix and bounded
+browser diagnostics. The preceding gaps describe the earlier agent-observed
+checkpoint, before the maintainer's acceptance below.
+
+## Maintainer acceptance (2026-10-23)
+
+The maintainer reported completing all grouped Windows tests successfully,
+including corrected Chrome/Edge/cleanup, production setup/installer lifecycle,
+permissions, English/Arabic and retained-state checks. This human report, together
+with the implementation and local verification, completes #88's functional gate
+and #82's corrected-run follow-up. No new raw logs or per-run versions were supplied.
+See [acceptance and limits](INSTALLED_BROWSER_QUALIFICATION.md).
+
+The maintainer declined recording performance numbers. #46 and full #47/#89/M6
+qualification remain open; no quantitative result or new release is inferred.

@@ -5,18 +5,30 @@ use std::{
 
 #[cfg(windows)]
 #[test]
-fn app_launch_closes_native_response_pipes_before_the_app_exits() {
+fn app_launch_inherits_neither_response_pipes_nor_other_browser_handles() {
+    use std::os::windows::io::{AsRawHandle, FromRawHandle, OwnedHandle};
     use std::os::windows::process::CommandExt;
     use std::{io::Read, sync::mpsc, time::Duration};
+    use windows_sys::Win32::{
+        Foundation::WAIT_TIMEOUT,
+        Security::SECURITY_ATTRIBUTES,
+        System::Threading::{CreateEventW, WaitForSingleObject},
+    };
     let temp = tempfile::tempdir().unwrap();
     let source = temp.path().join("pipe_child.rs");
     let done = temp.path().join("done");
     std::fs::write(&source, r#"#![windows_subsystem = "windows"]
 fn main() {
+    unsafe extern "system" { fn SetEvent(handle: *mut std::ffi::c_void) -> i32; }
+    let handle=std::env::var("ZIPZAP_PIPE_TEST_HANDLE").unwrap().parse::<usize>().unwrap();
+    unsafe { SetEvent(handle as *mut std::ffi::c_void); }
+    std::fs::write(std::env::var_os("ZIPZAP_PIPE_TEST_STARTED").unwrap(), b"started").unwrap();
     let done=std::env::var_os("ZIPZAP_PIPE_TEST_DONE").unwrap();
     for _ in 0..100 { if std::path::Path::new(&done).exists() {break} std::thread::sleep(std::time::Duration::from_millis(100)); }
 }"#).unwrap();
-    let fixture = temp.path().join("zipzap-desktop.exe");
+    let app_folder = temp.path().join("app with spaces العربية");
+    std::fs::create_dir(&app_folder).unwrap();
+    let fixture = app_folder.join("zipzap-desktop.exe");
     assert!(
         Command::new("rustc")
             .args(["--edition=2024", "--crate-name", "zipzap_pipe_fixture"])
@@ -29,11 +41,25 @@ fn main() {
             .status
             .success()
     );
-    let host = temp.path().join("host.exe");
+    let host = app_folder.join("host.exe");
     std::fs::copy(env!("CARGO_BIN_EXE_zipzap-native"), &host).unwrap();
+    let attributes = SECURITY_ATTRIBUTES {
+        nLength: std::mem::size_of::<SECURITY_ATTRIBUTES>() as u32,
+        lpSecurityDescriptor: std::ptr::null_mut(),
+        bInheritHandle: 1,
+    };
+    let event = unsafe { CreateEventW(&attributes, 1, 0, std::ptr::null()) };
+    assert!(!event.is_null());
+    let event = unsafe { OwnedHandle::from_raw_handle(event) };
+    let started = temp.path().join("started");
     let mut child = Command::new(host)
         .env("LOCALAPPDATA", temp.path())
         .env("ZIPZAP_PIPE_TEST_DONE", &done)
+        .env("ZIPZAP_PIPE_TEST_STARTED", &started)
+        .env(
+            "ZIPZAP_PIPE_TEST_HANDLE",
+            (event.as_raw_handle() as usize).to_string(),
+        )
         .arg(format!(
             "chrome-extension://{}/",
             zipzap_native::extension_id()
@@ -60,11 +86,23 @@ fn main() {
     assert!(child.wait().unwrap().success());
     let early = receive.recv_timeout(Duration::from_secs(3));
     let timely = early.is_ok();
+    for _ in 0..100 {
+        if started.exists() {
+            break;
+        }
+        std::thread::sleep(Duration::from_millis(20));
+    }
+    let inherited = unsafe { WaitForSingleObject(event.as_raw_handle(), 0) };
     std::fs::write(done, b"done").unwrap();
     let bytes = early.unwrap_or_else(|_| receive.recv_timeout(Duration::from_secs(5)).unwrap());
     reader.join().unwrap();
     let response: serde_json::Value = serde_json::from_slice(&bytes[4..]).unwrap();
     assert_eq!(response["state"], "received");
+    assert!(started.exists(), "Fixture app never started");
+    assert_eq!(
+        inherited, WAIT_TIMEOUT,
+        "The app inherited another browser handle"
+    );
     assert!(
         timely,
         "The child app retained the native response pipe after the host exited"

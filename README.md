@@ -19,7 +19,9 @@ links, customizable categories, appearance, tray mode and browser enqueue feedba
 See the [release notes](docs/releases/0.2.0-beta.1.md),
 [download page](https://zipzap-website.vercel.app) and
 [qualification record](docs/development/DAILY_USE_QUALIFICATION.md). Remaining
-startup/native/browser qualification in #46/#47/#82 keeps the full M6 gate open.
+quantitative startup and full candidate qualification in #46/#47/#89 keep the M6
+gate open. The maintainer reported successful Windows functional checks for
+#82/#88; see [acceptance and limits](docs/development/INSTALLED_BROWSER_QUALIFICATION.md).
 [الخطة بالعربية](docs/planning/NEXT_PHASE.ar.md).
 
 ## Current beta capabilities

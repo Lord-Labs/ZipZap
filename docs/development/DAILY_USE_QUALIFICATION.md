@@ -356,3 +356,20 @@ pause/reset and FAQ expansion. These are website checks, not native app tests.
 The new captures' [provenance](../images/README.md) distinguishes the actual
 isolated debug host with production frontend from installed-release evidence.
 No further control of the user's device was used.
+
+## Post-beta functional acceptance (2026-10-23)
+
+PR #106 fixes a command-line-proven native handle leak and bounds installed
+Chrome/Edge and cleanup diagnostics. Required local checks passed, including
+all 90 Rust tests, six comparison cases and 48 engine cases. The local installer
+was built and its contents checked; [exact hashes and limits](INSTALLED_BROWSER_QUALIFICATION.md)
+distinguish it from the published beta.
+
+After receiving the grouped Windows checklist, the maintainer reported all tests
+performed successfully and requested continuation. This supplies human-reported
+functional acceptance for #82/#88, including the corrected browser runners and
+setup/installer/permission checks. No new per-run logs or environment versions
+were supplied, and the maintainer declined recording performance numbers.
+No quantitative result is inferred: #46, full #47/#89 and M6/#28 remain open.
+The earlier cancelled run and published-beta exception remain unchanged.
+Hosted checks remain skipped under #54. No new release or store listing occurred.
