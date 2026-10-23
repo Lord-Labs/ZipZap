@@ -23,6 +23,12 @@ run; verified archives are cached in ignored `.research-local/media-assets/`.
 `npm run build:media` rebuilds only generated `dist/media/`. The installed app
 requires no external Python/Node setup. See [video boundaries](VIDEO_ACTION.md).
 
+The NSIS build also fetches Microsoft's x64 Evergreen WebView2 offline installer
+on its first build and caches it in Tauri's local tool cache. It is embedded in
+the setup EXE so the recipient needs no separate prerequisite download. See
+[one-file setup and qualification](ONE_FILE_SETUP.md). Original installer artwork
+can be regenerated with `pwsh -File scripts/build-installer-art.ps1`.
+
 | Command                   | Purpose                                                      |
 | ------------------------- | ------------------------------------------------------------ |
 | `npm run check`           | Formatting, local links, checker tests and Svelte/TypeScript |
