@@ -1787,6 +1787,14 @@
         }}>{text.setupTitle}</button
       >
       <BrowserStatus {language} registered={connected} />
+      <button
+        type="button"
+        class="secondary"
+        onclick={() => {
+          settingsDialog.close();
+          void setupDialog.open(2);
+        }}>{text.setupBrowserAction}</button
+      >
       {#if !connected}<p class="helper">{text.nativeRecovery}</p>{/if}
       <button type="button" class="secondary" onclick={connectBrowser}>{text.connect}</button>
       <p class="helper">{text.browserHelp}</p>

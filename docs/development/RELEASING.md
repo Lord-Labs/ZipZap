@@ -80,7 +80,7 @@ explain replacement artifacts rather than silently changing a release binary.
 
 `npm run desktop:build` produces the NSIS installer under
 `target/release/bundle/nsis`. `npm run build:extension` produces `dist/extension`.
-Unreleased #107 switches NSIS to an embedded x64 offline WebView2 installer and
+Unreleased #107 uses a small embedded WebView2 bootstrapper and
 prepares new-profile defaults before Finish; its [specific qualification](ONE_FILE_SETUP.md)
 must be completed on the new candidate. Prior installer acceptance is not reused.
 The sidecar preparation step runs `scripts/licenses.mjs` and bundles notices plus

@@ -47,8 +47,8 @@ the installed application never downloads or auto-updates its tools.
 The generated notices are authoritative for exact package versions and copyright
 texts. Windows system APIs/TLS and WebView2 are system/runtime dependencies with
 their own Microsoft terms; they are not relicensed by ZipZap. The installer uses
-Tauri's bundled x64 Evergreen WebView2 offline installer when the runtime is
-absent. Microsoft distributes that shared runtime under its own terms; it keeps
+Tauri's bundled Evergreen WebView2 bootstrapper to download/install the runtime
+from Microsoft only when it is absent. Microsoft distributes that shared runtime under its own terms; it keeps
 its normal update behavior and is retained when ZipZap is removed. See
 [Microsoft's deployment documentation](https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/distribution).
 

@@ -26,6 +26,8 @@
   let error = "";
   let busy = false;
   let testId = "";
+  let extensionPath = "";
+  let clipboardNotice = "";
   $: text = dictionary(draftLanguage);
   $: testJob = jobs.find((job) => job.id === testId && job.url === fixture);
   $: verified =
@@ -35,13 +37,14 @@
   function progress(done = false) {
     localStorage.setItem(key, JSON.stringify({ step, done, testId }));
   }
-  export async function open() {
+  export async function open(startStep?: number) {
     draftLanguage = language;
     draftFolder = folder;
     error = "";
     try {
       const saved = JSON.parse(localStorage.getItem(key) || "null");
       step = saved && !saved.done && [1, 2, 3].includes(saved.step) ? saved.step : 1;
+      if (startStep === 2) step = 2;
       testId =
         typeof saved?.testId === "string" && /^[a-f0-9-]{36}$/.test(saved.testId)
           ? saved.testId
@@ -51,6 +54,7 @@
       error = text.setupStorage;
     }
     dialog.showModal();
+    if (step === 2) void loadExtensionPath();
     await tick();
     title.focus();
   }
@@ -71,6 +75,7 @@
       if (step === 1 && target > step) await onsave(draftLanguage, draftFolder);
       step = target;
       progress();
+      if (step === 2) await loadExtensionPath();
       await tick();
       title.focus();
     } catch {
@@ -93,6 +98,37 @@
       await invoke("open_extension_folder");
     } catch {
       error = text.setupExtensionMissing;
+    }
+  }
+  async function loadExtensionPath() {
+    extensionPath = "";
+    clipboardNotice = "";
+    try {
+      extensionPath = await invoke<string>("extension_directory");
+    } catch {
+      error = text.setupExtensionMissing;
+    }
+  }
+  async function copyExtensionPath() {
+    clipboardNotice = "";
+    try {
+      await navigator.clipboard.writeText(extensionPath);
+      clipboardNotice = text.setupPathCopied;
+    } catch {
+      clipboardNotice = text.setupCopyFailed;
+    }
+  }
+  async function openBrowser(browser: "chrome" | "edge") {
+    if (busy || !extensionPath) return;
+    busy = true;
+    error = "";
+    await copyExtensionPath();
+    try {
+      await invoke("open_browser_extensions", { browser });
+    } catch {
+      error = text.setupBrowserOpenFailed;
+    } finally {
+      busy = false;
     }
   }
   async function connect() {
@@ -182,11 +218,37 @@
       <p class="helper">{text.setupBasicsHelp}</p>
     {:else if step === 2}
       <p>{text.setupExtensionHelp}</p>
+      <div class="browser-actions">
+        <button
+          type="button"
+          class="secondary"
+          disabled={busy || !extensionPath}
+          onclick={() => openBrowser("chrome")}>{text.setupOpenChrome}</button
+        >
+        <button
+          type="button"
+          class="secondary"
+          disabled={busy || !extensionPath}
+          onclick={() => openBrowser("edge")}>{text.setupOpenEdge}</button
+        >
+      </div>
+      <p class="helper"><code>chrome://extensions</code> · <code>edge://extensions</code></p>
       <ol>
         <li>{text.setupExtensionOne}</li>
         <li>{text.setupExtensionTwo}</li>
         <li>{text.setupExtensionThree}</li>
       </ol>
+      <label for="setup-extension-path">{text.setupPath}</label>
+      <div class="folder-field">
+        <input id="setup-extension-path" readonly value={extensionPath} dir="ltr" />
+        <button
+          type="button"
+          class="secondary"
+          disabled={busy || !extensionPath}
+          onclick={copyExtensionPath}>{text.setupCopyPath}</button
+        >
+      </div>
+      {#if clipboardNotice}<p role="status">{clipboardNotice}</p>{/if}
       <button type="button" class="secondary" onclick={extensionFolder}
         >{text.setupOpenExtension}</button
       >
@@ -295,6 +357,11 @@
   }
   .folder-field {
     display: flex;
+    gap: 8px;
+  }
+  .browser-actions {
+    display: flex;
+    flex-wrap: wrap;
     gap: 8px;
   }
   .folder-field input {

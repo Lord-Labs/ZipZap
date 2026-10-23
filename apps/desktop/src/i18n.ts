@@ -10,11 +10,20 @@ const en = {
   setupVerify: "Verify",
   setupBasicsHelp:
     "Keep the default Downloads folder or choose a writable NTFS folder. Existing downloads and advanced settings are kept.",
+  setupBrowserAction: "Browser extension setup",
+  setupOpenChrome: "Copy path and open Chrome",
+  setupOpenEdge: "Copy path and open Edge",
+  setupPath: "Included extension folder",
+  setupCopyPath: "Copy folder path",
+  setupPathCopied: "Folder path copied. Paste it into the Load unpacked folder dialog.",
+  setupCopyFailed: "Could not copy. Select the folder path and copy it manually.",
+  setupBrowserOpenFailed:
+    "Could not open this browser. Open chrome://extensions or edge://extensions manually and use the folder path shown here.",
   setupExtensionHelp:
-    "The installer includes the Chrome/Edge extension. Store listings are not available yet; loading this local extension currently needs Developer mode.",
-  setupExtensionOne: "Open chrome://extensions in Chrome or edge://extensions in Edge.",
+    "The extension is included. Choose your browser below. Store listings are not available yet; loading it needs Developer mode and your approval. Opening the page does not install the extension.",
+  setupExtensionOne: "On the browser's extensions page, turn on Developer mode.",
   setupExtensionTwo:
-    "Enable Developer mode, choose Load unpacked and select the browser-extension folder opened below.",
+    "Choose Load unpacked, paste the copied folder path into the folder dialog, then select that folder.",
   setupExtensionThree:
     "Enable ZipZap, open its toolbar popup and choose Check connection in the profile you will use.",
   setupOpenExtension: "Open included extension folder",
@@ -359,11 +368,20 @@ const ar: Record<keyof typeof en, string> = {
   setupVerify: "التحقق",
   setupBasicsHelp:
     "احتفظ بمجلد Downloads أو اختر مجلد NTFS قابلًا للكتابة. تبقى التنزيلات والإعدادات المتقدمة كما هي.",
+  setupBrowserAction: "تجهيز إضافة المتصفح",
+  setupOpenChrome: "نسخ المسار وفتح Chrome",
+  setupOpenEdge: "نسخ المسار وفتح Edge",
+  setupPath: "مجلد الإضافة المرفقة",
+  setupCopyPath: "نسخ مسار المجلد",
+  setupPathCopied: "نُسخ مسار المجلد. الصقه في نافذة اختيار مجلد الإضافة غير المضغوطة.",
+  setupCopyFailed: "تعذر النسخ. حدد مسار المجلد وانسخه يدويًا.",
+  setupBrowserOpenFailed:
+    "تعذر فتح المتصفح. افتح chrome://extensions أو edge://extensions يدويًا واستخدم مسار المجلد المعروض هنا.",
   setupExtensionHelp:
-    "يضم المثبت إضافة Chrome وEdge. لا توجد صفحات متجر معتمدة بعد؛ تحميل الإضافة المحلية يحتاج حاليًا وضع المطور.",
-  setupExtensionOne: "افتح chrome://extensions في Chrome أو edge://extensions في Edge.",
+    "الإضافة مرفقة. اختر المتصفح أدناه. لا تتوفر صفحات متجر بعد؛ تحميلها يحتاج وضع المطور وموافقتك. فتح الصفحة لا يعني تثبيت الإضافة.",
+  setupExtensionOne: "فعّل وضع المطور في صفحة إضافات المتصفح.",
   setupExtensionTwo:
-    "فعّل وضع المطور، ثم تحميل إضافة غير مضغوطة، واختر مجلد browser-extension الذي يفتحه الزر أدناه.",
+    "اختر تحميل إضافة غير مضغوطة، والصق المسار المنسوخ في نافذة اختيار المجلد، ثم اختر ذلك المجلد.",
   setupExtensionThree:
     "فعّل ZipZap وافتح نافذة الإضافة من شريط المتصفح واضغط فحص الاتصال في ملف المتصفح المطلوب.",
   setupOpenExtension: "فتح مجلد الإضافة المرفقة",

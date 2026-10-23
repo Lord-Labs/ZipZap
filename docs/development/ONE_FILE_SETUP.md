@@ -15,11 +15,13 @@ and concise bilingual welcome/finish/progress messages explain the preparation.
 `scripts/build-installer-art.ps1` regenerates both 24-bit BMPs from the existing
 project icon and independently authored shapes; no new image dependency is used.
 
-The package includes the full x64 Evergreen WebView2 installer, application,
+The revised default package includes a small Evergreen WebView2 bootstrapper, application,
 native host, browser extension, Python/Node/yt-dlp media tools, notices and source
-archives. Tauri reuses an installed WebView2 or runs the embedded installer
-silently when absent. It does not fetch a bootstrapper on the user's machine.
-This trades a larger download for offline prerequisite installation, following
+archives. Tauri reuses an installed WebView2 or runs the embedded bootstrapper
+silently when absent, automatically downloading the runtime from Microsoft.
+Internet is required only for that missing-runtime step; setup must fail clearly
+if it cannot complete it. This replaces the full offline runtime after the
+maintainer rejected its size. See
 [Tauri's supported mode](https://v2.tauri.app/distribute/windows-installer/#webview2-installation-options)
 and [Microsoft's deployment guidance](https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/distribution).
 Normal Evergreen updates and online downloads/video extraction still use the
@@ -38,13 +40,45 @@ Initialization or registration failure shows localized recovery guidance. Instal
 files do not imply successful preparation or a connected extension. The extension
 is included, but current distribution requires loading it unpacked in the browser;
 activation and per-site permissions need the user's approval. No policy sideload,
-new service, startup/tray opt-in, or guessed browser readiness is introduced.
+new ZipZap service, startup/tray opt-in, or guessed browser readiness is introduced.
+
+## Assisted browser extension setup
+
+Settings offers **Browser extension setup** directly at the browser step. Choose
+**Copy path and open Chrome/Edge** to copy the fixed bundled folder and request
+the chosen browser's extensions page. Enable Developer mode, choose Load unpacked
+and paste that folder into the folder dialog. Enable the extension and check its
+connection from its toolbar popup. This still requires browser approval; opening
+the page or copying a path is not installation or health evidence.
+
+The native command accepts only `chrome` or `edge`, searches fixed vendor paths
+under absolute Program Files/Program Files (x86)/LocalAppData roots, and launches
+that executable with only `--new-window` and its fixed internal extensions URL.
+No shell, arbitrary executable/URL/path argument, profile selection or browser
+policy is used. Custom/missing installations use the visible manual page address.
+Clipboard failure leaves the readable/selectable folder path and browser action
+available. Missing extension resources disable path-dependent actions and show
+repair guidance. Registration and recent native contact retain their existing,
+separate meanings.
+
+Chrome's Windows external-install flow requires a published Web Store item and
+user confirmation; no approved listing exists here. See
+[Chrome's contract](https://developer.chrome.com/docs/extensions/how-to/distribute/install-extensions)
+and [the distribution decision](../research/browser-distribution-decision.md).
+This revision improves the current unpacked fallback rather than claiming silent
+store installation or bypassing enterprise/browser restrictions.
 
 ## Verification
 
 Command-line regression tests cover fresh Arabic defaults with Unicode paths,
 empty queue/no created download, existing/future database byte retention, unavailable
-folder retention, invalid language and blocked initial folder. Installer lifecycle
+folder retention, invalid language and blocked initial folder. Additional native
+tests inspect the fixed browser executable/arguments with space/Unicode paths
+without executing them, and reject arbitrary commands and relative/missing roots.
+Headless UI tests exercise both browser choices, clipboard failure, manual retry,
+missing resources, keyboard and Arabic/narrow-layout accessibility with mocked
+native commands. These do not qualify actual browser opening or installation.
+Installer lifecycle
 tooling now verifies a real fresh preparation before its existing repair/retention
 passes; that tool requires a disposable Windows user and is maintainer-run.
 
@@ -52,10 +86,13 @@ No prior acceptance report qualifies this newly changed installer.
 Hosted checks remain skipped under #54. Existing #46/#47/#89 and M7 study gates
 are not waived by this packaging change.
 
-## Local candidate and results (2026-10-23)
+## Historical offline candidate (2026-10-23, superseded)
+
+The following records the earlier 246.82 MiB artifact, rejected by the maintainer
+as too large. Its hashes are historical, not the current default installer.
 
 Production build input: `f665447a6ccd9f580eb82d28a85da6f2dd1b06b3`.
-Subsequent edits are documentation only. Required local checks passed:
+For that earlier candidate, `3696633` changed documentation only. Its local checks passed:
 
 - `npm run check`: five Node tests and zero Svelte errors/warnings.
 - Rust fmt, workspace/all-target clippy with warnings denied, all 93 workspace
@@ -75,7 +112,7 @@ Subsequent edits are documentation only. Required local checks passed:
   Authenticode was **Valid**, signer **Microsoft Corporation**. Its installer
   ProductVersion is `1.3.299.15`; that is not an observed installed WebView2 version.
 
-Local installer: `target/release/bundle/nsis/ZipZap_0.2.0-beta.1_x64-setup.exe`,
+Earlier local installer, preserved in ignored research storage:
 **258,809,630 bytes (246.82 MiB)**, Authenticode **NotSigned**, SHA-256:
 
 `ccf16d07ffd46dc459deee88f7160eea4d4706f4cd9fae896d64fc5324e811eb`
@@ -99,7 +136,7 @@ maintainer-run and pending in draft PR #108. The candidate uses the existing bet
 filename but does not replace the published beta. No version/tag/release or hosted
 workflow was created, and no performance measurements were recorded.
 
-## Grouped maintainer Windows checks
+## Grouped maintainer Windows checks for the revised candidate
 
 Run these together after the local checks/build are complete. Use a separate
 Windows test user with no ZipZap state/registration, preserving personal data.
@@ -108,10 +145,11 @@ Windows test user with no ZipZap state/registration, preserving personal data.
    keyboard/DPI at 100%, 150%, 200%; clear license/directory/progress/final page.
    Preparation finishes before Finish. Open the app: the selected language and
    Windows Downloads folder work immediately without a required setup wizard.
-2. Offline prerequisite case on a suitable disposable Windows environment without
-   WebView2: turn off networking, install, then open the app. An existing WebView2
-   should be reused on another run. Do not remove the shared runtime from a work
-   computer. A failure must give recovery rather than false readiness.
+2. On a suitable disposable Windows environment without WebView2, install online:
+   the bootstrapper should fetch/install it automatically. Without internet this
+   case must fail clearly rather than launch an incomplete app. With WebView2
+   already installed, setup should reuse it and work offline. Do not remove the
+   shared runtime from a work computer to test this.
 3. Fresh silent install/repair/uninstall/reinstall retention with the existing
    guarded tool (no UI launch unless explicitly requested):
 
@@ -124,7 +162,10 @@ Windows test user with no ZipZap state/registration, preserving personal data.
    and files; no reset during upgrade or repair. Uninstall retains user data and
    shared WebView2, removing only the registration owned by this installation.
 5. Settings can still open optional setup and repair failed registration. Browser
-   extension activation and site permission refusal remain manual and truthful;
+   extension setup must copy the correct folder, open the chosen real Chrome/Edge
+   extensions page and allow Load unpacked by pasting the folder. Test clipboard
+   refusal, missing/custom browser and Unicode/space-containing installation paths.
+   Extension activation and site permission refusal remain manual and truthful;
    no automatic test download or browser readiness is claimed by installing.
 
 If a suitable absent-WebView2 environment is unavailable, report that case unrun.

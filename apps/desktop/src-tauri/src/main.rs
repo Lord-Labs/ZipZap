@@ -3,6 +3,8 @@
 #[cfg(windows)]
 mod app;
 #[cfg(windows)]
+mod browser_setup;
+#[cfg(windows)]
 mod capture;
 #[cfg(windows)]
 mod installer;
